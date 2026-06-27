@@ -1,0 +1,10 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+
+# local-only notes / private SQL (never publish learner data or admin secrets)
+theory*/
+seed-private.sql
+*.local.*

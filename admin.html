@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#7c3aed">
+<title>Wiskunde Avontuur · Admin</title>
+<link rel="icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .view.adm{max-width:840px}
+  .adm-head{margin:4px 2px 14px}
+  .adm-section{margin-bottom:16px}
+  .adm-section h2{font-size:19px;margin-bottom:2px}
+  .adm-strug{display:flex;flex-direction:column;margin-top:10px}
+  .adm-srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line)}
+  .adm-srow:last-child{border-bottom:none}
+  .adm-lhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+  .adm-tablewrap{overflow-x:auto;margin-top:10px}
+  .adm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  .adm-table th,.adm-table td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .adm-table th{color:var(--muted);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px}
+  .adm-table .mono{font-family:var(--font-num);font-weight:700}
+  .adm-actions{display:flex;gap:6px;white-space:nowrap}
+  .adm-inactive{color:var(--warn);font-weight:700}
+  .pwset{color:var(--muted);font-weight:700}
+  .pwreset{color:var(--bad);font-weight:700}
+  .btn.danger{color:#fff;background:linear-gradient(180deg,#f76b96,var(--bad));box-shadow:0 8px 18px -6px var(--bad)}
+</style>
+</head>
+<body>
+  <div id="admin"><main class="view"><p class="muted center" style="padding:48px 0">Laai…</p></main></div>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
