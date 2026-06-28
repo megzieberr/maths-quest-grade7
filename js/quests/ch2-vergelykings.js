@@ -1,89 +1,115 @@
 /* ============================================================
    HOOFSTUK 2 — ALGEBRAÏESE VERGELYKINGS
+   ------------------------------------------------------------
+   Baie sagte intrap-trap: net EEN-stap vergelykings, altyd 'n
+   positiewe heelgetal-antwoord. Drill, drill, drill. Daarna die
+   inset/uitset- en getalpatroon-rondtes.
    ============================================================ */
-import { mc, tf, calc, randInt, pick, code } from "./_shared.js";
+import { mc, calc, randInt, pick, shuffled, code } from "./_shared.js";
 
-const V = () => pick(["x", "a", "y", "m", "p"]);
-
-/* ============ v1 · Een-stap ============ */
-function genOne() {
-  const v = V(), kind = pick(["plus", "minus", "times", "div"]);
-  if (kind === "plus") { const x = randInt(1, 15), a = randInt(1, 15);
-    return calc(`Los op: ${code(`${v} + ${a} = ${x + a}`)}`, x, { allowNeg: true, answerLabel: `${v} = ${x}`,
-      hint: `Trek ${a} aan albei kante af.`, solution: [{ s: `${v} = ${x + a} − ${a} = ${x}`, r: "+ word −" }] }); }
-  if (kind === "minus") { const x = randInt(1, 15), a = randInt(1, 12);
-    return calc(`Los op: ${code(`${v} − ${a} = ${x - a}`)}`, x, { allowNeg: true, answerLabel: `${v} = ${x}`,
-      hint: `Tel ${a} aan albei kante by.`, solution: [{ s: `${v} = ${x - a} + ${a} = ${x}`, r: "− word +" }] }); }
-  if (kind === "times") { const a = randInt(2, 9), x = randInt(2, 12);
-    return calc(`Los op: ${code(`${a}${v} = ${a * x}`)}`, x, { answerLabel: `${v} = ${x}`,
-      hint: `Deel albei kante deur ${a}.`, solution: [{ s: `${v} = ${a * x} ÷ ${a} = ${x}`, r: "× word ÷" }] }); }
-  const a = randInt(2, 6), x = randInt(2, 9);
-  return calc(`Los op: ${code(`${v}/${a} = ${x}`)}`, a * x, { answerLabel: `${v} = ${a * x}`,
-    hint: `Maal albei kante met ${a}.`, solution: [{ s: `${v} = ${x} × ${a} = ${a * x}`, r: "÷ word ×" }] });
-}
-
-/* ============ v2 · Twee-stap ============ */
-function genTwo() {
-  const v = V(), a = randInt(2, 6), x = randInt(2, 9), b = randInt(1, 12);
-  if (Math.random() < 0.5) {
-    const c = a * x + b;
-    return calc(`Los op: ${code(`${a}${v} + ${b} = ${c}`)}`, x, { allowNeg: true, answerLabel: `${v} = ${x}`,
-      hint: `Trek eers ${b} af, deel dan deur ${a}.`,
-      solution: [{ s: `${a}${v} = ${c} − ${b} = ${a * x}`, r: "konstante weg" }, { s: `${v} = ${a * x} ÷ ${a} = ${x}`, r: "koëffisiënt weg" }] });
-  }
-  const c = a * x - b;
-  return calc(`Los op: ${code(`${a}${v} − ${b} = ${c}`)}`, x, { allowNeg: true, answerLabel: `${v} = ${x}`,
-    hint: `Tel eers ${b} by, deel dan deur ${a}.`,
-    solution: [{ s: `${a}${v} = ${c} + ${b} = ${a * x}`, r: "konstante weg" }, { s: `${v} = ${a * x} ÷ ${a} = ${x}`, r: "koëffisiënt weg" }] });
-}
-
-/* ============ v3 · Lastige gevalle ============ */
-function genTricky() {
-  const v = V(), kind = pick(["negc", "both", "negx"]);
-  if (kind === "negc") { const a = randInt(2, 6), x = randInt(-6, -2), b = -a * x;
-    return calc(`Los op: ${code(`−${a}${v} = ${b}`)}`, x, { allowNeg: true, answerLabel: `${v} = ${x}`,
-      hint: `Deel deur −${a}. Onthou − ÷ − = +, en + ÷ − = −.`,
-      solution: [{ s: `${v} = ${b} ÷ −${a} = ${x}`, r: "" }] }); }
-  if (kind === "negx") { const x = randInt(-12, -2), a = randInt(2, 12), b = -x - a;
-    return calc(`Los op: ${code(`−${v} − ${a} = ${b}`)}`, x, { allowNeg: true, answerLabel: `${v} = ${x}`,
-      hint: `Tel ${a} by: −${v} = ${b + a}. Dan ${v} = −(${b + a}).`,
-      solution: [{ s: `−${v} = ${b} + ${a} = ${b + a}`, r: "" }, { s: `${v} = ${x}`, r: "× −1" }] }); }
-  // veranderlike albei kante
-  const x = randInt(-6, 8), c1 = randInt(3, 9), c2 = randInt(2, c1 - 1), d1 = randInt(-4, 6);
-  const d2 = c1 * x + d1 - c2 * x;
-  return calc(`Los op: ${code(`${c1}${v} + ${fmtSigned(d1)} = ${c2}${v} + ${fmtSigned(d2)}`)}`, x, {
-    allowNeg: true, answerLabel: `${v} = ${x}`,
-    hint: "Skuif die veranderlikes na een kant en die getalle na die ander.",
-    solution: [{ s: `${c1}${v} − ${c2}${v} = ${fmtSigned(d2)} ${fmtSigned(-d1)}`, r: "groepeer" }, { s: `${c1 - c2}${v} = ${(c1 - c2) * x}  →  ${v} = ${x}`, r: "" }] });
-}
-function fmtSigned(n) { return n < 0 ? `− ${-n}` : `+ ${n}`; }
-
-/* ============ v4 · Toets & woordprobleme ============ */
-function genTest() {
-  const v = V(), a = randInt(2, 12), x = randInt(2, 12), b = x + a;
-  const claim = Math.random() < 0.5;                       // wys 'n korrekte of foutiewe oplossing
-  const shown = claim ? x : x + pick([-2, -1, 1, 2]);
-  return tf(`Is ${code(`${v} = ${shown}`)} 'n oplossing vir ${code(`${v} + ${a} = ${b}`)}?`, (shown + a) === b, {
-    labels: ["Ja", "Nee"],
-    hint: `Vervang ${v} = ${shown}: LK = ${shown} + ${a}. Is dit gelyk aan ${b}?`,
-    answerLabel: (shown + a) === b ? "Ja — LK = RK" : `Nee — LK = ${shown + a}, RK = ${b}`,
+/* ---------- een-stap oplossers (antwoord altyd 'n positiewe heelgetal) ---------- */
+function eqAdd() {
+  const x = randInt(2, 20), a = randInt(1, 15);
+  return calc(`Los op vir ${code("x")}:  ${code(`x + ${a} = ${x + a}`)}`, x, {
+    answerLabel: `x = ${x}`,
+    hint: `Maak x alleen: trek ${a} aan albei kante af.`,
+    solution: [{ s: `x = ${x + a} − ${a}`, r: "+ word −" }, { s: `x = ${x}`, r: "" }],
   });
 }
-function genWord() {
-  const a = randInt(2, 6), num = randInt(3, 15), b = randInt(1, 12), ans = a * num - b;
-  return calc(`'n Getal word met ${a} gemaal en dan word ${b} afgetrek. Die antwoord is ${code(ans)}. Wat is die getal?`, num, {
-    allowNeg: true, answerLabel: `${num}`,
-    hint: `Vergelyking: ${a}n − ${b} = ${ans}. Los op vir n.`,
-    solution: [{ s: `${a}n = ${ans} + ${b} = ${a * num}`, r: "" }, { s: `n = ${a * num} ÷ ${a} = ${num}`, r: "" }] });
+function eqMinus() {
+  const a = randInt(1, 12), x = a + randInt(2, 15), b = x - a;
+  return calc(`Los op vir ${code("x")}:  ${code(`x − ${a} = ${b}`)}`, x, {
+    answerLabel: `x = ${x}`,
+    hint: `Maak x alleen: tel ${a} aan albei kante by.`,
+    solution: [{ s: `x = ${b} + ${a}`, r: "− word +" }, { s: `x = ${x}`, r: "" }],
+  });
+}
+const eqAddSub = () => Math.random() < 0.5 ? eqAdd() : eqMinus();
+function eqMul() {
+  const a = randInt(2, 9), x = randInt(2, 12);
+  return calc(`Los op vir ${code("x")}:  ${code(`${a}x = ${a * x}`)}`, x, {
+    answerLabel: `x = ${x}`,
+    hint: `${a}x beteken ${a} maal x. Doen die teenoorgestelde: deel albei kante deur ${a}.`,
+    solution: [{ s: `x = ${a * x} ÷ ${a}`, r: "× word ÷" }, { s: `x = ${x}`, r: "" }],
+  });
+}
+function eqDiv() {
+  const a = randInt(2, 6), x = a * randInt(2, 10), b = x / a;
+  return calc(`Los op vir ${code("x")}:  ${code(`x ÷ ${a} = ${b}`)}`, x, {
+    answerLabel: `x = ${x}`,
+    hint: `Doen die teenoorgestelde van deel: maal albei kante met ${a}.`,
+    solution: [{ s: `x = ${b} × ${a}`, r: "÷ word ×" }, { s: `x = ${x}`, r: "" }],
+  });
+}
+const eqMulDiv = () => Math.random() < 0.5 ? eqMul() : eqDiv();
+const eqAll = () => pick([eqAdd, eqMinus, eqMul, eqDiv])();
+
+/* ============ v9 · Inset & uitset ============ */
+function genIO() {
+  const m = randInt(2, 6), c = randInt(1, 9);
+  if (Math.random() < 0.6) {
+    const inp = randInt(2, 12), out = m * inp + c;
+    return calc(`Reël: ${code(m + "n + " + c)}. As die inset ${code(inp)} is, wat is die uitset?`, out, {
+      hint: `Sit n = ${inp} in: ${m}×${inp} + ${c}.`,
+      solution: [{ s: `${m}(${inp}) + ${c} = ${out}`, r: "" }],
+    });
+  }
+  const inp = randInt(2, 12), out = m * inp + c;
+  return calc(`Reël: ${code(m + "n + " + c)}. As die uitset ${code(out)} is, wat is die inset?`, inp, {
+    hint: `Werk terug: (${out} − ${c}) ÷ ${m}.`,
+    solution: [{ s: `${out} − ${c} = ${out - c}`, r: "trek konstante af" }, { s: `${out - c} ÷ ${m} = ${inp}`, r: "deel deur koëffisiënt" }],
+  });
+}
+
+/* ============ v10 · Getalpatrone ============ */
+function pattern() { const d = randInt(2, 5), c = randInt(1, 6); return { d, c, T: k => d * k + c }; }
+function ruleStr(d, c) { const dn = d === 1 ? "n" : `${d}n`; return c === 0 ? `Tn = ${dn}` : `Tn = ${dn} + ${c}`; }
+function dedupeOpts(opts) { const seen = new Set(), out = []; for (const o of opts) if (!seen.has(o.label)) { seen.add(o.label); out.push(o); } return out; }
+function genPatTerm() {
+  const { d, c, T } = pattern();
+  const seq = [1, 2, 3, 4].map(T).join("; ");
+  const k = randInt(8, 15), ans = T(k);
+  return calc(`Die ry begin ${code(seq + "; ...")} (reël ${code(ruleStr(d, c))}). Bepaal term ${code(k)}.`, ans, {
+    hint: `Sit n = ${k} in die reël: ${d}×${k} + ${c}.`,
+    solution: [{ s: `${d}(${k}) + ${c} = ${ans}`, r: "" }],
+  });
+}
+function genPatPos() {
+  const { d, c, T } = pattern();
+  const pos = randInt(6, 20), val = T(pos);
+  return calc(`Reël ${code(ruleStr(d, c))}. By watter posisie is die term ${code(val)}?`, pos, {
+    hint: `Stel ${ruleStr(d, c)} = ${val} en los op vir n.`,
+    solution: [{ s: `${d}n + ${c} = ${val}`, r: "" }, { s: `n = ${pos}`, r: "los op" }],
+  });
+}
+function genPatRule() {
+  const { d, c, T } = pattern();
+  const seq = [1, 2, 3, 4].map(T).join("; ");
+  const opts = dedupeOpts([
+    { label: ruleStr(d, c), correct: true },
+    { label: ruleStr(d, c + 1), correct: false },
+    { label: ruleStr(d + 1, c), correct: false },
+    { label: ruleStr(d + 1, c + 1), correct: false },
+  ]);
+  return mc(`Gee die reël vir ${code(seq + "; ...")} in die vorm ${code("Tn = dn + c")}.`, opts, {
+    hint: "d = die verskil tussen terme. c = die eerste term min d.",
+    answerLabel: ruleStr(d, c),
+  });
 }
 
 export const CH2 = {
-  v1: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: genOne })) },
-  v2: { skills: Array.from({ length: 5 }, () => ({ concept: "tweestap", gen: genTwo })) },
-  v3: { skills: Array.from({ length: 5 }, () => ({ concept: "spesiaal", gen: genTricky })) },
-  v4: { skills: [
-    { concept: "toets", gen: genTest }, { concept: "toets", gen: genWord },
-    { concept: "toets", gen: genTest }, { concept: "toets", gen: genWord },
-    { concept: "toets", gen: genTest },
+  v1: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqAddSub })) },
+  v2: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqAddSub })) },
+  v3: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqMul })) },
+  v4: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqDiv })) },
+  v5: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqMulDiv })) },
+  v6: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqAll })) },
+  v7: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqAll })) },
+  v8: { skills: Array.from({ length: 5 }, () => ({ concept: "eenstap", gen: eqAll })) },
+  v9: { skills: Array.from({ length: 5 }, () => ({ concept: "insetuitset", gen: genIO })) },
+  v10: { skills: [
+    { concept: "patrone", gen: genPatTerm }, { concept: "patrone", gen: genPatRule },
+    { concept: "patrone", gen: genPatPos }, { concept: "patrone", gen: genPatTerm },
+    { concept: "patrone", gen: genPatPos },
   ] },
 };

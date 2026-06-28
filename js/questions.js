@@ -35,6 +35,13 @@ export function mountQuestion(host, q, handlers = {}) {
     root.appendChild(fig);
   }
 
+  // optional always-visible tip (e.g. a calculator-order reminder)
+  if (q.tip) {
+    const tip = el("div", "tip-box");
+    tip.innerHTML = `<span class="tip-ic">💡</span>${q.tip}`;
+    root.appendChild(tip);
+  }
+
   const inputHost = el("div", "q-input");
   root.appendChild(inputHost);
 
@@ -156,6 +163,24 @@ export function mountQuestion(host, q, handlers = {}) {
 
   else if (q.type === "coord") {
     mountCoord(inputHost, q, (ok, label) => commit(ok, label));
+  }
+
+  else if (q.type === "tap") {
+    // die figuur bevat [data-tap] areas; tik die regte een
+    const figEl = root.querySelector(".q-figure");
+    const zones = figEl ? [...figEl.querySelectorAll("[data-tap]")] : [];
+    zones.forEach(z => {
+      z.addEventListener("click", () => {
+        if (answered) return;
+        const ok = z.dataset.tap === q.target;
+        zones.forEach(o => {
+          o.style.pointerEvents = "none";
+          if (o.dataset.tap === q.target) o.classList.add("tap-correct");
+        });
+        if (!ok) z.classList.add("tap-wrong");
+        commit(ok, z.dataset.tap);
+      });
+    });
   }
 
   root.appendChild(hintBox);

@@ -37,17 +37,24 @@ function genTranslate() {
   });
 }
 
-/* ============ t3 · Refleksie-as / rotasie-hoek (diagram) ============ */
-function genReflectRotate() {
-  if (Math.random() < 0.5) {
-    const axis = pick(["x", "y"]);
-    return mc("Om watter as is vorm <b>A</b> na <b>A′</b> gereflekteer (geflip)?",
-      shuffled([{ label: "die x-as", correct: axis === "x" }, { label: "die y-as", correct: axis === "y" }]), {
-      figure: reflectFigure(axis, ACC),
-      hint: "Die stippellyn is die as waaroor die vorm geflip is. 'n Punt en sy beeld lê ewe ver weerskante daarvan.",
-      answerLabel: axis === "x" ? "die x-as" : "die y-as",
-    });
-  }
+/* ============ t3 · Refleksie & rotasie (diagram) ============
+   Gewaarborgde mengsel: beide refleksie EN rotasie kom voor, met twee
+   vraagtipes elk — "watter as/hoek?" (diagram-MK) en "kry die beeld se
+   koördinate" (punt-invoer). Soveel afwisseling dat niks herhaal nie. */
+
+/* refleksie — watter as is die vorm oor geflip? */
+function genReflectAxis() {
+  const axis = pick(["x", "y"]);
+  return mc("Om watter as is vorm <b>A</b> na <b>A′</b> gereflekteer (geflip)?",
+    shuffled([{ label: "die x-as", correct: axis === "x" }, { label: "die y-as", correct: axis === "y" }]), {
+    figure: reflectFigure(axis, ACC),
+    hint: "Die stippellyn is die as waaroor die vorm geflip is. 'n Punt en sy beeld lê ewe ver weerskante daarvan.",
+    answerLabel: axis === "x" ? "die x-as" : "die y-as",
+  });
+}
+
+/* rotasie — deur watter hoek is die vorm om O gedraai? */
+function genRotateAngle() {
   const deg = pick([90, 180, 270]);
   const label = deg === 180 ? "180°" : deg === 90 ? "90° anti-kloksgewys" : "90° kloksgewys";
   return mc("Vorm <b>A</b> is om die punt <b>O</b> gedraai na <b>A′</b>. Deur hoeveel is dit gedraai?",
@@ -59,6 +66,35 @@ function genReflectRotate() {
     figure: rotateFigure(deg, ACC),
     hint: "180° draai dit reguit oor (onderste-bo). 90° is 'n kwartdraai — kloksgewys draai na regs, anti-kloksgewys na links.",
     answerLabel: label,
+  });
+}
+
+/* refleksie — kry die beeld-koördinate van 'n punt */
+function genReflectPoint() {
+  const axis = pick(["x", "y"]);
+  const x = randInt(-5, 5) || 2, y = randInt(-5, 5) || 3;   // vermy presies op die as
+  const img = axis === "x" ? { x, y: -y } : { x: -x, y };
+  const asNaam = axis === "x" ? "die x-as" : "die y-as";
+  return coord(`Punt A is by ${code(`(${x} ; ${y})`)}. Reflekteer dit om ${asNaam}. Wat is die beeld A′?`,
+    img, {
+    figure: pointFigure(x, y, ACC),
+    hint: axis === "x"
+      ? "By 'n refleksie om die x-as bly x dieselfde en y verander van teken (+ word − en omgekeerd)."
+      : "By 'n refleksie om die y-as bly y dieselfde en x verander van teken (+ word − en omgekeerd).",
+    solution: axis === "x"
+      ? [{ s: `x bly dieselfde: ${x}`, r: "" }, { s: `y verander teken: ${y} → ${-y}`, r: "" }]
+      : [{ s: `x verander teken: ${x} → ${-x}`, r: "" }, { s: `y bly dieselfde: ${y}`, r: "" }],
+  });
+}
+
+/* rotasie — kry die beeld-koördinate ná 'n draai van 180° om O */
+function genRotatePoint() {
+  const x = randInt(-5, 5) || 2, y = randInt(-5, 5) || -3;
+  return coord(`Punt A is by ${code(`(${x} ; ${y})`)}. Draai dit 180° om die oorsprong O. Wat is die beeld A′?`,
+    { x: -x, y: -y }, {
+    figure: pointFigure(x, y, ACC),
+    hint: "By 'n draai van 180° om O verander BEIDE koördinate van teken: (x ; y) → (−x ; −y).",
+    solution: [{ s: `x verander teken: ${x} → ${-x}`, r: "" }, { s: `y verander teken: ${y} → ${-y}`, r: "" }],
   });
 }
 
@@ -113,14 +149,20 @@ function genEnlarge() {
   });
 }
 
+/* ============ t10 · Transformasies gemeng (hersiening) ============ */
+function genMixed() {
+  return pick([genName, genReflectAxis, genRotateAngle, genTranslate, genReflectPoint])();
+}
+
 export const CH5 = {
   t1: { skills: Array.from({ length: 5 }, () => ({ concept: "transformasie", gen: genName })) },
   t2: { skills: Array.from({ length: 5 }, () => ({ concept: "translasie", gen: genTranslate })) },
-  t3: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genReflectRotate })) },
-  t4: { skills: [
-    { concept: "simmetrie", gen: genLines }, { concept: "simmetrie", gen: genOrder },
-    { concept: "simmetrie", gen: genLines }, { concept: "simmetrie", gen: genOrder },
-    { concept: "simmetrie", gen: genLines },
-  ] },
-  t5: { skills: Array.from({ length: 5 }, () => ({ concept: "vergroting", gen: genEnlarge })) },
+  t3: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genReflectAxis })) },
+  t4: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genReflectPoint })) },
+  t5: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genRotateAngle })) },
+  t6: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genRotatePoint })) },
+  t7: { skills: Array.from({ length: 5 }, () => ({ concept: "simmetrie", gen: genLines })) },
+  t8: { skills: Array.from({ length: 5 }, () => ({ concept: "simmetrie", gen: genOrder })) },
+  t9: { skills: Array.from({ length: 5 }, () => ({ concept: "vergroting", gen: genEnlarge })) },
+  t10: { skills: Array.from({ length: 5 }, () => ({ concept: "transformasie", gen: genMixed })) },
 };

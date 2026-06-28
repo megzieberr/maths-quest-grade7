@@ -33,6 +33,18 @@ export function renderPlay(app, host, params) {
   const st = { i: 0, firstTry: 0, xp: 0, streak: 0, total: skills.length };
   let attempt = 0;
 
+  // hou tred met vrae wat reeds in hierdie quest-lopie gewys is, sodat
+  // ons nie dieselfde vraag (selfde getalle/antwoord) herhaal nie.
+  const seen = new Set();
+  const sig = (q) => [q.type, q.prompt || "", q.answerLabel ?? "",
+    q.expected != null ? JSON.stringify(q.expected) : "", q.angle ?? ""].join("¦");
+  function freshQuestion(skill) {
+    let q = skill.gen(), guard = 0;
+    while (guard++ < 25 && seen.has(sig(q))) q = skill.gen();
+    seen.add(sig(q));
+    return q;
+  }
+
   function showSkill() {
     attempt = 0;
     top.querySelector(".pcount").textContent = `${st.i + 1} / ${st.total}`;
@@ -44,7 +56,7 @@ export function renderPlay(app, host, params) {
   function present() {
     attempt++;
     const skill = skills[st.i];
-    const q = skill.gen();
+    const q = freshQuestion(skill);
     window.__Q__ = q;
     mountQuestion(qhost, q, {
       accent,

@@ -10,6 +10,7 @@ const C = {
     <ul>
       <li>Die <b>koëffisiënt</b> is die getal vóór die veranderlike — by <code>3x</code> is dit 3.</li>
       <li>'n <b>Konstante</b> is 'n getal op sy eie — by <code>2x + 5</code> is 5 die konstante.</li>
+      <li>Die <b>eksponent</b> (mag) is die klein getalletjie regs-bo — by <code>4a³</code> is dit 3. Dit sê hoeveel keer <code>a</code> met homself maal word.</li>
       <li>'n <b>Term</b> is 'n stuk wat deur <code>+</code> of <code>−</code> geskei word. <code>3x² + 5x − 7</code> het 3 terme.</li>
     </ul>` },
   gelyksoortig: { title: "Gelyksoortige terme", body: `
@@ -19,6 +20,13 @@ const C = {
       <li><code>3ab</code> en <code>2ba</code> is gelyksoortig (volgorde maak nie saak nie).</li>
       <li><code>4a</code> en <code>4a²</code> is <b>nie</b> gelyksoortig nie (een het 'n kwadraat).</li>
     </ul>` },
+  kombineer: { title: "Tel terme op en trek af", body: `
+    <p>Jy kan <b>net gelyksoortige terme</b> bymekaartel of aftrek. Tel die getalle (koëffisiënte) — die veranderlike bly presies dieselfde.</p>
+    <ul>
+      <li><code>3x + 5x = 8x</code> (3 + 5 = 8)</li>
+      <li><code>7a − 2a = 5a</code> (7 − 2 = 5)</li>
+    </ul>
+    <p>Pasop: die veranderlike verdwyn nie, en jy <b>maal</b> nie die getalle nie — <code>3x + 5x</code> is <code>8x</code>, nié <code>15x</code> nie.</p>` },
   vervang: { title: "Vervang en bereken", body: `
     <p>Om te <b>vervang</b>: skryf die getal in die plek van die letter, dan werk jy uit.</p>
     <p>As <code>y = 7</code>, dan is <code>3y + 6 = 3(7) + 6 = 27</code>.</p>
@@ -90,6 +98,10 @@ const C = {
       <li><b>Regoorstaande hoeke</b> (waar twee lyne sny) is gelyk.</li>
       <li><b>Hoeke rondom 'n punt</b> tel saam tot 360°.</li>
     </ul>` },
+  reflekshoek: { title: "Inspringende (refleks) hoeke", body: `
+    <p>'n <b>Inspringende (refleks) hoek</b> lê tussen 180° en 360° — dit is die GROOT hoek aan die buitekant.</p>
+    <p>Die kleiner hoek en die refleks-hoek maak saam 'n volle draai: <code>360°</code>.</p>
+    <p>So: <b>refleks-hoek = 360° − die kleiner hoek</b>. Bv. kleiner hoek 110° → refleks = <code>360 − 110 = 250°</code>.</p>` },
   sirkeldele: { title: "Dele van 'n sirkel", body: `
     <ul>
       <li><b>Radius (straal):</b> van die middelpunt na die omtrek.</li>

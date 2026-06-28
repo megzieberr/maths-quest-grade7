@@ -34,6 +34,10 @@ export function coord(prompt, expected, extra = {}) {
   return { type: "coord", prompt, expected, allowNeg: true,
     answerLabel: extra.answerLabel ?? `(${expected.x} ; ${expected.y})`, ...extra };
 }
+/* tik-die-deel: figure bevat [data-tap] areas; target = die regte sleutel */
+export function tap(prompt, target, figure, extra = {}) {
+  return { type: "tap", prompt, target, figure, ...extra };
+}
 /* gradeboog-lees */
 export function protractor(prompt, angle, extra = {}) {
   return { type: "protractor", prompt, angle, unit: "°",

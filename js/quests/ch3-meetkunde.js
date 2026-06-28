@@ -1,15 +1,14 @@
 /* ============================================================
-   HOOFSTUK 3 — REGUITLYN MEETKUNDE
+   HOOFSTUK 3 — REGUITLYN MEETKUNDE  (met diagramme)
    Sterkpunt: m1 "Lees die gradeboog" (akkurate protractor).
    ============================================================ */
-import { mc, mcFrom, tf, calc, protractor, randInt, pick, shuffled, distinct, code } from "./_shared.js";
-import { circleFigure } from "../engine/diagrams.js";
+import { mc, calc, protractor, randInt, pick, shuffled, code } from "./_shared.js";
+import { angleFigure, lineFigure, straightLineFigure, aroundPointFigure, verticalFigure } from "../engine/diagrams.js";
 
 const TEAL = "#0d9488";
 
 /* ============ m1 · Lees die gradeboog ============ */
 function genRead() {
-  // veelvoude van 5, weg van die uiterstes; sluit soms presies 90 in
   let ang = randInt(3, 33) * 5;            // 15 … 165
   if (Math.random() < 0.12) ang = 90;
   const type = ang < 90 ? "skerphoek" : ang === 90 ? "regtehoek" : "stomphoek";
@@ -20,152 +19,170 @@ function genRead() {
   });
 }
 
-/* ============ m2 · Soorte hoeke ============ */
-const TYPES = [
-  { name: "skerphoek", lo: 1, hi: 89, range: "tussen 0° en 90°" },
-  { name: "regtehoek", exact: 90, range: "presies 90°" },
-  { name: "stomphoek", lo: 91, hi: 179, range: "tussen 90° en 180°" },
-  { name: "gestrekte hoek", exact: 180, range: "presies 180°" },
-  { name: "inspringende hoek", lo: 181, hi: 359, range: "tussen 180° en 360°" },
+/* ============ m2 · Soorte hoeke (klassifiseer uit 'n diagram) ============ */
+const HOEK_TIPES = [
+  { name: "skerphoek", lo: 4, hi: 16 },     // ×5 → 20…80
+  { name: "regtehoek", exact: 90 },
+  { name: "stomphoek", lo: 20, hi: 33 },    // ×5 → 100…165
+  { name: "gestrekte hoek", exact: 180 },
 ];
-function genTypeFromDeg() {
-  const t = pick(TYPES.filter(x => x.name !== "inspringende hoek" || Math.random() < 0.3));
-  const deg = t.exact != null ? t.exact : randInt(t.lo, t.hi);
-  const opts = shuffled(TYPES).slice(0, 4);
-  if (!opts.find(o => o.name === t.name)) opts[0] = t;
-  return mc(`'n Hoek meet ${code(deg + "°")}. Watter tipe hoek is dit?`,
-    opts.map(o => ({ label: o.name, correct: o.name === t.name })), {
-    hint: "Onthou: < 90° skerp · 90° reg · 90°–180° stomp · 180° gestrek · > 180° inspringend.",
+function genSoortHoek() {
+  const t = pick(HOEK_TIPES);
+  const deg = t.exact != null ? t.exact : randInt(t.lo, t.hi) * 5;
+  return mc("Watter soort hoek is dit?",
+    shuffled(HOEK_TIPES.map(x => ({ label: x.name, correct: x.name === t.name }))), {
+    figure: angleFigure(deg, TEAL),
+    hint: "Kleiner as 'n regtehoek (90°) = skerp · presies 90° = reg · groter as 90° maar nie reguit = stomp · 'n reguit lyn = gestrek (180°).",
     answerLabel: t.name,
-  });
-}
-function genRangeFromType() {
-  const t = pick(TYPES.slice(0, 4));
-  const opts = shuffled(TYPES.slice(0, 5)).slice(0, 4);
-  if (!opts.find(o => o.name === t.name)) opts[0] = t;
-  return mc(`Tussen watter groottes lê 'n ${code(t.name)}?`,
-    opts.map(o => ({ label: o.range, correct: o.name === t.name })), {
-    hint: "Dink aan 'n regtehoek (90°) en 'n gestrekte hoek (180°) as die grenslyne.",
-    answerLabel: t.range,
   });
 }
 
 /* ============ m3 · Lyne & notasie ============ */
-function genLines() {
-  const items = [
-    { q: `Twee lyne met pyltjies op loop langs mekaar en sny nooit. Hulle is...?`, a: "ewewydig (parallel)", d: ["loodreg", "snylyne", "strale"] },
-    { q: `Twee lyne sny mekaar teen 'n 90°-hoek. Hulle is...?`, a: "loodreg", d: ["ewewydig", "parallel", "gestrek"] },
-    { q: `'n Lyn met twee pyltjies en geen eindpunte is 'n...?`, a: "lyn", d: ["lynsegment", "straal", "punt"] },
-    { q: `Begin by een punt, geen eindpunt, een pyltjie. Dit is 'n...?`, a: "straal", d: ["lyn", "lynsegment", "snylyn"] },
-    { q: `Strepies op twee lyne beteken die lyne is...?`, a: "ewe lank", d: ["ewewydig", "loodreg", "geboë"] },
-  ];
-  const it = pick(items);
-  return mc(it.q, [{ label: it.a, correct: true }, ...it.d.map(x => ({ label: x, correct: false }))], {
-    hint: "Pyltjies → parallel. Vierkantjie → loodreg (90°). Strepies → ewe lank.",
-    answerLabel: it.a,
-  });
-}
-function genNotasie() {
+function genLineNotasie() {
   const par = Math.random() < 0.5;
-  const correct = par ? "AB // CD" : "AB ⟂ CD";
-  const opts = [
-    { label: "AB // CD", correct: par },
-    { label: "AB ⟂ CD", correct: !par },
-    { label: "AB = CD", correct: false },
-    { label: "AB ≡ CD", correct: false },
-  ];
-  return mc(`Hoe dui jy aan dat AB ${par ? "ewewydig (parallel)" : "loodreg"} op CD is?`, shuffled(opts), {
-    hint: "// beteken parallel. ⟂ beteken loodreg (90°).",
-    answerLabel: correct,
+  const kind = par ? "ewewydig" : "loodreg";
+  if (Math.random() < 0.5) {
+    return mc("Hoe lê hierdie twee lyne teenoor mekaar?",
+      shuffled([
+        { label: "ewewydig (parallel)", correct: par },
+        { label: "loodreg", correct: !par },
+        { label: "ewe lank", correct: false },
+      ]), {
+      figure: lineFigure(kind, TEAL),
+      hint: "›-merkies wat dieselfde rigting wys = ewewydig (loop langs mekaar). 'n Regtehoek-blokkie (90°) = loodreg.",
+      answerLabel: par ? "ewewydig (parallel)" : "loodreg",
+    });
+  }
+  return mc(`Watter simbool beteken ${par ? "ewewydig (parallel)" : "loodreg"}?`,
+    shuffled([
+      { label: "//", correct: par },
+      { label: "⟂", correct: !par },
+      { label: "=", correct: false },
+      { label: "≡", correct: false },
+    ]), {
+    figure: lineFigure(kind, TEAL),
+    hint: "// beteken ewewydig · ⟂ beteken loodreg (90°).",
+    answerLabel: par ? "//" : "⟂",
   });
 }
 
-/* ============ m4 · Hoekverwantskappe ============ */
+/* ============ m4 · Soorte lyne ============ */
+const LINE_TYPES = [
+  { key: "lyn", name: "lyn" },
+  { key: "straal", name: "straal" },
+  { key: "lynsegment", name: "lynsegment" },
+  { key: "snylyne", name: "snylyne" },
+];
+function genLineType() {
+  const t = pick(LINE_TYPES);
+  return mc("Wat sien jy hier?",
+    shuffled(LINE_TYPES.map(x => ({ label: x.name, correct: x.key === t.key }))), {
+    figure: lineFigure(t.key, TEAL),
+    hint: "Lyn = pyltjies altwee kante (hou vir ewig aan) · straal = begin by 'n punt, een pyltjie · lynsegment = 'n stukkie met twee eindpunte · snylyne = twee lyne wat kruis.",
+    answerLabel: t.name,
+  });
+}
+
+/* ============ m5 · Komplementêre hoeke (som = 90°) ============ */
 function genComp() {
-  const a = randInt(10, 80);
-  return calc(`Skryf die komplement van ${code(a + "°")}.`, 90 - a, {
-    unit: "°",
-    hint: "Komplementêre hoeke maak saam 90°. Trek af van 90°.",
+  const a = randInt(2, 16) * 5;            // 10…80
+  return calc(`Twee hoeke is komplementêr. Een is ${code(a + "°")}. Wat is die ander?`, 90 - a, {
+    unit: "°", figure: angleFigure(a, TEAL),
+    hint: "Komplementêre hoeke maak saam 90°. Trek die hoek van 90° af.",
     solution: [{ s: `90 − ${a} = ${90 - a}`, r: "" }],
   });
 }
+
+/* ============ m6 · Supplementêre hoeke (som = 180°) ============ */
 function genSupp() {
-  const a = randInt(20, 160);
-  return calc(`Skryf die supplement van ${code(a + "°")}.`, 180 - a, {
-    unit: "°",
-    hint: "Supplementêre hoeke maak saam 180°. Trek af van 180°.",
+  const a = randInt(4, 34) * 5;            // 20…170
+  return calc(`Twee hoeke is supplementêr. Een is ${code(a + "°")}. Wat is die ander?`, 180 - a, {
+    unit: "°", figure: angleFigure(a, TEAL),
+    hint: "Supplementêre hoeke maak saam 180°. Trek die hoek van 180° af.",
     solution: [{ s: `180 − ${a} = ${180 - a}`, r: "" }],
   });
 }
-function genStraight() {
-  const x = randInt(30, 150);
-  return calc(`Twee hoeke op 'n reguitlyn is ${code("x")} en ${code((180 - x) + "°")}. Wat is ${code("x")}?`, x, {
-    unit: "°",
-    hint: "Hoeke op 'n reguitlyn tel saam tot 180°.",
-    solution: [{ s: `x = 180 − ${180 - x} = ${x}`, r: "reguitlyn = 180°" }],
-  });
-}
-function genReflex() {
-  const inner = randInt(40, 160);
-  return calc(`Die binnehoek is ${code(inner + "°")}. Wat is die inspringende (refleks) hoek?`, 360 - inner, {
-    unit: "°",
-    hint: "Inspringende hoek = 360° − die binnehoek.",
-    solution: [{ s: `360 − ${inner} = ${360 - inner}`, r: "" }],
+
+/* ============ m7 · Hoeke op 'n reguitlyn (som = 180°) ============ */
+function genStraightLineQ() {
+  const given = randInt(5, 31) * 5;        // 25…155
+  return calc(`Bereken die hoek wat met ${code("?")} gemerk is.`, 180 - given, {
+    unit: "°", figure: straightLineFigure(given, TEAL),
+    hint: "Hoeke op 'n reguitlyn tel saam tot 180°. Trek die gegewe hoek van 180° af.",
+    solution: [{ s: `180 − ${given} = ${180 - given}`, r: "reguitlyn = 180°" }],
   });
 }
 
-/* ============ m5 · Dele van 'n sirkel ============ */
-const CIRCLE_PARTS = [
-  { key: "radius", name: "radius (straal)" },
-  { key: "middellyn", name: "middellyn (deursnee)" },
-  { key: "koord", name: "koord" },
-  { key: "sektor", name: "sektor" },
-  { key: "omtrek", name: "omtrek" },
-  { key: "boog", name: "boog" },
-];
-function genCirclePart() {
-  const it = pick(CIRCLE_PARTS);
-  const distract = shuffled(CIRCLE_PARTS.filter(p => p.key !== it.key)).slice(0, 3);
-  const opts = [{ label: it.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))];
-  return mc("Wat noem ons die <b>gemerkte</b> deel van die sirkel?", opts, {
-    figure: circleFigure(it.key, TEAL),
-    hint: "Radius: middel→rand. Middellyn: oor die sirkel, deur die middel. Koord: twee randpunte (nie deur die middel). Sektor: 'n “pizza-snytjie”. Boog: 'n stuk van die rand.",
-    answerLabel: it.name,
+/* ============ m8 · Hoeke rondom 'n punt (som = 360°) ============ */
+function genAroundPointQ() {
+  let a, b;
+  do { a = randInt(8, 22) * 5; b = randInt(8, 22) * 5; } while (360 - a - b < 40 || 360 - a - b > 230);
+  return calc(`Bereken die hoek wat met ${code("?")} gemerk is.`, 360 - a - b, {
+    unit: "°", figure: aroundPointFigure(a, b, TEAL),
+    hint: "Al die hoeke rondom 'n punt tel saam tot 360°. Trek die twee gegewe hoeke van 360° af.",
+    solution: [{ s: `360 − ${a} − ${b} = ${360 - a - b}`, r: "rondom 'n punt = 360°" }],
   });
 }
-function genDiameter() {
-  const r = randInt(2, 15);
-  if (Math.random() < 0.5)
-    return calc(`'n Sirkel het 'n radius van ${code(r + " cm")}. Wat is die middellyn?`, 2 * r, {
-      unit: "cm", figure: circleFigure("radius", TEAL),
-      hint: "Middellyn = 2 × radius.", solution: [{ s: `2 × ${r} = ${2 * r}`, r: "" }],
-    });
-  return calc(`'n Sirkel het 'n middellyn van ${code(2 * r + " cm")}. Wat is die radius?`, r, {
-    unit: "cm", figure: circleFigure("middellyn", TEAL),
-    hint: "Radius = middellyn ÷ 2.", solution: [{ s: `${2 * r} ÷ 2 = ${r}`, r: "" }],
+
+/* ============ m9 · Regoorstaande hoeke (gelyk) ============ */
+function genVerticalQ() {
+  const known = randInt(5, 15) * 5;        // 25…75
+  return calc(`Bereken die hoek wat met ${code("?")} gemerk is (die regoorstaande hoek).`, known, {
+    unit: "°", figure: verticalFigure(known, TEAL),
+    hint: "Regoorstaande hoeke (waar twee lyne sny) is altyd GELYK. So ? is dieselfde as die gegewe hoek.",
+    solution: [{ s: `? = ${known}`, r: "regoorstaande hoeke is gelyk" }],
+  });
+}
+
+/* ============ m10 · Inspringende (refleks) hoeke (360 − kleiner) ============ */
+function genReflexFromInner() {
+  const inner = randInt(20, 175);
+  return calc(`Die kleiner hoek is ${code(inner + "°")}. Wat is die inspringende (refleks) hoek?`, 360 - inner, {
+    unit: "°",
+    hint: "Die kleiner hoek en die refleks-hoek maak saam 'n volle draai (360°). Trek dus die kleiner hoek van 360° af.",
+    solution: [{ s: `360 − ${inner} = ${360 - inner}`, r: "volle draai = 360°" }],
+  });
+}
+function genReflexAroundPoint() {
+  const a = randInt(30, 170);
+  return calc(`Hoeke rondom 'n punt maak saam ${code("360°")}. Een hoek is ${code(a + "°")}. Wat is die ander (refleks) hoek rondom die punt?`, 360 - a, {
+    unit: "°",
+    hint: "Al die hoeke rondom 'n punt tel saam tot 360°. Trek die gegewe hoek van 360° af.",
+    solution: [{ s: `360 − ${a} = ${360 - a}`, r: "" }],
+  });
+}
+function genReflexReverse() {
+  const reflex = randInt(185, 340);
+  return calc(`'n Refleks-hoek is ${code(reflex + "°")}. Wat is die kleiner hoek?`, 360 - reflex, {
+    unit: "°",
+    hint: "Die refleks-hoek en die kleiner hoek maak saam 360°. Trek die refleks-hoek van 360° af.",
+    solution: [{ s: `360 − ${reflex} = ${360 - reflex}`, r: "" }],
+  });
+}
+function genReflexIdentify() {
+  const reflex = randInt(37, 71) * 5;
+  const pool = new Set();
+  while (pool.size < 3) { const d = randInt(2, 35) * 5; if (d < 180) pool.add(d); }
+  return mc("Watter een van hierdie is 'n inspringende (refleks) hoek?",
+    shuffled([{ label: `${reflex}°`, correct: true }, ...[...pool].map(d => ({ label: `${d}°`, correct: false }))]), {
+    hint: "'n Refleks-hoek lê tussen 180° en 360° — dit is groter as 'n gestrekte hoek (180°).",
+    answerLabel: `${reflex}°`,
   });
 }
 
 export const CH3 = {
-  m1: { skills: Array.from({ length: 6 }, () => ({ concept: "gradeboog", gen: genRead })) },
-  m2: { skills: [
-    { concept: "hoektipes", gen: genTypeFromDeg }, { concept: "hoektipes", gen: genRangeFromType },
-    { concept: "hoektipes", gen: genTypeFromDeg }, { concept: "hoektipes", gen: genRangeFromType },
-    { concept: "hoektipes", gen: genTypeFromDeg },
-  ] },
-  m3: { skills: [
-    { concept: "lyne", gen: genLines }, { concept: "lyne", gen: genNotasie },
-    { concept: "lyne", gen: genLines }, { concept: "lyne", gen: genNotasie },
-    { concept: "lyne", gen: genLines },
-  ] },
-  m4: { skills: [
-    { concept: "hoekverwant", gen: genComp }, { concept: "hoekverwant", gen: genSupp },
-    { concept: "hoekverwant", gen: genStraight }, { concept: "hoekverwant", gen: genReflex },
-    { concept: "hoekverwant", gen: genComp }, { concept: "hoekverwant", gen: genSupp },
-  ] },
-  m5: { skills: [
-    { concept: "sirkeldele", gen: genCirclePart }, { concept: "sirkeldele", gen: genDiameter },
-    { concept: "sirkeldele", gen: genCirclePart }, { concept: "sirkeldele", gen: genDiameter },
-    { concept: "sirkeldele", gen: genCirclePart },
+  m1: { skills: Array.from({ length: 5 }, () => ({ concept: "gradeboog", gen: genRead })) },
+  m2: { skills: Array.from({ length: 5 }, () => ({ concept: "hoektipes", gen: genSoortHoek })) },
+  m3: { skills: Array.from({ length: 5 }, () => ({ concept: "lyne", gen: genLineNotasie })) },
+  m4: { skills: Array.from({ length: 5 }, () => ({ concept: "lyne", gen: genLineType })) },
+  m5: { skills: Array.from({ length: 5 }, () => ({ concept: "hoekverwant", gen: genComp })) },
+  m6: { skills: Array.from({ length: 5 }, () => ({ concept: "hoekverwant", gen: genSupp })) },
+  m7: { skills: Array.from({ length: 5 }, () => ({ concept: "hoekverwant", gen: genStraightLineQ })) },
+  m8: { skills: Array.from({ length: 5 }, () => ({ concept: "hoekverwant", gen: genAroundPointQ })) },
+  m9: { skills: Array.from({ length: 5 }, () => ({ concept: "hoekverwant", gen: genVerticalQ })) },
+  m10: { skills: [
+    { concept: "reflekshoek", gen: genReflexFromInner }, { concept: "reflekshoek", gen: genReflexAroundPoint },
+    { concept: "reflekshoek", gen: genReflexIdentify }, { concept: "reflekshoek", gen: genReflexReverse },
+    { concept: "reflekshoek", gen: genReflexFromInner },
   ] },
 };

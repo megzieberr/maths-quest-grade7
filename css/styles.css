@@ -211,6 +211,16 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
   font-size:15px;font-weight:700;color:#8a5a00;line-height:1.45}
 .hint-box .tag{font-family:var(--font-display);font-size:11px;letter-spacing:.6px;background:var(--warn);color:#fff;
   padding:2px 9px;border-radius:99px;margin-right:8px;vertical-align:middle}
+.tip-box{background:#eaf4ff;border:2px solid #b9dbff;border-radius:var(--r-md);padding:11px 14px;margin:0 0 14px;
+  font-size:14.5px;font-weight:700;color:#15508c;line-height:1.45}
+.tip-box .tip-ic{margin-right:7px}
+/* tik-die-deel terugvoer */
+.q-figure [data-tap]{transition:opacity .12s}
+.q-figure [data-tap]:hover{opacity:.7}
+.q-figure [data-tap].tap-correct *{stroke:var(--good,#16a34a)!important;fill:var(--good,#16a34a)}
+.q-figure [data-tap].tap-correct line,.q-figure [data-tap].tap-correct polyline{stroke:#16a34a!important}
+.q-figure [data-tap].tap-wrong *{stroke:#e11d48!important}
+.tip-box code{font-family:var(--font-num);font-weight:700;background:#d8eaff;padding:1px 6px;border-radius:6px}
 .help-row{display:flex;gap:10px;margin-top:14px}
 .help-row .btn{flex:1}
 
