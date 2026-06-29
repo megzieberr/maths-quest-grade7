@@ -34,5 +34,16 @@
 <body>
   <div id="admin"><main class="view"><p class="muted center" style="padding:48px 0">Laai…</p></main></div>
   <script type="module" src="js/admin.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (reloaded) return; reloaded = true; location.reload();
+      });
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
