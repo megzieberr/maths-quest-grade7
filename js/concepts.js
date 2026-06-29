@@ -121,8 +121,9 @@ const C = {
   poligone: { title: "Poligone", body: `
     <p>'n <b>Poligoon</b> is 'n geslote vorm met reguit sye en 3+ hoeke. Geboë sye? Dan is dit nie 'n poligoon nie.</p>
     <ul>
-      <li>3 = driehoek · 4 = vierhoek · 5 = vyfhoek (pentagoon)</li>
-      <li>6 = seshoek (heksagoon) · 8 = agthoek (oktagoon)</li>
+      <li>3 = driehoek · 4 = vierhoek · 5 = pentagoon</li>
+      <li>6 = heksagoon · 7 = heptagoon · 8 = oktagoon</li>
+      <li>9 = nonagoon · 10 = dekagoon</li>
     </ul>` },
   vierhoeke: { title: "Vierhoeke", body: `
     <ul>

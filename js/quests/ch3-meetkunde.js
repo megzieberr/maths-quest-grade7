@@ -66,19 +66,20 @@ function genLineNotasie() {
   });
 }
 
-/* ============ m4 · Soorte lyne ============ */
+/* ============ m4 · Punte & lyne ============ */
 const LINE_TYPES = [
+  { key: "punt", name: "punt" },
   { key: "lyn", name: "lyn" },
   { key: "straal", name: "straal" },
   { key: "lynsegment", name: "lynsegment" },
-  { key: "snylyne", name: "snylyne" },
+  { key: "snylyne", name: "snylyn" },
 ];
 function genLineType() {
   const t = pick(LINE_TYPES);
   return mc("Wat sien jy hier?",
     shuffled(LINE_TYPES.map(x => ({ label: x.name, correct: x.key === t.key }))), {
     figure: lineFigure(t.key, TEAL),
-    hint: "Lyn = pyltjies altwee kante (hou vir ewig aan) · straal = begin by 'n punt, een pyltjie · lynsegment = 'n stukkie met twee eindpunte · snylyne = twee lyne wat kruis.",
+    hint: "Punt = net 'n kol (geen lengte of breedte) · lyn = pyltjies altwee kante (hou vir ewig aan) · straal = begin by 'n punt, een pyltjie · lynsegment = 'n stukkie met twee eindpunte · snylyn = 'n lyn wat deur ander lyne sny.",
     answerLabel: t.name,
   });
 }

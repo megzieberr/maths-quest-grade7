@@ -44,7 +44,7 @@ export const CHAPTERS = [
       { id: "m1", n: 1, title: "Lees die gradeboog", blurb: "Meet die hoek op die gradeboog.", built: true },
       { id: "m2", n: 2, title: "Soorte hoeke", blurb: "Skerp, reg, stomp of gestrek?", built: true },
       { id: "m3", n: 3, title: "Lyne & notasie", blurb: "Parallel, loodreg en die simbole.", built: true },
-      { id: "m4", n: 4, title: "Soorte lyne", blurb: "Lyn, straal, lynsegment of snylyn?", built: true },
+      { id: "m4", n: 4, title: "Punte & lyne", blurb: "Punt, lyn, straal, lynsegment of snylyn?", built: true },
       { id: "m5", n: 5, title: "Komplementêre hoeke", blurb: "Twee hoeke maak saam 90°.", built: true },
       { id: "m6", n: 6, title: "Supplementêre hoeke", blurb: "Twee hoeke maak saam 180°.", built: true },
       { id: "m7", n: 7, title: "Hoeke op 'n reguitlyn", blurb: "Die hoeke tel saam tot 180°.", built: true },

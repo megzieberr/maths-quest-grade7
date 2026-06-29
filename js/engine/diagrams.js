@@ -241,7 +241,10 @@ export function verticalFigure(known, accent = "#0d9488") {
 export function lineFigure(kind, accent = "#0d9488") {
   const tick = (x, y, ang) => { const a = rd(ang + 90); const dx = 6 * Math.cos(a), dy = 6 * Math.sin(a); return `<line x1="${f(x - dx)}" y1="${f(y - dy)}" x2="${f(x + dx)}" y2="${f(y + dy)}" stroke="${accent}" stroke-width="2.4"/>`; };
   let inner = "";
-  if (kind === "ewewydig") {
+  if (kind === "punt") {
+    inner = `<circle cx="120" cy="92" r="7.5" fill="${accent}"/>`
+      + `<text x="136" y="85" font-family="Fredoka, sans-serif" font-size="19" font-weight="700" fill="${INK}">A</text>`;
+  } else if (kind === "ewewydig") {
     inner = [60, 110].map(y => `<line x1="24" y1="${y}" x2="236" y2="${y}" stroke="${INK}" stroke-width="3"/>` + arrowHead(24, y, 180, INK) + arrowHead(236, y, 0, INK) + `<text x="150" y="${y - 8}" text-anchor="middle" fill="${accent}" font-size="15" font-weight="700">›</text>`).join("");
   } else if (kind === "loodreg") {
     inner = `<line x1="40" y1="90" x2="220" y2="90" stroke="${INK}" stroke-width="3"/>` + arrowHead(40, 90, 180, INK) + arrowHead(220, 90, 0, INK)

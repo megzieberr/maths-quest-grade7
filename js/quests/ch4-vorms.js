@@ -76,8 +76,9 @@ function genQuad() {
 
 /* ============ s5 · Poligone ============ */
 const POLY = [
-  { sides: 3, name: "driehoek" }, { sides: 4, name: "vierhoek" }, { sides: 5, name: "vyfhoek" },
-  { sides: 6, name: "seshoek" }, { sides: 7, name: "sewehoek" }, { sides: 8, name: "agthoek" },
+  { sides: 3, name: "driehoek" }, { sides: 4, name: "vierhoek" }, { sides: 5, name: "pentagoon" },
+  { sides: 6, name: "heksagoon" }, { sides: 7, name: "heptagoon" }, { sides: 8, name: "oktagoon" },
+  { sides: 9, name: "nonagoon" }, { sides: 10, name: "dekagoon" },
 ];
 function genPoly() {
   const p = pick(POLY);
@@ -91,7 +92,7 @@ function genPoly() {
   return mc("Wat noem ons hierdie vorm?",
     shuffled([{ label: p.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
     figure: polygonFigure(p.sides, ORANGE),
-    hint: "Tel die sye: 5 = vyfhoek, 6 = seshoek, 7 = sewehoek, 8 = agthoek.",
+    hint: "Tel die sye: 5 = pentagoon, 6 = heksagoon, 7 = heptagoon, 8 = oktagoon, 9 = nonagoon, 10 = dekagoon.",
     answerLabel: p.name,
   });
 }
