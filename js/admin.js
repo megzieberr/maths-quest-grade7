@@ -49,10 +49,53 @@ async function dashboard() {
   try { data = await api.adminData(pw); } catch { status.textContent = "Kan nie laai nie. Kontroleer jou verbinding."; return; }
   if (!data || !data.ok) { status.textContent = "Kon nie die dashboard laai nie."; return; }
   status.remove();
+  view.appendChild(questGateSection(data.quests));
   view.appendChild(struggleSection(data.struggles || []));
   view.appendChild(learnerSection(data.rows || [], data.inactiveDays || 7));
 }
 const reload = () => dashboard();
+
+/* ---------------- Rounds: open / close (teacher gating) ---------------- */
+function questGateSection(quests) {
+  const sec = el("div", "card adm-section");
+  sec.appendChild(el("h2", "", "Rounds — open / close"));
+  if (!quests || !quests.length) {
+    sec.appendChild(el("p", "muted small", "Round control isn’t set up yet. Run supabase/migration-quest-gating.sql once in the Supabase SQL editor to enable opening and closing rounds."));
+    return sec;
+  }
+  sec.appendChild(el("p", "muted small", "Learners only see rounds that are open. Everything starts open — close the ones you haven’t taught yet."));
+  const openById = {}; quests.forEach(q => { openById[q.quest_id] = !!q.is_open; });
+
+  CHAPTERS.forEach(ch => {
+    const built = (ch.quests || []).filter(q => q.built);
+    if (!built.length) return;
+    const block = el("div", "adm-qchap");
+    const openCount = built.filter(q => openById[q.id]).length;
+    const head = el("div", "adm-qchead",
+      `<span class="adm-qctitle">${ch.icon} ${ch.name}</span><span class="muted small adm-qcount">${openCount} / ${built.length} open</span>`);
+    const btns = el("div", "adm-qcbtns");
+    const openAll = el("button", "btn ghost small", "Open all");
+    openAll.addEventListener("click", async () => { openAll.disabled = true; await api.adminSetChapterOpen(pw, ch.id, true); reload(); });
+    const closeAll = el("button", "btn ghost small", "Close all");
+    closeAll.addEventListener("click", async () => { closeAll.disabled = true; await api.adminSetChapterOpen(pw, ch.id, false); reload(); });
+    btns.appendChild(openAll); btns.appendChild(closeAll);
+    head.appendChild(btns);
+    block.appendChild(head);
+
+    const list = el("div", "adm-qlist");
+    built.forEach(q => {
+      const row = el("label", "adm-qrow" + (openById[q.id] ? " on" : ""));
+      const cb = el("input"); cb.type = "checkbox"; cb.checked = !!openById[q.id];
+      cb.addEventListener("change", async () => { cb.disabled = true; await api.adminSetQuestOpen(pw, q.id, cb.checked); reload(); });
+      row.appendChild(cb);
+      row.appendChild(el("span", "adm-qname", `${q.n}. ${q.title}`));
+      list.appendChild(row);
+    });
+    block.appendChild(list);
+    sec.appendChild(block);
+  });
+  return sec;
+}
 
 function struggleSection(struggles) {
   const sec = el("div", "card adm-section");

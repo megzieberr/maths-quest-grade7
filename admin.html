@@ -29,6 +29,18 @@
   .pwset{color:var(--muted);font-weight:700}
   .pwreset{color:var(--bad);font-weight:700}
   .btn.danger{color:#fff;background:linear-gradient(180deg,#f76b96,var(--bad));box-shadow:0 8px 18px -6px var(--bad)}
+  /* rounds open/close gating */
+  .adm-qchap{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .adm-qchap:first-of-type{border-top:none}
+  .adm-qchead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .adm-qctitle{font-family:var(--font-display);font-weight:600;font-size:16px}
+  .adm-qcount{margin-left:2px}
+  .adm-qcbtns{display:flex;gap:6px;margin-left:auto}
+  .adm-qlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+  .adm-qrow{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;background:#fbfaff}
+  .adm-qrow.on{border-color:color-mix(in srgb,var(--good,#16a34a) 45%,white);background:color-mix(in srgb,var(--good,#16a34a) 8%,white)}
+  .adm-qrow input{width:17px;height:17px;accent-color:var(--good,#16a34a);flex:none}
+  .adm-qname{line-height:1.2}
 </style>
 </head>
 <body>

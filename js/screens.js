@@ -7,6 +7,11 @@ import { el } from "./ui.js";
 const progressOf = (app, id) => (app.state && app.state.progress && app.state.progress[id]) || { best_score: 0, attempts: 0, passed: false, total_xp: 0 };
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
 
+/* Quest-hek: app.state.openQuests is 'n lys oop rondte-id's. As dit ontbreek
+   (bv. agterkant nog nie opgedateer nie) → behandel ALLES as oop (null). */
+const openSetOf = app => { const oq = app.state && app.state.openQuests; return Array.isArray(oq) ? new Set(oq) : null; };
+const isOpen = (set, id) => set === null || set.has(id);
+
 /* ---------------- HUB ---------------- */
 export function renderHub(app, host) {
   const name = ((app.state && app.state.student && app.state.student.name) || "").split(" ")[0];
@@ -16,22 +21,23 @@ export function renderHub(app, host) {
     <p>Kies 'n afdeling om te oefen.</p>`;
   host.appendChild(head);
 
+  const openSet = openSetOf(app);
   const cards = el("div", "chapter-cards");
   CHAPTERS.forEach(ch => {
-    const live = ch.open && (ch.quests || []).some(q => q.built);
+    const openQ = (ch.quests || []).filter(q => q.built && isOpen(openSet, q.id));
+    const live = ch.open && openQ.length > 0;
     const card = el("div", "ch-card" + (live ? "" : " locked"));
     card.style.setProperty("--accent", ch.signature);
     if (live) {
-      const qs = (ch.quests || []).filter(q => q.built);
-      const total = qs.length;
-      const done = qs.filter(q => progressOf(app, q.id).passed).length;
+      const total = openQ.length;
+      const done = openQ.filter(q => progressOf(app, q.id).passed).length;
       const pct = total ? Math.round(done / total * 100) : 0;
       const allDone = total && done === total;
       card.innerHTML = `
         <div class="ico">${ch.icon}</div>
         <h2>${ch.name} ${allDone ? '<span class="pill done">Klaar ✓</span>' : '<span class="pill open">Oop</span>'}</h2>
         <div class="sub">${ch.blurb || ""}</div>
-        <div class="ch-meta"><span>${total} quest${total > 1 ? "s" : ""}</span><span class="num">${done} / ${total} gemeester</span></div>
+        <div class="ch-meta"><span>${total} quest${total > 1 ? "s" : ""} oop</span><span class="num">${done} / ${total} gemeester</span></div>
         <div class="ch-prog" style="--p:${pct}%"><i></i></div>`;
       card.addEventListener("click", () => app.go("chapter", { chapterId: ch.id }));
     } else {
@@ -56,10 +62,16 @@ export function renderChapter(app, host, params) {
   head.querySelector(".back").addEventListener("click", () => app.go("hub"));
   host.appendChild(head);
 
-  const quests = (ch.quests || []).filter(q => q.built);
+  const openSet = openSetOf(app);
+  const builtTotal = (ch.quests || []).filter(q => q.built).length;
+  const quests = (ch.quests || []).filter(q => q.built && isOpen(openSet, q.id));
+  if (!quests.length) {
+    host.appendChild(el("div", "card", `<p class="muted center" style="padding:22px 4px">Nog geen rondtes hier oop nie — jou juffrou maak elke rondte oop sodra julle dit in die klas gedoen het. Kom kyk gou weer! 🙂</p>`));
+    return;
+  }
   const grid = el("div", "quest-grid");
   quests.forEach(q => {
-    const accent = questAccent(ch, q.n, quests.length);
+    const accent = questAccent(ch, q.n, builtTotal);
     const def = questDef(q.id);
     const playable = q.built && !!def;
     const prog = progressOf(app, q.id);
