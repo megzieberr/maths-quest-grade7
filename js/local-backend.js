@@ -5,7 +5,7 @@
    ============================================================ */
 import { CHAPTERS } from "./config.js";
 
-const LS = { students: "g7.students", progress: "g7.progress", struggles: "g7.struggles", meta: "g7.meta", quests: "g7.quests" };
+const LS = { students: "g7.students", progress: "g7.progress", struggles: "g7.struggles", meta: "g7.meta", quests: "g7.quests", xpevents: "g7.xpevents" };
 const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
@@ -17,6 +17,8 @@ function seed() {
   if (!read(LS.progress, null)) write(LS.progress, {});
   if (!read(LS.struggles, null)) write(LS.struggles, {});
   if (!read(LS.meta, null)) write(LS.meta, { adminPassword: "admin" });
+  if (!read(LS.xpevents, null)) write(LS.xpevents, {});
+  const m = read(LS.meta, {}); if (m.weeklyAnchor == null) { m.weeklyAnchor = 0; write(LS.meta, m); }
   // verseker elke rondte het 'n inskrywing (verstek: oop)
   const q = read(LS.quests, {}); let changed = false;
   ALL_QUESTS.forEach((it, i) => { if (!q[it.id]) { q[it.id] = { is_open: true, chapter: it.chapter, sort: i + 1 }; changed = true; } });
@@ -79,6 +81,7 @@ export const LocalBackend = {
     const award = wasPassed ? 0 : Math.max(0, Math.min(Math.round(xp) || 0, 1000));
     p[quest] = { best_score: Math.max(prev.best_score, score), attempts: prev.attempts + 1, total_xp: prev.total_xp + award, passed: prev.passed || passed, last_played_at: Date.now() };
     all[s.id] = p; write(LS.progress, all); touch(s.id);
+    if (award > 0) { const ev = read(LS.xpevents, {}); (ev[s.id] || (ev[s.id] = [])).push({ ts: Date.now(), xp: award }); write(LS.xpevents, ev); }
     return { ok: true, passed, badgeEarned: passed && !wasPassed, xpAwarded: award, alreadyPassed: wasPassed };
   },
   async logStruggle(username, password, concept) {
@@ -97,11 +100,13 @@ export const LocalBackend = {
     seed();
     if (read(LS.meta, {}).adminPassword !== pw) return { ok: false, error: "auth" };
     const students = read(LS.students, {}), progress = read(LS.progress, {}), struggles = read(LS.struggles, {});
+    const events = read(LS.xpevents, {}); const anchor = read(LS.meta, {}).weeklyAnchor || 0;
     const rows = Object.values(students).map(s => ({
       id: s.id, name: s.display_name, username: s.username, hasPassword: s.password != null, lastActive: s.last_active_at,
       totalXp: Object.values(progress[s.id] || {}).reduce((a, p) => a + (p.total_xp || 0), 0),
+      weeklyXp: (events[s.id] || []).filter(e => e.ts >= anchor).reduce((a, e) => a + (e.xp || 0), 0),
       quests: progress[s.id] || {},
-    })).sort((a, b) => a.name.localeCompare(b.name));
+    })).sort((a, b) => (b.totalXp - a.totalXp) || a.name.localeCompare(b.name));
     const cByConcept = {};
     Object.values(struggles).forEach(byC => Object.entries(byC).forEach(([c, v]) => {
       const g = cByConcept[c] || (cByConcept[c] = { concept: c, count: 0, students: 0 });
@@ -120,6 +125,10 @@ export const LocalBackend = {
     const q = read(LS.quests, {});
     ALL_QUESTS.filter(it => it.chapter === chapter).forEach(it => { if (q[it.id]) q[it.id].is_open = !!open; });
     write(LS.quests, q); return { ok: true };
+  },
+  async adminResetWeekly(pw) {
+    if (read(LS.meta, {}).adminPassword !== pw) return { ok: false, error: "auth" };
+    const m = read(LS.meta, {}); m.weeklyAnchor = Date.now(); write(LS.meta, m); return { ok: true };
   },
   async adminResetPassword(pw, id) {
     if (read(LS.meta, {}).adminPassword !== pw) return { ok: false, error: "auth" };

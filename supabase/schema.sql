@@ -63,13 +63,25 @@ create table if not exists public.quests (
   sort     int not null default 0
 );
 
+-- append-only XP log; the weekly board is a time filter over this
+create table if not exists public.xp_events (
+  id          bigserial primary key,
+  student_id  uuid not null references public.students(id) on delete cascade,
+  quest_id    text,
+  xp          int not null,
+  score       numeric,
+  created_at  timestamptz not null default now()
+);
+create index if not exists xp_events_student_time on public.xp_events (student_id, created_at);
+
 -- ---------- lock everything down ----------
 alter table public.students   enable row level security;
 alter table public.progress   enable row level security;
 alter table public.struggles  enable row level security;
 alter table public.app_config enable row level security;
 alter table public.quests     enable row level security;
-revoke all on public.students, public.progress, public.struggles, public.app_config, public.quests from anon, authenticated;
+alter table public.xp_events  enable row level security;
+revoke all on public.students, public.progress, public.struggles, public.app_config, public.quests, public.xp_events from anon, authenticated;
 
 drop function if exists public._g7_auth(text, text);
 drop function if exists public.g7_signup(text, text, text);
@@ -91,6 +103,11 @@ $$;
 create or replace function public._g7_admin_ok(p_admin_password text)
 returns boolean language sql stable security definer set search_path = public, extensions as $$
   select coalesce((select value = crypt(p_admin_password, value) from public.app_config where key = 'admin_password'), false);
+$$;
+
+create or replace function public._g7_week_start()
+returns timestamptz language sql stable security definer set search_path = public, extensions as $$
+  select coalesce((select value::timestamptz from public.app_config where key = 'weekly_anchor'), 'epoch'::timestamptz);
 $$;
 
 -- ============================================================
@@ -179,6 +196,10 @@ begin
     total_xp   = public.progress.total_xp + excluded.total_xp,
     passed     = public.progress.passed or excluded.passed,
     last_played_at = now();
+
+  if xp_award > 0 then
+    insert into public.xp_events (student_id, quest_id, xp, score) values (sid, p_quest, xp_award, p_score);
+  end if;
   update public.students set last_active_at = now() where id = sid;
 
   return jsonb_build_object('ok', true, 'passed', now_passed,
@@ -206,20 +227,26 @@ $$;
 
 create or replace function public.g7_admin_data(p_admin_password text)
 returns jsonb language plpgsql security definer set search_path = public, extensions as $$
-declare rows jsonb; strug jsonb; qs jsonb;
+declare ws timestamptz; rows jsonb; strug jsonb; qs jsonb;
 begin
   if not public._g7_admin_ok(p_admin_password) then return jsonb_build_object('ok', false, 'error', 'auth'); end if;
+  ws := public._g7_week_start();
 
+  with totals as (
+    select s.id, s.display_name as name, s.username, (s.password is not null) as has_pw, s.last_active_at,
+           coalesce(sum(e.xp) filter (where e.created_at >= ws), 0) as wk,
+           coalesce((select sum(total_xp) from public.progress p where p.student_id = s.id), 0) as al
+    from public.students s left join public.xp_events e on e.student_id = s.id
+    group by s.id, s.display_name, s.username, s.password, s.last_active_at
+  )
   select coalesce(jsonb_agg(jsonb_build_object(
-      'id', s.id, 'name', s.display_name, 'username', s.username,
-      'hasPassword', (s.password is not null),
-      'lastActive', s.last_active_at,
-      'totalXp', coalesce((select sum(total_xp) from public.progress p where p.student_id = s.id), 0),
+      'id', id, 'name', name, 'username', username, 'hasPassword', has_pw,
+      'weeklyXp', wk, 'totalXp', al, 'lastActive', last_active_at,
       'quests', coalesce((select jsonb_object_agg(quest_id, jsonb_build_object(
-                  'best_score', best_score, 'attempts', attempts, 'passed', passed,
-                  'last_played_at', last_played_at)) from public.progress p where p.student_id = s.id), '{}'::jsonb)
-    ) order by s.display_name), '[]'::jsonb)
-  into rows from public.students s;
+                    'best_score', best_score, 'attempts', attempts, 'passed', passed,
+                    'last_played_at', last_played_at)) from public.progress p where p.student_id = totals.id), '{}'::jsonb)
+    ) order by al desc, name), '[]'::jsonb)
+  into rows from totals;
 
   select coalesce(jsonb_agg(j order by (j->>'count')::int desc), '[]'::jsonb) into strug
   from (select jsonb_build_object('concept', concept, 'count', sum(count), 'students', count(distinct student_id)) j
@@ -244,6 +271,15 @@ returns jsonb language plpgsql security definer set search_path = public, extens
 begin
   if not public._g7_admin_ok(p_admin_password) then return jsonb_build_object('ok', false, 'error', 'auth'); end if;
   update public.quests set is_open = p_open where chapter = p_chapter;
+  return jsonb_build_object('ok', true);
+end; $$;
+
+create or replace function public.g7_admin_reset_weekly(p_admin_password text)
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not public._g7_admin_ok(p_admin_password) then return jsonb_build_object('ok', false, 'error', 'auth'); end if;
+  insert into public.app_config (key, value) values ('weekly_anchor', now()::text)
+    on conflict (key) do update set value = excluded.value;
   return jsonb_build_object('ok', true);
 end; $$;
 
@@ -297,7 +333,8 @@ grant execute on function
   public.g7_admin_reset_progress(text, uuid),
   public.g7_admin_resolve_struggle(text, text),
   public.g7_admin_set_quest_open(text, text, boolean),
-  public.g7_admin_set_chapter_open(text, text, boolean)
+  public.g7_admin_set_chapter_open(text, text, boolean),
+  public.g7_admin_reset_weekly(text)
 to anon, authenticated;
 
 -- ============================================================

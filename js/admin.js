@@ -15,6 +15,12 @@ const root = () => document.getElementById("admin");
 let pw = null;
 
 const questCount = CHAPTERS.reduce((n, ch) => n + (ch.quests || []).filter(q => q.built).length, 0);
+/* flat, globally-numbered list of every built round, for the per-learner grid */
+const ROUND_LIST = (() => {
+  let gi = 0, out = [];
+  CHAPTERS.forEach(ch => (ch.quests || []).filter(q => q.built).forEach(q => { out.push({ id: q.id, gi: ++gi, title: q.title, ch: ch.name }); }));
+  return out;
+})();
 const conceptTitle = id => (CONCEPTS[id] && CONCEPTS[id].title) || id;
 const fmtDate = v => { if (!v) return "nooit"; const d = new Date(v); return isNaN(d) ? "—" : d.toLocaleDateString(); };
 const daysSince = v => { if (!v) return Infinity; const d = new Date(v); return isNaN(d) ? Infinity : (Date.now() - d.getTime()) / 864e5; };
@@ -119,27 +125,37 @@ function struggleSection(struggles) {
 function learnerSection(rows, inactiveDays) {
   const sec = el("div", "card adm-section");
   const head = el("div", "adm-lhead", `<h2>Learners (${rows.length})</h2>`);
+  const btns = el("div", "adm-lbtns");
+  const wk = el("button", "btn ghost small", "↺ Reset weekly");
+  wk.addEventListener("click", async () => { if (!confirm("Reset the weekly board to zero for everyone? (All-time XP is kept.)")) return; wk.disabled = true; await api.adminResetWeekly(pw); reload(); });
   const csv = el("button", "btn ghost small", "Export CSV");
   csv.addEventListener("click", () => exportCsv(rows));
-  head.appendChild(csv);
+  btns.appendChild(wk); btns.appendChild(csv);
+  head.appendChild(btns);
   sec.appendChild(head);
 
-  sec.appendChild(el("p", "muted small", "Learners sign themselves up. You never see their passwords — reset a forgotten one (they set a new one next login, progress kept) or remove a learner."));
+  sec.appendChild(el("p", "muted small", "Sorted by all-time XP. Rounds: green = mastered (80%+ first try) · orange = tried · grey = not started. Hover a chip for the round and best score. You never see passwords — reset a forgotten one (progress kept)."));
 
   const table = el("table", "adm-table");
-  table.innerHTML = `<thead><tr><th>Name</th><th>Username</th><th>Password</th><th>XP</th><th>Mastered</th><th>Last active</th><th></th></tr></thead>`;
+  table.innerHTML = `<thead><tr><th>#</th><th>Name</th><th>Password</th><th>Weekly</th><th>All-time</th><th>Last active</th><th>Rounds (best %)</th><th></th></tr></thead>`;
   const tb = el("tbody");
-  rows.forEach(r => {
-    const passed = Object.entries(r.quests || {}).filter(([, p]) => p.passed).length;
+  rows.forEach((r, i) => {
     const inactive = r.lastActive && daysSince(r.lastActive) >= inactiveDays;
+    const chips = ROUND_LIST.map(rd => {
+      const p = (r.quests || {})[rd.id];
+      const best = p ? Math.round((p.best_score || 0) * 100) : 0;
+      const cls = p && p.passed ? "ok" : (p && p.attempts ? "try" : "none");
+      return `<span class="rchip ${cls}" title="${rd.gi}. ${rd.ch} · ${rd.title} — ${p ? best + "%" : "nog nie begin"}">${rd.gi}</span>`;
+    }).join("");
     const tr = el("tr");
     tr.innerHTML = `
-      <td>${r.name}</td>
-      <td class="mono">${r.username}</td>
-      <td>${r.hasPassword ? '<span class="pwset">•••• set</span>' : '<span class="pwreset">reset — awaiting new</span>'}</td>
-      <td class="mono">${r.totalXp || 0}</td>
-      <td class="mono">${passed} / ${questCount}</td>
-      <td class="${inactive ? "adm-inactive" : ""}">${fmtDate(r.lastActive)}${inactive ? " ⚠" : ""}</td>`;
+      <td class="mono">${i + 1}</td>
+      <td><b>${r.name}</b><div class="muted small mono">${r.username}</div></td>
+      <td>${r.hasPassword ? '<span class="pwset">✓ set</span>' : '<span class="pwreset">reset — awaiting</span>'}</td>
+      <td class="num">${r.weeklyXp || 0}</td>
+      <td class="num">${r.totalXp || 0}</td>
+      <td class="${inactive ? "adm-inactive" : ""}">${fmtDate(r.lastActive)}${inactive ? " ⚠" : ""}</td>
+      <td class="chips"><div class="rgrid">${chips}</div></td>`;
     const act = el("td", "adm-actions");
     const rpw = el("button", "btn ghost small", "Reset pw");
     rpw.addEventListener("click", async () => { if (!confirm(`Reset ${r.name}'s password? They'll set a new one next login (progress kept).`)) return; await api.adminResetPassword(pw, r.id); reload(); });
@@ -158,10 +174,12 @@ function learnerSection(rows, inactiveDays) {
 }
 
 function exportCsv(rows) {
-  const lines = [["Name", "Username", "Total XP", "Last active", "Mastered quests"].join(",")];
-  rows.forEach(r => {
-    const passed = Object.entries(r.quests || {}).filter(([, p]) => p.passed).map(([q]) => q).join(" ");
-    const cells = [r.name, r.username, r.totalXp || 0, r.lastActive ? new Date(r.lastActive).toISOString() : "", passed];
+  const lines = [["Rank", "Name", "Username", "Password set", "Weekly XP", "All-time XP", "Last active", "Mastered", "Best per round"].join(",")];
+  rows.forEach((r, i) => {
+    const mastered = ROUND_LIST.filter(rd => (r.quests || {})[rd.id] && (r.quests || {})[rd.id].passed).length;
+    const best = ROUND_LIST.map(rd => { const p = (r.quests || {})[rd.id]; return `${rd.gi}:${p ? Math.round((p.best_score || 0) * 100) : 0}`; }).join(" ");
+    const cells = [i + 1, r.name, r.username, r.hasPassword ? "yes" : "no", r.weeklyXp || 0, r.totalXp || 0,
+      r.lastActive ? new Date(r.lastActive).toISOString() : "", `${mastered}/${questCount}`, best];
     lines.push(cells.map(c => `"${String(c).replace(/"/g, '""')}"`).join(","));
   });
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });

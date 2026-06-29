@@ -41,4 +41,5 @@ export const SupabaseBackend = {
   async adminResolveStruggle(pw, concept) { return rpc("g7_admin_resolve_struggle", { p_admin_password: pw, p_concept: concept }); },
   async adminSetQuestOpen(pw, quest, open) { return rpc("g7_admin_set_quest_open", { p_admin_password: pw, p_quest: quest, p_open: open }); },
   async adminSetChapterOpen(pw, chapter, open) { return rpc("g7_admin_set_chapter_open", { p_admin_password: pw, p_chapter: chapter, p_open: open }); },
+  async adminResetWeekly(pw) { return rpc("g7_admin_reset_weekly", { p_admin_password: pw }); },
 };

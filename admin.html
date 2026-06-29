@@ -41,6 +41,16 @@
   .adm-qrow.on{border-color:color-mix(in srgb,var(--good,#16a34a) 45%,white);background:color-mix(in srgb,var(--good,#16a34a) 8%,white)}
   .adm-qrow input{width:17px;height:17px;accent-color:var(--good,#16a34a);flex:none}
   .adm-qname{line-height:1.2}
+  /* learner table: weekly/all-time numbers + round-status chips */
+  .adm-lbtns{display:flex;gap:6px;margin-left:auto}
+  .adm-table td.num{font-family:var(--font-num);font-weight:700;text-align:right;white-space:nowrap}
+  .adm-table td.chips{padding-top:8px;padding-bottom:8px}
+  .rgrid{display:grid;grid-template-columns:repeat(14,19px);gap:3px;width:max-content}
+  @media (max-width:760px){.rgrid{grid-template-columns:repeat(10,19px)}}
+  .rchip{display:grid;place-items:center;width:19px;height:19px;border-radius:6px;font-size:10px;font-weight:800;color:#fff;cursor:default}
+  .rchip.ok{background:#16a34a}
+  .rchip.try{background:#f59e0b;color:#3a2a00}
+  .rchip.none{background:#e7e8ef;color:#9aa3b2}
 </style>
 </head>
 <body>
