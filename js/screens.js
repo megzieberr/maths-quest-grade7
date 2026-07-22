@@ -3,6 +3,7 @@
 import { CHAPTERS, chapterById, questAccent, PASS } from "./config.js";
 import { questDef } from "./quests/index.js";
 import { el } from "./ui.js";
+import { installEntryButton } from "./install.js";
 
 const progressOf = (app, id) => (app.state && app.state.progress && app.state.progress[id]) || { best_score: 0, attempts: 0, passed: false, total_xp: 0 };
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
@@ -48,6 +49,13 @@ export function renderHub(app, host) {
     cards.appendChild(card);
   });
   host.appendChild(cards);
+
+  const install = installEntryButton();
+  if (install) {
+    const row = el("div", "install-row");
+    row.appendChild(install);
+    host.appendChild(row);
+  }
 }
 
 /* ---------------- HOOFSTUK · quest-kaart ---------------- */

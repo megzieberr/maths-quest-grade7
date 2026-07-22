@@ -7,10 +7,30 @@
 <title>Wiskunde Avontuur · Graad 7</title>
 <meta name="description" content="Graad 7 Wiskunde — oefen Algebra, Meetkunde, 2D Vorms en Transformasies. Verdien XP en kentekens!">
 <link rel="icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wiskunde">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
+<script>
+  /* Vang Chrome se installeer-geleentheid HIER, in die <head> — dit vuur dikwels
+     voordat die app se modules gelaai is. js/install.js lees dit later. */
+  window.__installPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    window.__installPrompt = e;
+    window.dispatchEvent(new Event("wq-install-ready"));
+  });
+  window.addEventListener("appinstalled", () => {
+    window.__installPrompt = null;
+    window.dispatchEvent(new Event("wq-installed"));
+  });
+</script>
 </head>
 <body>
   <div id="app"><main class="view"><p class="muted center" style="padding:48px 0">Laai…</p></main></div>

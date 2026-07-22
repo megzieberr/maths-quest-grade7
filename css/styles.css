@@ -297,5 +297,32 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 .login-swap{display:block;margin:14px auto 0;color:var(--muted);font-weight:700;font-size:15px;background:none;border:0;cursor:pointer}
 .login-swap:hover{color:var(--accent)}
 
-@media (min-width:560px){.modal-scrim{align-items:center}}
+/* ---------- "sit dit op jou foon" (installeer-pop-up) ---------- */
+.install-row{display:flex;justify-content:center;margin:22px 0 4px}
+.inst-entry{background:#fff;box-shadow:var(--shadow-sm);border:2px solid var(--line);color:var(--muted)}
+.inst-entry:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+
+.inst-scrim{position:fixed;inset:0;z-index:60;background:rgba(44,33,80,.5);backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;justify-content:center;padding:14px;animation:fade .15s}
+.inst-modal{position:relative;background:var(--card);border-radius:var(--r-xl);box-shadow:0 -10px 50px -10px rgba(44,33,80,.45);
+  padding:26px 22px 22px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;text-align:center;animation:slideup .22s}
+.inst-close{position:absolute;top:12px;right:12px}
+.inst-icon{width:66px;height:66px;margin:0 auto 12px;border-radius:21px;display:grid;place-items:center;font-size:34px;
+  background:linear-gradient(180deg,#a78bfa,#7c3aed);box-shadow:0 10px 22px -8px rgba(124,58,237,.75)}
+.inst-modal h2{font-size:23px;margin-bottom:6px}
+.inst-body{margin-top:18px;text-align:left}
+.inst-lead{font-size:15.5px;margin-bottom:14px}
+.inst-go{margin:2px 0 10px}
+.inst-note{text-align:center}
+.inst-later{margin-top:12px;color:var(--muted);border-color:var(--line)}
+.inst-done{background:var(--good-bg);color:var(--good);font-weight:800;font-size:16px;text-align:center;
+  border-radius:var(--r-md);padding:20px 16px}
+.inst-steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:11px;margin:4px 0 2px}
+.inst-steps li{counter-increment:s;position:relative;padding-left:40px;font-size:15px;line-height:1.5}
+.inst-steps li::before{content:counter(s);position:absolute;left:0;top:-1px;width:27px;height:27px;border-radius:50%;
+  display:grid;place-items:center;font-family:var(--font-num);font-weight:700;font-size:15px;
+  background:color-mix(in srgb,var(--accent) 12%,#f4f1ff);color:var(--accent)}
+.inst-steps b{font-family:var(--font-display);font-weight:600}
+
+@media (min-width:560px){.modal-scrim,.inst-scrim{align-items:center}}
 @media (max-width:360px){.quest-grid{grid-template-columns:1fr}}

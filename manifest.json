@@ -1,0 +1,19 @@
+{
+  "name": "Wiskunde Avontuur · Graad 7",
+  "short_name": "Wiskunde",
+  "description": "Graad 7 Wiskunde — oefen Uitdrukkings, Vergelykings, Meetkunde, 2D Vorms en Transformasies. Verdien XP en kentekens!",
+  "lang": "af",
+  "dir": "ltr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f3ff",
+  "theme_color": "#7c3aed",
+  "categories": ["education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

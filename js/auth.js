@@ -8,6 +8,7 @@
 import { api } from "./api.js";
 import { setSession } from "./session.js";
 import { el, clear } from "./ui.js";
+import { installEntryButton } from "./install.js";
 
 const errMsg = c => ({
   wrong_password: "Daardie wagwoord is verkeerd. Probeer weer, of vra jou onderwyser om dit te herstel.",
@@ -25,6 +26,12 @@ export function renderLogin(app, host) {
   wrap.innerHTML = `<div class="login-head"><div class="login-logo">🚀</div><div><h1>Wiskunde Avontuur</h1><p class="muted small">Graad 7 · leerwerk</p></div></div>`;
   const body = el("div", "login-body");
   wrap.appendChild(body);
+  const install = installEntryButton();
+  if (install) {
+    const row = el("div", "install-row");
+    row.appendChild(install);
+    wrap.appendChild(row);
+  }
   host.appendChild(wrap);
 
   showLogin();

@@ -5,6 +5,7 @@ import { el, clear } from "./ui.js";
 import { renderLogin } from "./auth.js";
 import { renderHub, renderChapter, renderResults } from "./screens.js";
 import { renderPlay } from "./play.js";
+import { maybeShowInstallPopup } from "./install.js";
 
 const app = {
   root: null, state: null, screen: "login", params: {},
@@ -33,7 +34,7 @@ const app = {
     this.root.appendChild(view);
     switch (this.screen) {
       case "login": renderLogin(this, view); break;
-      case "hub": renderHub(this, view); break;
+      case "hub": renderHub(this, view); maybeShowInstallPopup(this); break;
       case "chapter": renderChapter(this, view, this.params); break;
       case "play": renderPlay(this, view, this.params); break;
       case "results": renderResults(this, view, this.params); break;
