@@ -1,4 +1,4 @@
-# Project status — updated 2026-07-22
+# Project status — updated 2026-07-25
 
 ## Where we are
 Live and feature-complete at **https://megzieberr.github.io/maths-quest-grade7/** (+ `/admin.html`),
@@ -32,11 +32,7 @@ button rendering, no console errors).
   the cache is only an offline fallback (unlike the Gr11 app).
 
 ## Pending on Megan
-- **Test one install on your own phone**, from a WhatsApp message to yourself — that's the exact path
-  the learners take and the only thing that can't be verified from here.
-- If the site is already open on a phone, close and reopen it **twice** — the service worker needs one
-  load to fetch the new files and another to serve them.
-- No SQL to run. No migration was part of this change.
+- Nothing. (2026-07-25 amnesty: WhatsApp install test done. No SQL was ever pending here.)
 
 ## Next up
 - Nothing queued. Term 3 content decisions (which rounds to open in the admin dashboard) are yours as
