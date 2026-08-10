@@ -598,9 +598,11 @@ function gelykR1noDiv() {
     _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
   });
 }
-/* st20 — "Deel jy deur 2?": Yay (tophoek gegee) / Nay (basishoek gegee) */
-function gelykDeelDeur2() {
-  if (Math.random() < 0.5) {
+/* st20 — "Deel jy deur 2?": Yay (tophoek gegee) / Nay (basishoek gegee).
+   apexGiven word deur die skills-lys GEFORSEER (5 Yay + 5 Nay, geskommel) —
+   'n muntgooi hier binne kan 'n hele rondte een kant toe laat val (CLAUDE.md-gotcha). */
+function gelykDeelDeur2(apexGiven) {
+  if (apexGiven) {
     const apex = apexEven();
     return tf("Moet jy deur 2 deel om die onbekende basishoek te kry?", true, {
       figure: triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }),
@@ -751,10 +753,11 @@ function introBuiteReason2() {
   });
 }
 
-/* st24 — "Binne of buite?": een hoek gemerk, kies binnehoek/buitehoek */
-function binneOfBuite() {
+/* st24 — "Binne of buite?": een hoek gemerk, kies binnehoek/buitehoek.
+   `which` word deur die skills-lys GEFORSEER (5 buite + 5 binne, geskommel) —
+   pick() hier binne gee gemiddeld net 2,5 buitehoeke per rondte. */
+function binneOfBuite(which) {
   const [a, b] = buitePair();
-  const which = pick(["A", "B", "C", "ext"]);
   const isBuite = which === "ext";
   const vals = { A: a, B: b, C: 180 - a - b, ext: a + b };
   return mc("Watter TIPE hoek is gemerk?",
@@ -925,7 +928,8 @@ export const CH6 = {
   },
   st18: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1div2) },
   st19: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1noDiv) },
-  st20: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykDeelDeur2) },
+  st20: { guide: ["gelykbenig"], skills: shuffled([true, true, true, true, true, false, false, false, false, false])
+    .map(k => ({ concept: "gelykbenig", gen: () => gelykDeelDeur2(k) })) },
   st21: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR2) },
   st22: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR3) },
 
@@ -944,7 +948,8 @@ export const CH6 = {
       { concept: "buite", gen: introBuiteMC2 }, { concept: "buite", gen: introBuiteReason2 },
     ],
   },
-  st24: { guide: ["buite", "binne"], skills: rep(10, "buite", binneOfBuite) },
+  st24: { guide: ["buite", "binne"], skills: shuffled(["ext", "ext", "ext", "ext", "ext", "A", "B", "C", "A", "B"])
+    .map(w => ({ concept: "buite", gen: () => binneOfBuite(w) })) },
   st25: { guide: ["buite"], skills: rep(10, "buite", buiteR1) },
   st26: { guide: ["buite", "binne"], skills: rep(10, "buite", buiteR2) },
   st27: { guide: ["buite"], skills: rep(10, "buite", buiteR3) },
