@@ -4,7 +4,7 @@
    en kongruent vs gelykvormig.
    ============================================================ */
 import { mc, calc, tap, randInt, pick, shuffled, code } from "./_shared.js";
-import { triangleFigure, quadFigure, polygonFigure, circleFigure, circleTapFigure, congruentFigure } from "../engine/diagrams.js";
+import { triangleFigure, quadFigure, polygonFigure, circleFigure, circleTapFigure, congruentFigure, quadPropsFigure, QUAD_PROPS } from "../engine/diagrams.js";
 
 const ORANGE = "#ea580c";
 
@@ -157,6 +157,114 @@ function genCongruent() {
   });
 }
 
+/* ============ s11 · Teenoorstaande & aangrensende sye ============
+   'n Vierhoek ABCD: elke sy/hoekpunt het een teenoorstaande party (die
+   een heel anderkant) en twee aangrensende (wat 'n hoekpunt deel). Die
+   drie vraag-vorms hieronder is elk sy EIE skill-inskrywing (nie 'n
+   muntgooi binne een gen() nie — CLAUDE.md se gemengde-rondte-gotcha)
+   sodat 'n 10-vraag rondte altyd al drie soorte kry. */
+const SIDE_KEYS = ["AB", "BC", "CD", "DA"];
+const CORNER_KEYS = ["A", "B", "C", "D"];
+const OPP_SIDE = { AB: "CD", BC: "DA", CD: "AB", DA: "BC" };
+const ADJ_SIDES = { AB: ["BC", "DA"], BC: ["AB", "CD"], CD: ["BC", "DA"], DA: ["AB", "CD"] };
+const OPP_CORNER = { A: "C", B: "D", C: "A", D: "B" };
+
+function genOppositeSide() {
+  const q = pick(QUADS), side = pick(SIDE_KEYS), target = OPP_SIDE[side];
+  return tap(`Die BLOU sy is <b>${side}</b>. Tap die sy <b>TEENOORSTAANDE</b> ${side}.`, target,
+    quadPropsFigure(q.key, ORANGE, { highlightSide: side, decor: "none" }), {
+    tip: "Teenoorstaande = oorkant, raak nie.",
+    hint: `${side} en ${target} lê oorkant mekaar in die vierhoek — hulle raak mekaar nêrens.`,
+    answerLabel: target,
+  });
+}
+function genAdjacentSide() {
+  const q = pick(QUADS), side = pick(SIDE_KEYS), targets = ADJ_SIDES[side];
+  return tap(`Die BLOU sy is <b>${side}</b>. Tap 'n sy wat <b>AANGRENSEND</b> aan ${side} is.`, targets,
+    quadPropsFigure(q.key, ORANGE, { highlightSide: side, decor: "none" }), {
+    tip: "Aangrensend = langsaan, deel 'n hoekpunt.",
+    hint: `${targets.join(" en ")} deel elk 'n hoekpunt met ${side} — albei tel.`,
+    answerLabel: targets.join(" of "),
+  });
+}
+function genOppositeCorner() {
+  const q = pick(QUADS), corner = pick(CORNER_KEYS), target = OPP_CORNER[corner];
+  return tap(`Die BLOU hoek is <b>${corner}</b>. Tap die hoek <b>TEENOORSTAANDE</b> hoek ${corner}.`, target,
+    quadPropsFigure(q.key, ORANGE, { highlightCorner: corner, decor: "none" }), {
+    tip: "Teenoorstaande = oorkant, raak nie.",
+    hint: `${corner} en ${target} is die twee hoekpunte heel anderkant mekaar.`,
+    answerLabel: target,
+  });
+}
+
+/* ============ s12 · Wat beteken die simbole? ============
+   3 simbole (pyltjie=parallel, streep=ewe lank, blokkie=90°) — mc vra
+   die BETEKENIS, die tap-vrae werk ANDERSOM ('n gegewe groen sy, tap sy
+   party). Elke keuse-lys is beperk tot vierhoeke wat DIE eienskap
+   werklik het (bv. 'n vlieër het geen parallelle sye nie — nooit vra
+   nie; 'n trapesium se bene kry nooit pyltjies nie). */
+const PARALLEL_KINDS = QUADS.filter(q => QUAD_PROPS[q.key].parallelPairs.length > 0);
+const EQUAL_KINDS = QUADS.filter(q => QUAD_PROPS[q.key].equalGroups.length > 0);
+const RIGHT_KINDS = QUADS.filter(q => QUAD_PROPS[q.key].rightCorners.length > 0);
+const SYMBOL_OPTS = (correctLabel) => shuffled([
+  { label: "Die sye is parallel (ewewydig)", correct: correctLabel === "par" },
+  { label: "Die sye is ewe lank", correct: correctLabel === "tick" },
+  { label: "Die hoek is 'n regte hoek (90°)", correct: correctLabel === "right" },
+]);
+
+function genSymbolPar() {
+  const q = pick(PARALLEL_KINDS);
+  const pairs = QUAD_PROPS[q.key].parallelPairs;
+  const pi = randInt(0, pairs.length - 1);
+  return mc("Wat beteken die <b>›</b>-pyltjie(s) op die sye?", SYMBOL_OPTS("par"), {
+    figure: quadPropsFigure(q.key, ORANGE, { tapSides: false, tapCorners: false, decor: { type: "par", pair: pi } }),
+    hint: "Pyltjies (›) op sye beteken hulle is parallel — hulle loop langs mekaar en sny nooit.",
+    answerLabel: "Die sye is parallel (ewewydig)",
+  });
+}
+function genSymbolTick() {
+  const q = pick(EQUAL_KINDS);
+  const groups = QUAD_PROPS[q.key].equalGroups;
+  const gi = randInt(0, groups.length - 1);
+  return mc("Wat beteken die <b>streep-merkies</b> op die sye?", SYMBOL_OPTS("tick"), {
+    figure: quadPropsFigure(q.key, ORANGE, { tapSides: false, tapCorners: false, decor: { type: "tick", group: gi } }),
+    hint: "Streep-merkies (dieselfde aantal strepies) op sye beteken hulle is ewe lank.",
+    answerLabel: "Die sye is ewe lank",
+  });
+}
+function genSymbolRight() {
+  const q = pick(RIGHT_KINDS);
+  const corners = QUAD_PROPS[q.key].rightCorners;
+  const c = pick(corners);
+  return mc("Wat beteken die <b>blokkie</b>-merkie by die hoek?", SYMBOL_OPTS("right"), {
+    figure: quadPropsFigure(q.key, ORANGE, { tapSides: false, tapCorners: false, decor: { type: "right", corner: c } }),
+    hint: "'n Klein blokkie by 'n hoekpunt beteken dit is presies 90° — 'n regte hoek.",
+    answerLabel: "Die hoek is 'n regte hoek (90°)",
+  });
+}
+function genTapParallel() {
+  const q = pick(PARALLEL_KINDS);
+  const pair = pick(QUAD_PROPS[q.key].parallelPairs);
+  const green = pick(pair), target = pair.find(s => s !== green);
+  return tap(`Die GROEN sy is <b>${green}</b>. Tap 'n sy wat <b>parallel</b> aan die groen sy is.`, target,
+    quadPropsFigure(q.key, ORANGE, { highlightSide: green, highlightColor: "#16a34a", decor: "none" }), {
+    tip: "Parallel = loop langs mekaar, sny nooit.",
+    hint: `${target} is die enigste ander sy wat nooit ${green} sal raak nie — parallel.`,
+    answerLabel: target,
+  });
+}
+function genTapEqual() {
+  const q = pick(EQUAL_KINDS);
+  const group = pick(QUAD_PROPS[q.key].equalGroups);
+  const green = pick(group), targets = group.filter(s => s !== green);
+  return tap(`Die GROEN sy is <b>${green}</b>. Tap 'n sy wat <b>ewe lank</b> is as die groen sy.`, targets,
+    quadPropsFigure(q.key, ORANGE, { highlightSide: green, highlightColor: "#16a34a", decor: "none" }), {
+    tip: "Ewe lank = presies dieselfde lengte.",
+    hint: `${targets.join(" en ")} is ewe lank as ${green}.`,
+    answerLabel: targets.join(" of "),
+  });
+}
+
 export const CH4 = {
   s1: { skills: Array.from({ length: 5 }, () => ({ concept: "driehoeke", gen: genTriBySides })) },
   s2: { skills: Array.from({ length: 5 }, () => ({ concept: "driehoeke", gen: genTriByAngles })) },
@@ -168,4 +276,14 @@ export const CH4 = {
   s8: { skills: Array.from({ length: 5 }, () => ({ concept: "sirkeldele", gen: genDiameter })) },
   s9: { skills: Array.from({ length: 5 }, () => ({ concept: "kongruent", gen: genCongruent })) },
   s10: { skills: Array.from({ length: 5 }, () => ({ concept: "kongruent", gen: genCongruent })) },
+  s11: { skills: shuffled([
+    genOppositeSide, genOppositeSide, genOppositeSide, genOppositeSide,
+    genAdjacentSide, genAdjacentSide, genAdjacentSide,
+    genOppositeCorner, genOppositeCorner, genOppositeCorner,
+  ]).map(gen => ({ concept: "vierhoeksye", gen })) },
+  s12: { skills: shuffled([
+    genSymbolPar, genSymbolPar, genSymbolTick, genSymbolRight,
+    genTapParallel, genTapParallel, genTapEqual, genTapEqual,
+    genSymbolTick, genSymbolRight,
+  ]).map(gen => ({ concept: "vierhoeksimbole", gen })) },
 };

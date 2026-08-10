@@ -590,6 +590,96 @@ export function quadFigure(kind, accent = "#ea580c") {
   return svgWrap(poly + marks, "0 0 240 185", 230, "Vierhoek");
 }
 
+/* ---------- ch4 s11/s12: vierhoek met TIKBARE sye/hoeke + eienskap-simbole ----------
+   Haar PDF "Eienskappe van veelhoeke": watter sye ewe lank is (merkies),
+   watter sypare parallel is (pyltjies ›/››), en watter hoekpunte regte
+   hoeke is (blokkie). Een bron van waarheid vir BEIDE die tekening hier
+   ÉN die s11/s12-generators (wat QUAD_PROPS invoer om korrekte teikens
+   — teenoorstaande/aangrensende/gelyk/parallel — te bereken).
+     equalGroups: groepe sye wat ewe lank is (elke groep kry sy eie
+       aantal strepies: groep 1 → een streep, groep 2 → twee strepe).
+     parallelPairs: sy-pare wat parallel is (pyltjie-telling ›/›› per paar).
+     rightCorners: hoekpunte wat presies 90° is (blokkie-merk).
+   Geometrie is DIESELFDE punte as die ou s4 quadFigure — dekorasies is
+   suiwer dekoratief, hulle skuif nooit die vorm nie. */
+export const QUAD_PROPS = {
+  vierkant:      { equalGroups: [["AB", "BC", "CD", "DA"]], parallelPairs: [["AB", "CD"], ["BC", "DA"]], rightCorners: ["A", "B", "C", "D"] },
+  reghoek:       { equalGroups: [["AB", "CD"], ["BC", "DA"]], parallelPairs: [["AB", "CD"], ["BC", "DA"]], rightCorners: ["A", "B", "C", "D"] },
+  parallelogram: { equalGroups: [["AB", "CD"], ["BC", "DA"]], parallelPairs: [["AB", "CD"], ["BC", "DA"]], rightCorners: [] },
+  ruit:          { equalGroups: [["AB", "BC", "CD", "DA"]], parallelPairs: [["AB", "CD"], ["BC", "DA"]], rightCorners: [] },
+  trapesium:     { equalGroups: [], parallelPairs: [["AB", "CD"]], rightCorners: [] },
+  vlieer:        { equalGroups: [["AB", "DA"], ["BC", "CD"]], parallelPairs: [], rightCorners: [] },
+};
+const QP_SIDE_IDX = { AB: [0, 1], BC: [1, 2], CD: [2, 3], DA: [3, 0] };
+const QP_CORNER_IDX = { A: 0, B: 1, C: 2, D: 3 };
+
+/* opt: { tapSides=true, tapCorners=true, showSideLabels=true, showCornerLabels=true,
+   highlightSide, highlightCorner ("AB".."A" ens.), highlightColor="#2563eb",
+   decor: "all" (verstek — wys AL die vorm se eie eienskap-merke) | "none"
+   (skoon vorm, geen merke) | {type:"tick", group:N} | {type:"par", pair:N} |
+   {type:"right", corner:"A"} (wys NET DIÉ EEN simbool — vir s12 se
+   "wat beteken dit?"-vrae, sodat die vraag ondubbelsinnig is). */
+export function quadPropsFigure(kind, accent = "#ea580c", opt = {}) {
+  const d = QUADS[kind] || QUADS.vierkant;
+  const p = d.pts;
+  const props = QUAD_PROPS[kind] || QUAD_PROPS.vierkant;
+  const cx = (p[0][0] + p[1][0] + p[2][0] + p[3][0]) / 4, cy = (p[0][1] + p[1][1] + p[2][1] + p[3][1]) / 4;
+  const poly = `<polygon points="${p.map(q => q.join(",")).join(" ")}" fill="${accent}" fill-opacity="0.13" stroke="${INK}" stroke-width="2.8" stroke-linejoin="round"/>`;
+
+  const decor = opt.decor ?? "all";
+  const wantTick = gi => decor !== "none" && (decor === "all" || (decor.type === "tick" && decor.group === gi));
+  const wantPar = pi => decor !== "none" && (decor === "all" || (decor.type === "par" && decor.pair === pi));
+  const wantRight = c => decor !== "none" && (decor === "all" || (decor.type === "right" && decor.corner === c));
+
+  let marks = "";
+  props.equalGroups.forEach((group, gi) => {
+    if (!wantTick(gi)) return;
+    group.forEach(side => { const [i, j] = QP_SIDE_IDX[side]; marks += sideTick(p[i], p[j], gi + 1, accent); });
+  });
+  props.parallelPairs.forEach((pair, pi) => {
+    if (!wantPar(pi)) return;
+    pair.forEach(side => {
+      const [i, j] = QP_SIDE_IDX[side];
+      const mx = (p[i][0] + p[j][0]) / 2, my = (p[i][1] + p[j][1]) / 2;
+      marks += txt([mx, my], "›".repeat(pi + 1), accent, 14);
+    });
+  });
+  props.rightCorners.forEach(c => {
+    if (!wantRight(c)) return;
+    const i = QP_CORNER_IDX[c];
+    marks += rightAngle(p[i], p[(i + 1) % 4], p[(i + 3) % 4], accent, 13);
+  });
+
+  // tikbare sye + hoekpunte — ruim onsigbare tik-areas (vingers op 'n tablet)
+  let taps = "";
+  if (opt.tapSides !== false) {
+    Object.entries(QP_SIDE_IDX).forEach(([side, [i, j]]) => {
+      const isHi = opt.highlightSide === side;
+      const col = isHi ? (opt.highlightColor || "#2563eb") : INK;
+      const mx = (p[i][0] + p[j][0]) / 2, my = (p[i][1] + p[j][1]) / 2;
+      const dx = mx - cx, dy = my - cy, dist = Math.hypot(dx, dy) || 1;
+      const lp = [f(mx + dx / dist * 17), f(my + dy / dist * 17)];
+      const fatLine = `<line x1="${p[i][0]}" y1="${p[i][1]}" x2="${p[j][0]}" y2="${p[j][1]}" stroke="transparent" stroke-width="24"/>`;
+      const hiLine = isHi ? `<line x1="${p[i][0]}" y1="${p[i][1]}" x2="${p[j][0]}" y2="${p[j][1]}" stroke="${col}" stroke-width="5" stroke-linecap="round"/>` : "";
+      const label = (isHi || opt.showSideLabels !== false) ? txt(lp, side, col, isHi ? 15 : 12) : "";
+      taps += `<g data-tap="${side}" style="cursor:pointer">${fatLine}${hiLine}${label}</g>`;
+    });
+  }
+  if (opt.tapCorners !== false) {
+    Object.entries(QP_CORNER_IDX).forEach(([corner, i]) => {
+      const isHi = opt.highlightCorner === corner;
+      const col = isHi ? (opt.highlightColor || "#2563eb") : INK;
+      const dx = p[i][0] - cx, dy = p[i][1] - cy, dist = Math.hypot(dx, dy) || 1;
+      const lp = [f(p[i][0] + dx / dist * 19), f(p[i][1] + dy / dist * 19)];
+      const dot = isHi ? `<circle cx="${p[i][0]}" cy="${p[i][1]}" r="5" fill="${col}"/>` : "";
+      const label = (isHi || opt.showCornerLabels !== false) ? txt(lp, corner, col, isHi ? 15 : 12) : "";
+      taps += `<g data-tap="${corner}" style="cursor:pointer"><circle cx="${p[i][0]}" cy="${p[i][1]}" r="15" fill="transparent"/>${dot}${label}</g>`;
+    });
+  }
+
+  return svgWrap(poly + marks + taps, "0 0 240 185", 230, "Vierhoek met sye en hoeke");
+}
+
 /* ---------- ch4: reëlmatige poligoon met N sye ---------- */
 export function polygonFigure(n, accent = "#ea580c") {
   const cx = 120, cy = 95, r = 72;

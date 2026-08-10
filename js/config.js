@@ -68,6 +68,8 @@ export const CHAPTERS = [
       { id: "s8", n: 8, title: "Radius & middellyn", blurb: "Middellyn = 2 × radius.", built: true },
       { id: "s9", n: 9, title: "Kongruent of gelykvormig?", blurb: "Selfde grootte, of net selfde vorm?", built: true },
       { id: "s10", n: 10, title: "Nog kongruent of gelykvormig?", blurb: "Meer oefening met die verskil.", built: true },
+      { id: "s11", n: 11, title: "Teenoorstaande & aangrensende sye", blurb: "Watter sy is oorkant, watter een is langsaan?", built: true },
+      { id: "s12", n: 12, title: "Wat beteken die simbole?", blurb: "Pyltjies, strepies en blokkies — lees die merke.", built: true },
     ],
   },
   {

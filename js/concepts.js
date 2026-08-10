@@ -137,6 +137,20 @@ const C = {
     <p><b>Kongruent</b> (<code>≡</code>): presies dieselfde — sye én hoeke gelyk. Net die posisie verskil.</p>
     <p><b>Gelykvormig</b> (<code>|||</code>): dieselfde vorm, ander grootte. Hoeke gelyk, sye in verhouding.</p>
     <p>Voorwaardes om driehoeke kongruent te bewys: <b>SSS</b>, <b>SHS</b>, <b>HHS</b>, <b>RSS</b>.</p>` },
+  vierhoeksye: { title: "Teenoorstaande & aangrensende sye", body: `
+    <p>'n Vierhoek <code>ABCD</code> het vier sye: <code>AB</code>, <code>BC</code>, <code>CD</code> en <code>DA</code>.</p>
+    <ul>
+      <li><b>Teenoorstaande</b> sye lê oorkant mekaar — hulle raak NIE. <code>AB</code> se teenoorstaande sy is <code>CD</code>.</li>
+      <li><b>Aangrensende</b> sye lê langsaan mekaar — hulle DEEL 'n hoekpunt. <code>AB</code> se aangrensende sye is <code>BC</code> (deel B) en <code>DA</code> (deel A).</li>
+    </ul>
+    <p>Dieselfde geld vir hoekpunte: hoekpunt <code>A</code> se teenoorstaande hoekpunt is <code>C</code> — die een heel anderkant.</p>` },
+  vierhoeksimbole: { title: "Wat beteken die simbole?", body: `
+    <ul>
+      <li><b>Pyltjies</b> (<code>›</code> of <code>››</code>) op sye: daardie sye is <b>parallel</b> (ewewydig) — hulle loop langs mekaar en sny nooit. Dieselfde aantal pyltjies = dieselfde paar.</li>
+      <li><b>Streep-merkies</b> op sye: daardie sye is <b>ewe lank</b>. Dieselfde aantal strepies = dieselfde groep.</li>
+      <li><b>Blokkie</b> by 'n hoekpunt: daardie hoek is presies <b>90°</b> — 'n regte hoek.</li>
+    </ul>
+    <p>'n Vierkant het al drie: al vier sye ewe lank, teenoorstaande sye parallel, én al vier hoeke reg.</p>` },
 
   /* ---- Hoofstuk 5: Transformasies ---- */
   transformasie: { title: "Soorte transformasies", body: `
