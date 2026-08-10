@@ -586,10 +586,14 @@ export function buitehoekBentFigure(angA, angB, accent = "#16a34a", opt = {}) {
   const arcB = vertexAngleArc(pB, pA, pC, 22, colB);
   const arcBent = vertexAngleArc(pC, pD, pA, 27, colBent);
   const markedAngle = f(arcBent.span);   // die hoek soos GETEKEN — dieselfde getal wat verify sal meet
+  /* Foreman-hersiening (2026-08-10): die ETIKET wys 'n heelgetal (leerders
+     verwag nie "86.22°" nie) — maar markedAngle self (en dus _chk by die
+     roeper) bly die PRESIESE geTEKENDE hoek, sodat verify-stellings steeds
+     die WERKLIKE booghoek meet, nie die afgeronde etiket nie. */
   const marks = arcA.svg + arcB.svg + arcBent.svg;
   const labels = labelAt(pA, arcA.mid, labelDist(arcA.span), `${angA}°`, colA)
     + labelAt(pB, arcB.mid, labelDist(arcB.span), `${angB}°`, colB)
-    + labelAt(pC, arcBent.mid, labelDist(arcBent.span, 42), ask ? "?" : `${markedAngle}°`, colBent);
+    + labelAt(pC, arcBent.mid, labelDist(arcBent.span, 42), ask ? "?" : `${Math.round(markedAngle)}°`, colBent);
 
   return { svg: svgWrap(base + marks + labels, "0 0 240 168", 230, "Buitehoek — strikvraag"), markedAngle };
 }
