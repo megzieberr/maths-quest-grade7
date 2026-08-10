@@ -8,6 +8,21 @@ import { getSession } from "./session.js";
 import { mountQuestion } from "./questions.js";
 import { openConcept } from "./modal.js";
 import { el, clear, mount } from "./ui.js";
+import { REDES } from "./redes.js";
+
+/* collapsible "Watter rede? 🧭" gids — 'n rondte kies in via def.guide = [kodes].
+   Lys elke rede se kort + vol bewoording; toe by verstek, oop met 'n tik. */
+function guideCard(def) {
+  if (!Array.isArray(def.guide) || !def.guide.length) return null;
+  const d = el("details", "card guide-card");
+  const rows = def.guide.map(code => {
+    const r = REDES[code];
+    if (!r) return "";
+    return `<div class="gd-row"><span class="gd-kort">${r.kort}</span><span class="gd-vol">${r.vol}</span></div>`;
+  }).join("");
+  d.innerHTML = `<summary>🧭 Watter rede?</summary><div class="gd-body">${rows}</div>`;
+  return d;
+}
 
 export function renderPlay(app, host, params) {
   const { chapter, quest, def, accent } = params;
@@ -26,6 +41,8 @@ export function renderPlay(app, host, params) {
   const xpPop = el("div", "xp-pop");
   const qhost = el("div", "q-host");
   mount(screen, top, bar, xpPop, qhost);
+  const guide = guideCard(def);
+  if (guide) screen.insertBefore(guide, qhost);
   host.appendChild(screen);
 
   const logStruggle = (concept) => { try { sess && api.logStruggle(sess.username, sess.password, concept).catch(() => {}); } catch { /* fire and forget */ } };

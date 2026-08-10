@@ -224,6 +224,38 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 .help-row{display:flex;gap:10px;margin-top:14px}
 .help-row .btn{flex:1}
 
+/* ---------- ch6: "Watter rede? 🧭" gids (collapsible) ---------- */
+.guide-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:0;
+  margin-bottom:14px;overflow:hidden;border:2px solid color-mix(in srgb,var(--accent) 22%,transparent)}
+.guide-card summary{cursor:pointer;list-style:none;padding:14px 18px;font-family:var(--font-display);
+  font-weight:600;font-size:15.5px;color:var(--accent);display:flex;align-items:center;gap:6px}
+.guide-card summary::-webkit-details-marker{display:none}
+.guide-card summary:hover{background:var(--card-2)}
+.guide-card[open] summary{border-bottom:2px dashed var(--line)}
+.gd-body{padding:8px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.gd-row{display:flex;flex-direction:column;gap:1px;background:var(--card-2);border-radius:12px;padding:9px 12px}
+.gd-kort{font-family:var(--font-display);font-weight:600;font-size:14.5px;color:var(--ink)}
+.gd-vol{font-size:12.5px;color:var(--muted);font-weight:600}
+
+/* ---------- ch6: rede-chips ("reason" / "calcReason") ---------- */
+.reason-grid{display:flex;flex-direction:column;gap:10px}
+.reason-grid.cr{margin-top:14px}
+.reason-chip{font-family:var(--font-body);text-align:left;color:var(--ink);background:var(--card-2);
+  border:2px solid var(--line);border-radius:var(--r-md);padding:12px 15px;cursor:pointer;width:100%;
+  display:flex;flex-direction:column;gap:2px;transition:transform .1s,border-color .1s,background .1s}
+.reason-chip:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px)}
+.reason-chip:disabled{cursor:default}
+.reason-chip .rc-kort{font-family:var(--font-display);font-weight:600;font-size:16px}
+.reason-chip .rc-vol{font-size:12.5px;color:var(--muted);font-weight:600}
+.reason-chip.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,#fff)}
+.reason-chip.is-correct{border-color:var(--good);background:var(--good-bg)}
+.reason-chip.is-correct .rc-kort{color:#0d7a3a}
+.reason-chip.is-wrong{border-color:var(--bad);background:var(--bad-bg)}
+.reason-chip.is-wrong .rc-kort{color:#b4145a}
+.q-input-sub{margin-bottom:6px}
+.cr-foot{margin-top:14px}
+.fb-parts{font-family:var(--font-display);font-weight:600;font-size:13.5px;margin:2px 0 8px;opacity:.85}
+
 /* ---------- feedback ---------- */
 .feedback{margin-top:16px;border-radius:var(--r-md);padding:15px 16px;border:2px solid}
 .feedback.good{background:var(--good-bg);border-color:#a7e8c1}

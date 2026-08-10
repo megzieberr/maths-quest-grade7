@@ -10,13 +10,15 @@
    konsepkaart (altyd beskikbaar).
 
    handlers = { accent, onResult(ok, chosen), onContinue(), onSibling(), onLost() }
-   q.type: "mc" | "tf" | "calc" | "multi" | "coord" | "protractor"
+   q.type: "mc" | "tf" | "calc" | "multi" | "coord" | "protractor" | "tap" |
+           "reason" (kies-die-rede) | "calcReason" (waarde ÉN rede)
    ============================================================ */
 import { el, clear } from "./ui.js";
 import { mountKeypad } from "./keypad.js";
 import { answerCorrect, fmtComma, parseNum } from "./check.js";
 import { renderProtractor } from "./engine/protractor.js";
 import { TOL } from "./config.js";
+import { REDES } from "./redes.js";
 
 export function mountQuestion(host, q, handlers = {}) {
   clear(host);
@@ -58,7 +60,8 @@ export function mountQuestion(host, q, handlers = {}) {
   const feedback = el("div", "feedback"); feedback.hidden = true;
 
   let answered = false;
-  function commit(isCorrect, chosen) {
+  /* parts (opsioneel) = { okVal, okReason } — vir calcReason se twee-deel terugvoer */
+  function commit(isCorrect, chosen, parts) {
     if (answered) return;
     answered = true;
     handlers.onResult && handlers.onResult(isCorrect, chosen);
@@ -67,6 +70,7 @@ export function mountQuestion(host, q, handlers = {}) {
     feedback.hidden = false;
     feedback.classList.add(isCorrect ? "good" : "bad");
     let html = `<div class="fb-head">${isCorrect ? "✓ Reg!" : "✗ Nie heeltemal nie"}</div>`;
+    if (parts) html += `<div class="fb-parts">Waarde ${parts.okVal ? "✓" : "✗"} · Rede ${parts.okReason ? "✓" : "✗"}</div>`;
     if (q.answerLabel != null) html += `<div class="fb-answer"><b>Antwoord:</b> ${q.answerLabel}</div>`;
     if (!isCorrect && Array.isArray(q.solution) && q.solution.length) {
       html += `<div class="sol">` + q.solution.map(s =>
@@ -165,17 +169,86 @@ export function mountQuestion(host, q, handlers = {}) {
     mountCoord(inputHost, q, (ok, label) => commit(ok, label));
   }
 
+  else if (q.type === "reason") {
+    // kies-die-rede: een chip per aangebode REDES-kode (kort groot, vol klein)
+    const grid = el("div", "reason-grid");
+    q.options.forEach((o, idx) => {
+      const r = REDES[o.code];
+      const chip = el("button", "reason-chip");
+      chip.type = "button";
+      chip.innerHTML = `<span class="rc-kort">${r.kort}</span><span class="rc-vol">${r.vol}</span>`;
+      chip.addEventListener("click", () => {
+        if (answered) return;
+        [...grid.children].forEach((x, i) => { x.disabled = true; if (q.options[i].correct) x.classList.add("is-correct"); });
+        chip.classList.add(o.correct ? "is-correct" : "is-wrong");
+        commit(!!o.correct, r.kort);
+      });
+      grid.appendChild(chip);
+    });
+    inputHost.appendChild(grid);
+  }
+
+  else if (q.type === "calcReason") {
+    // sleutelbord (waarde) + rede-chips; EEN Stuur-knoppie toets albei saam.
+    const valWrap = el("div", "q-input-sub");
+    inputHost.appendChild(valWrap);
+    const kp = mountKeypad(valWrap, { unit: q.unit || "°", allowNeg: !!q.allowNeg });
+    const kpSubmit = valWrap.querySelector(".key.submit");
+    if (kpSubmit) kpSubmit.style.display = "none";   // hierdie tipe stuur saam met die rede, nie apart nie
+
+    const grid = el("div", "reason-grid cr");
+    let chosenCode = null, chosenChip = null;
+    q.options.forEach(o => {
+      const r = REDES[o.code];
+      const chip = el("button", "reason-chip");
+      chip.type = "button";
+      chip.innerHTML = `<span class="rc-kort">${r.kort}</span><span class="rc-vol">${r.vol}</span>`;
+      chip.addEventListener("click", () => {
+        if (answered) return;
+        [...grid.children].forEach(x => x.classList.remove("sel"));
+        chip.classList.add("sel");
+        chosenCode = o.code; chosenChip = chip;
+        crSubmit.disabled = false;
+      });
+      grid.appendChild(chip);
+    });
+    inputHost.appendChild(grid);
+
+    const foot = el("div", "cr-foot");
+    const crSubmit = el("button", "btn primary big", "Stuur ✓");
+    crSubmit.disabled = true;   // eers aktief sodra 'n rede gekies is
+    crSubmit.addEventListener("click", () => {
+      if (answered) return;
+      const v = kp.value;
+      if (!Number.isFinite(v) || chosenCode == null) return;
+      kp.disable();
+      crSubmit.disabled = true;
+      const okVal = answerCorrect(v, q.expected, { dp: q.dp, tol: q.tol });
+      const okReason = chosenCode === q.correctCode;
+      [...grid.children].forEach((c, i) => {
+        c.disabled = true;
+        if (q.options[i].correct) c.classList.add("is-correct");
+        else if (c === chosenChip) c.classList.add("is-wrong");
+      });
+      commit(okVal && okReason, `${fmtComma(v, q.dp)}${q.unit || ""} · ${REDES[chosenCode].kort}`, { okVal, okReason });
+    });
+    foot.appendChild(crSubmit);
+    inputHost.appendChild(foot);
+  }
+
   else if (q.type === "tap") {
-    // die figuur bevat [data-tap] areas; tik die regte een
+    // die figuur bevat [data-tap] areas; tik die regte een.
+    // q.target mag 'n string wees (een regte area) OF 'n ARRAY (enige een tel).
     const figEl = root.querySelector(".q-figure");
     const zones = figEl ? [...figEl.querySelectorAll("[data-tap]")] : [];
+    const isTarget = key => Array.isArray(q.target) ? q.target.includes(key) : key === q.target;
     zones.forEach(z => {
       z.addEventListener("click", () => {
         if (answered) return;
-        const ok = z.dataset.tap === q.target;
+        const ok = isTarget(z.dataset.tap);
         zones.forEach(o => {
           o.style.pointerEvents = "none";
-          if (o.dataset.tap === q.target) o.classList.add("tap-correct");
+          if (isTarget(o.dataset.tap)) o.classList.add("tap-correct");
         });
         if (!ok) z.classList.add("tap-wrong");
         commit(ok, z.dataset.tap);

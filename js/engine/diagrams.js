@@ -262,6 +262,86 @@ export function lineFigure(kind, accent = "#0d9488") {
   return svgWrap(inner, "0 0 260 180", 250, "Lyne");
 }
 
+/* ============================================================
+   ch6: MEETKUNDE STELLINGS — op-skaal driehoek-geometrie
+   ------------------------------------------------------------
+   Anders as die TRIS-vorms hierbo (vaste, geskatte punte vir
+   klassifiseer-vrae), word hierdie driehoeke uit werklike
+   hoekwaardes BEREKEN (twee strale se snypunt), dan eenvormig
+   geskaal om in die tekenboks te pas — die vorm bly dus altyd
+   wiskundig korrek, ongeag hoe groot/klein die boks is.
+   ============================================================ */
+const angleOfVec = v => { const d = Math.atan2(-v[1], v[0]) * 180 / Math.PI; return d < 0 ? d + 360 : d; };
+function rayIntersect(p1, d1, p2, d2) {
+  const denom = d1[0] * d2[1] - d1[1] * d2[0];
+  if (Math.abs(denom) < 1e-9) return [p1[0] + d1[0], p1[1] + d1[1]];   // ontaarde rande — moet nie gebeur met geldige driehoek-hoeke nie
+  const dx = p2[0] - p1[0], dy = p2[1] - p1[1];
+  const t = (dx * d2[1] - dy * d2[0]) / denom;
+  return [p1[0] + t * d1[0], p1[1] + t * d1[1]];
+}
+/* pas 'n stel rou punte (arbitrêre skaal) in 'n teikenboks in met EENVORMIGE
+   skaal (behou dus die ware hoeke — "op skaal"), plus padding vanaf die kante. */
+function fitPoints(pts, boxW, boxH, padL, padT) {
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const w = Math.max(maxX - minX, 1e-6), h = Math.max(maxY - minY, 1e-6);
+  const k = Math.min(boxW / w, boxH / h);
+  return pts.map(([x, y]) => [f(padL + (x - minX) * k), f(padT + (y - minY) * k)]);
+}
+/* driehoek uit die twee basishoeke by B (links) en C (regs); unit-skaal, BC = 1 */
+function triFromBaseAngles(angB, angC) {
+  const dBA = [Math.cos(rd(angB)), -Math.sin(rd(angB))];
+  const dCA = [Math.cos(rd(180 - angC)), -Math.sin(rd(180 - angC))];
+  const A = rayIntersect([0, 0], dBA, [1, 0], dCA);
+  return { A, B: [0, 0], C: [1, 0] };
+}
+/* die hoek-boog by punt p, tussen strale na q1 en q2. Gee { svg, mid } terug
+   (mid = die middel-graad, vir label-plasing langs die halveerlyn). */
+function vertexAngleArc(p, q1, q2, r, col, w = 2.4) {
+  const a1 = angleOfVec([q1[0] - p[0], q1[1] - p[1]]);
+  const a2 = angleOfVec([q2[0] - p[0], q2[1] - p[1]]);
+  const lo = Math.min(a1, a2), hi = Math.max(a1, a2);
+  return { svg: arcPoly(p[0], p[1], r, lo, hi, col, w), mid: (lo + hi) / 2 };
+}
+/* plaas 'n label 'n gegewe afstand van p af, in rigting midDeg (grade) */
+function labelAt(p, midDeg, dist, s, col, size = 13) {
+  return txt([f(p[0] + dist * Math.cos(rd(midDeg))), f(p[1] - dist * Math.sin(rd(midDeg)))], s, col, size);
+}
+
+/* ---------- buitehoek van 'n driehoek (buitehoek-stelling) ----------
+   angA, angB = die twee "ver" binnehoeke (by A en B) — hulle som is die
+   buitehoek by C. Die sy BC word oor C verleng na D; die buitehoek word
+   daar gemerk. opt.hide: "A" | "B" | "ext" (verstek "ext") — daardie
+   hoek se etiket word "?" i.p.v. die syfer (vir die vraagrigting). */
+export function buitehoekFigure(angA, angB, accent = "#16a34a", opt = {}) {
+  const angC = 180 - angA - angB;      // binnehoek by C (nie self gemerk nie)
+  const ext = angA + angB;              // buitehoek by C
+  const { A, B, C } = triFromBaseAngles(angB, angC);
+  const D = [C[0] + (C[0] - B[0]) * 0.55, C[1] + (C[1] - B[1]) * 0.55];
+  const [pA, pB, pC, pD] = fitPoints([A, B, C, D], 188, 116, 26, 24);
+
+  const line = (p1, p2) => `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
+  const dot = p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="${INK}"/>`;
+
+  const arcA = vertexAngleArc(pA, pB, pC, 22, accent);
+  const arcB = vertexAngleArc(pB, pA, pC, 22, accent);
+  const arcExt = vertexAngleArc(pC, pD, pA, 27, "#f59e0b");
+
+  const hide = opt.hide || "ext";
+  const lblA = hide === "A" ? "?" : `${angA}°`;
+  const lblB = hide === "B" ? "?" : `${angB}°`;
+  const lblExt = hide === "ext" ? "?" : `${ext}°`;
+
+  const inner = line(pA, pB) + line(pB, pC) + line(pA, pC) + line(pC, pD)
+    + arrowHead(pD[0], pD[1], angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK)
+    + arcA.svg + arcB.svg + arcExt.svg
+    + labelAt(pA, arcA.mid, 36, lblA, accent)
+    + labelAt(pB, arcB.mid, 36, lblB, accent)
+    + labelAt(pC, arcExt.mid, 42, lblExt, "#d97706")
+    + dot(pA) + dot(pB) + dot(pC);
+  return svgWrap(inner, "0 0 240 168", 230, "Buitehoek van 'n driehoek");
+}
+
 /* ---------- ch4: driehoeke (met merkies / regtehoek-blokkie) ---------- */
 const sideTick = (p1, p2, n, accent) => {
   const mx = (p1[0] + p2[0]) / 2, my = (p1[1] + p2[1]) / 2;
@@ -291,7 +371,35 @@ const TRIS = {
   stomphoekig: { pts: [[40, 70], [150, 36], [205, 150]], obtuseAt: 0 },
   skerphoekig: { pts: [[112, 34], [50, 146], [172, 138]] },
 };
-export function triangleFigure(kind, accent = "#ea580c") {
+/* kind === "gelykbenig" + opt.apex (getal, grade): op-skaal gelykbenige
+   driehoek uit die WERKLIKE tophoek, met opsionele etikette + boogmerke
+   ("Ek is verlore"-vriendelike (180−x)÷2-vrae). Sonder opt.apex bly die
+   ou vaste-vorm gedrag (s1/s2 klassifiseer-vrae) ONVERANDERD.
+   opt: { showApex=true, showBase=true, hide:"apex"|"base" } */
+export function triangleFigure(kind, accent = "#ea580c", opt = {}) {
+  if (kind === "gelykbenig" && typeof opt.apex === "number") {
+    const apex = opt.apex, baseAng = (180 - apex) / 2;
+    const half = Math.tan(rd(apex / 2));                 // unit-hoogte = 1
+    const raw = [[0, 0], [-half, 1], [half, 1]];          // apex, basis-links, basis-regs
+    const [pApex, pL, pR] = fitPoints(raw, 148, 128, 46, 18);
+    const tri = `<polygon points="${[pApex, pL, pR].map(q => q.join(",")).join(" ")}" fill="${accent}" fill-opacity="0.13" stroke="${INK}" stroke-width="2.8" stroke-linejoin="round"/>`;
+    let marks = sideTick(pApex, pL, 1, accent) + sideTick(pApex, pR, 1, accent);
+    let labels = "";
+    if (opt.showApex !== false) {
+      const a = vertexAngleArc(pApex, pL, pR, 22, accent);
+      marks += a.svg;
+      labels += labelAt(pApex, a.mid, 32, opt.hide === "apex" ? "?" : `${apex}°`, accent);
+    }
+    if (opt.showBase !== false) {
+      const bL = vertexAngleArc(pL, pApex, pR, 19, accent);
+      const bR = vertexAngleArc(pR, pApex, pL, 19, accent);
+      marks += bL.svg + bR.svg;
+      const bLbl = opt.hide === "base" ? "?" : `${baseAng}°`;
+      labels += labelAt(pL, bL.mid, 30, bLbl, accent) + labelAt(pR, bR.mid, 30, bLbl, accent);
+    }
+    return svgWrap(tri + marks + labels, "0 0 220 165", 210, "Gelykbenige driehoek");
+  }
+
   const d = TRIS[kind] || TRIS.skerphoekig;
   const p = d.pts;
   const poly = `<polygon points="${p.map(q => q.join(",")).join(" ")}" fill="${accent}" fill-opacity="0.13" stroke="${INK}" stroke-width="2.8" stroke-linejoin="round"/>`;

@@ -5,6 +5,7 @@
    bly. Elke bouer gee 'n vraag-objek terug wat questions.js wys.
    ============================================================ */
 import { randInt, pick, shuffled } from "../ui.js";
+import { REDES } from "../redes.js";
 export { randInt, pick, shuffled };
 
 /* meervoudige keuse. options = [{label, correct}], word geskommel. */
@@ -42,6 +43,32 @@ export function tap(prompt, target, figure, extra = {}) {
 export function protractor(prompt, angle, extra = {}) {
   return { type: "protractor", prompt, angle, unit: "°",
     answerLabel: extra.answerLabel ?? `${angle}°`, ...extra };
+}
+
+/* ---------- Hoofstuk 6: Meetkunde Stellings — rede-vrae ---------- */
+/* hulp: sorg dat die korrekte kode in die aangebode lys is, geskommel */
+function withCorrect(correctCode, offeredCodes) {
+  const codes = offeredCodes.includes(correctCode) ? offeredCodes : [correctCode, ...offeredCodes];
+  return shuffled(codes.map(c => ({ code: c, correct: c === correctCode })));
+}
+
+/* kies-die-rede: prompt + figuur + 'n chip-rooster (kort groot, vol klein).
+   correctCode = die regte REDES-sleutel; offeredCodes = al die kodes om te wys
+   (moet correctCode insluit — indien nie, word dit outomaties bygevoeg). */
+export function reasonQ(prompt, correctCode, offeredCodes, figure, extra = {}) {
+  const options = withCorrect(correctCode, offeredCodes);
+  return { type: "reason", prompt, figure, correctCode, options,
+    answerLabel: extra.answerLabel ?? REDES[correctCode].kort, ...extra };
+}
+
+/* waarde ÉN rede: sleutelbord (waarde) + chip-rooster (rede) — Stuur toets albei.
+   expected = die korrekte hoekwaarde; correctCode/offeredCodes soos reasonQ. */
+export function calcReason(prompt, expected, correctCode, offeredCodes, figure, extra = {}) {
+  const options = withCorrect(correctCode, offeredCodes);
+  const unit = extra.unit ?? "°";
+  return { type: "calcReason", prompt, figure, expected, correctCode, options, unit,
+    answerLabel: extra.answerLabel ?? `${fmt(expected, extra.dp)}${unit} · ${REDES[correctCode].kort}`,
+    ...extra };
 }
 
 /* formateer met komma */
