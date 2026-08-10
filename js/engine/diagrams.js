@@ -160,6 +160,17 @@ export function enlargeFigure(oldSide, newSide, accent = "#db2777") {
    grootte geteken sodat 'n leerder visueel kan klassifiseer.
    ============================================================ */
 const INK = "#52606d";
+/* ---------- Feature 4 (2026-08-10): kleur per gemerkte hoek ----------
+   Wanneer 'n figuur MEER AS EEN bekende hoek gelyktydig wys, kry elke
+   hoek sy EIE kleur uit hierdie vaste palet (deterministies: hoek-
+   indeks → palet-indeks), sodat 'n leerder elke gemerkte hoek se boog
+   EN etiket as EEN ding kan volg. Die "?" (die gevraagde hoek) hou sy
+   oranje behandeling ORAL — dis 'n gelaaide konvensie (kyk gerus na
+   ander stellings-figure wat reeds oranje "?" gebruik) en verander nooit.
+   Figure wat met 'n ENKELE bekende hoek gebruik word (bv. 'n gewone
+   calc-vraag se "gegewe + ?") behou eenvoudig die aangebode `accent`. */
+const MULTI_PALETTE = ["#16a34a", "#2563eb", "#7c3aed", "#0d9488"];
+const ASK_COL = "#f59e0b", ASK_TXT = "#d97706";
 const rd = d => d * Math.PI / 180;
 const txt = (p, s, col, size = 14) => `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="middle" font-family="Fredoka, sans-serif" font-weight="600" font-size="${size}" fill="${col}">${s}</text>`;
 const svgWrap = (inner, vb, max = 250, label = "Meetkunde-diagram") =>
@@ -208,12 +219,17 @@ export function straightLineFigure(givenDeg, accent = "#0d9488", opt = {}) {
   const ray = arm(givenDeg, L);
   const rayLine = `<line x1="${OX}" y1="${OY}" x2="${ray[0]}" y2="${ray[1]}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`;
   const askDeg = 180 - givenDeg;
-  const givenArc = arcPoly(OX, OY, 30, 0, givenDeg, accent);
-  const askArc = arcPoly(OX, OY, 30, givenDeg, 180, opt.showAsk ? accent : "#f59e0b");
-  const givenLbl = txt(arm(givenDeg / 2, 48), `${givenDeg}°`, accent, 13);
+  /* twee bekende hoeke gelyktydig gewys (showAsk, bv. ch6 se INTRO-rondtes)
+     kry elk hulle eie kleur (Feature 4); 'n gewone enkel-bekend-vraag
+     (die algemene geval, ook gedeel met ch3) behou net die accent. */
+  const givenCol = opt.showAsk ? MULTI_PALETTE[0] : accent;
+  const askCol = opt.showAsk ? MULTI_PALETTE[1] : ASK_COL;
+  const givenArc = arcPoly(OX, OY, 30, 0, givenDeg, givenCol);
+  const askArc = arcPoly(OX, OY, 30, givenDeg, 180, askCol);
+  const givenLbl = txt(arm(givenDeg / 2, 48), `${givenDeg}°`, givenCol, 13);
   const askLbl = opt.showAsk
-    ? txt(arm((givenDeg + 180) / 2, 48), `${askDeg}°`, accent, 13)
-    : txt(arm((givenDeg + 180) / 2, 48), "?", "#d97706", 16);
+    ? txt(arm((givenDeg + 180) / 2, 48), `${askDeg}°`, askCol, 13)
+    : txt(arm((givenDeg + 180) / 2, 48), "?", ASK_TXT, 16);
   return svgWrap(`${base}${rayLine}${givenArc}${askArc}${givenLbl}${askLbl}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
     "0 0 260 150", 260, "Hoeke op 'n reguitlyn");
 }
@@ -238,13 +254,16 @@ export function straightLineFigure3(angA, angB, accent = "#0d9488", opt = {}) {
   let arcs = "", labels = "";
   ["A", "B", "C"].forEach((key, i) => {
     const [d0, d1] = ranges[key];
-    const isAsk = key === hide;
-    const col = isAsk ? "#f59e0b" : cols[key];
+    /* Feature 4: die "?" bly oranje ORAL, maar SLEGS wanneer dit werklik
+       "?" wys — sodra showAsk die regte waarde wys, kry dit sy EIE
+       palet-kleur soos die ander twee (nie meer altyd oranje nie). */
+    const isAsk = key === hide && !opt.showAsk;
+    const col = isAsk ? ASK_COL : cols[key];
     const r = 26 + i * 8;
     const mid = (d0 + d1) / 2;
-    const showVal = !isAsk || opt.showAsk;
+    const showVal = key !== hide || opt.showAsk;
     arcs += arcPoly(OX, OY, r, d0, d1, col);
-    labels += txt(arm(mid, r + 18), showVal ? `${vals[key]}°` : "?", isAsk ? "#d97706" : col, showVal ? 13 : 16);
+    labels += txt(arm(mid, r + 18), showVal ? `${vals[key]}°` : "?", isAsk ? ASK_TXT : col, showVal ? 13 : 16);
   });
   return svgWrap(`${base}${rays}${arcs}${labels}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
     "0 0 260 155", 260, "Hoeke op 'n reguitlyn (drie hoeke)");
@@ -284,13 +303,15 @@ export function aroundPointFigureN(values, hideIndex, accent = "#16a34a", opt = 
   let arcs = "", labels = "";
   for (let i = 0; i < n; i++) {
     const d0 = rays[i], d1 = i + 1 < n ? rays[i + 1] : 360;
-    const isAsk = i === hideIndex;
-    const col = isAsk ? "#f59e0b" : palette[i % palette.length];
+    /* Feature 4: oranje bly gereserveer vir 'n werklike "?" — sodra
+       showAsk die regte waarde wys, kry dit sy palet-kleur soos die res. */
+    const isAsk = i === hideIndex && !opt.showAsk;
+    const col = isAsk ? ASK_COL : palette[i % palette.length];
     const r = 24 + (i % 2) * 12;
     const mid = (d0 + d1) / 2;
-    const showVal = !isAsk || opt.showAsk;
+    const showVal = i !== hideIndex || opt.showAsk;
     arcs += arcPoly(OX, OY, r, d0, d1, col);
-    labels += txt(arm(mid, r + 20), showVal ? `${values[i]}°` : "?", isAsk ? "#d97706" : col, showVal ? 13 : 16);
+    labels += txt(arm(mid, r + 20), showVal ? `${values[i]}°` : "?", isAsk ? ASK_TXT : col, showVal ? 13 : 16);
   }
   return svgWrap(`${lines}${arcs}${labels}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
     "0 0 260 200", 250, "Hoeke rondom 'n punt");
@@ -299,15 +320,28 @@ export function aroundPointFigureN(values, hideIndex, accent = "#16a34a", opt = 
 /* ---------- m9: regoorstaande (vertikaal-teenoorgestelde) hoeke ----------
    opt.showAsk: label die regoorstaande hoek met sy werklike (gelyke)
    waarde i.p.v. "?" — vir ch6 se INTRO-rondtes. */
+/* opt.adjacent (Feature 2, 2026-08-10 traps): i.p.v. die REGOORSTAANDE
+   hoek (oorkant die snypunt, dieselfde waarde) merk dit die hoek
+   LANGSAAN die bekende een, op DIESELFDE reguit lyn (som = 180°) — vir
+   st2/st3/st4 se "nie regoorstaande nie"-strikvrae. Dieselfde X-figuur,
+   net 'n ander wig gemerk, sodat 'n leerder na die PRENTJIE moet kyk,
+   nie net die woorde herken nie. */
 export function verticalFigure(known, accent = "#0d9488", opt = {}) {
   const OX = 130, OY = 95, L = 105;
   const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
   const line = d => { const p1 = arm(d, L), p2 = arm(d + 180, L); return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`; };
-  const givenArc = arcPoly(OX, OY, 26, 0, known, accent) + txt(arm(known / 2, 42), `${known}°`, accent, 13);
-  const askArc = arcPoly(OX, OY, 26, 180, 180 + known, opt.showAsk ? accent : "#f59e0b")
-    + txt(arm(180 + known / 2, 42), opt.showAsk ? `${known}°` : "?", opt.showAsk ? accent : "#d97706", opt.showAsk ? 13 : 16);
+  const adjacent = !!opt.adjacent;
+  const askVal = adjacent ? 180 - known : known;
+  const [askD0, askD1] = adjacent ? [known, 180] : [180, 180 + known];
+  /* twee bekende hoeke gelyktydig gewys (showAsk) kry elk 'n eie kleur
+     (Feature 4); die gewone enkel-bekend-vraag behou die accent. */
+  const givenCol = opt.showAsk ? MULTI_PALETTE[0] : accent;
+  const askCol = opt.showAsk ? MULTI_PALETTE[1] : ASK_COL;
+  const givenArc = arcPoly(OX, OY, 26, 0, known, givenCol) + txt(arm(known / 2, 42), `${known}°`, givenCol, 13);
+  const askArc = arcPoly(OX, OY, 26, askD0, askD1, askCol)
+    + txt(arm((askD0 + askD1) / 2, 42), opt.showAsk ? `${askVal}°` : "?", opt.showAsk ? askCol : ASK_TXT, opt.showAsk ? 13 : 16);
   return svgWrap(`${line(0)}${line(known)}${givenArc}${askArc}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
-    "0 0 260 190", 250, "Regoorstaande hoeke");
+    "0 0 260 190", 250, adjacent ? "Hoeke langsaan mekaar op 'n reguitlyn" : "Regoorstaande hoeke");
 }
 
 /* ---------- m3/m4: lyne & notasie ---------- */
@@ -420,16 +454,21 @@ export function triAnglesFigure(angB, angC, accent = "#16a34a", opt = {}) {
   const others = { A: [pB, pC], B: [pA, pC], C: [pA, pB] };
   const hide = opt.hide || null;
   const showAll = opt.showAsk === true;
+  const KEYS = ["A", "B", "C"];
 
+  /* Feature 4: elke gemerkte hoek kry sy eie palet-kleur (deterministies
+     via sy indeks); die gevraagde hoek ("?") bly ALTYD oranje. */
   let marks = "", labels = "";
-  ["A", "B", "C"].forEach(key => {
+  KEYS.forEach((key, i) => {
     const [q1, q2] = others[key];
     const isBlokkie = vals[key] === 90;
-    const isAsk = key === hide;
-    const showVal = !isAsk || showAll;
-    const arc = vertexAngleArc(pts[key], q1, q2, isBlokkie ? 17 : 22, accent, 2.4, isBlokkie);
+    const isAsk = key === hide && !showAll;
+    const showVal = key !== hide || showAll;
+    const col = isAsk ? ASK_COL : MULTI_PALETTE[i];
+    const txtCol = isAsk ? ASK_TXT : col;
+    const arc = vertexAngleArc(pts[key], q1, q2, isBlokkie ? 17 : 22, col, 2.4, isBlokkie);
     marks += arc.svg;
-    labels += labelAt(pts[key], arc.mid, labelDist(arc.span, isBlokkie ? 30 : 32), showVal ? `${vals[key]}°` : "?", accent);
+    labels += labelAt(pts[key], arc.mid, labelDist(arc.span, isBlokkie ? 30 : 32), showVal ? `${vals[key]}°` : "?", txtCol);
   });
 
   const inner = line(pA, pB) + line(pB, pC) + line(pA, pC) + marks + labels + dot(pA) + dot(pB) + dot(pC);
@@ -457,36 +496,41 @@ export function buitehoekFigure(angA, angB, accent = "#16a34a", opt = {}) {
   const line = (p1, p2) => `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
   const dot = p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="${INK}"/>`;
 
-  const arcA = vertexAngleArc(pA, pB, pC, 22, accent);
-  const arcB = vertexAngleArc(pB, pA, pC, 22, accent);
-  const arcExt = vertexAngleArc(pC, pD, pA, 27, "#f59e0b");
-  const arcCint = vertexAngleArc(pC, pA, pB, 20, accent);
-
   const base = line(pA, pB) + line(pB, pC) + line(pA, pC) + line(pC, pD)
     + arrowHead(pD[0], pD[1], angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK)
     + dot(pA) + dot(pB) + dot(pC);
 
   let marks, labels;
   if (opt.markOnly) {
+    /* een enkele gemerkte hoek (st24 "Binne of buite?") — bly by die accent. */
     const specs = {
-      A: { arc: arcA, p: pA, val: angA, base: 36 },
-      B: { arc: arcB, p: pB, val: angB, base: 36 },
-      C: { arc: arcCint, p: pC, val: angC, base: 32 },
-      ext: { arc: arcExt, p: pC, val: ext, base: 42 },
+      A: { arc: vertexAngleArc(pA, pB, pC, 22, accent), p: pA, val: angA, base: 36 },
+      B: { arc: vertexAngleArc(pB, pA, pC, 22, accent), p: pB, val: angB, base: 36 },
+      C: { arc: vertexAngleArc(pC, pA, pB, 20, accent), p: pC, val: angC, base: 32 },
+      ext: { arc: vertexAngleArc(pC, pD, pA, 27, accent), p: pC, val: ext, base: 42 },
     };
     const s = specs[opt.markOnly] || specs.ext;
     marks = s.arc.svg;
     labels = labelAt(s.p, s.arc.mid, labelDist(s.arc.span, s.base), `${s.val}°`, accent);
   } else {
+    /* Feature 4: A/B/ext elk hulle eie palet-kleur; die gevraagde hoek
+       ("?") bly oranje — ongeag WATTER een (A, B of ext) versteek is. */
     const hide = opt.hide || "ext";
     const showAll = opt.showAsk === true;
-    const lblA = (hide === "A" && !showAll) ? "?" : `${angA}°`;
-    const lblB = (hide === "B" && !showAll) ? "?" : `${angB}°`;
-    const lblExt = (hide === "ext" && !showAll) ? "?" : `${ext}°`;
+    const isAskA = hide === "A" && !showAll, isAskB = hide === "B" && !showAll, isAskExt = hide === "ext" && !showAll;
+    const colA = isAskA ? ASK_COL : MULTI_PALETTE[0];
+    const colB = isAskB ? ASK_COL : MULTI_PALETTE[1];
+    const colExt = isAskExt ? ASK_COL : MULTI_PALETTE[2];
+    const arcA = vertexAngleArc(pA, pB, pC, 22, colA);
+    const arcB = vertexAngleArc(pB, pA, pC, 22, colB);
+    const arcExt = vertexAngleArc(pC, pD, pA, 27, colExt);
+    const lblA = isAskA ? "?" : `${angA}°`;
+    const lblB = isAskB ? "?" : `${angB}°`;
+    const lblExt = isAskExt ? "?" : `${ext}°`;
     marks = arcA.svg + arcB.svg + arcExt.svg;
-    labels = labelAt(pA, arcA.mid, labelDist(arcA.span), lblA, accent)
-      + labelAt(pB, arcB.mid, labelDist(arcB.span), lblB, accent)
-      + labelAt(pC, arcExt.mid, labelDist(arcExt.span, 42), lblExt, "#d97706");
+    labels = labelAt(pA, arcA.mid, labelDist(arcA.span), lblA, isAskA ? ASK_TXT : colA)
+      + labelAt(pB, arcB.mid, labelDist(arcB.span), lblB, isAskB ? ASK_TXT : colB)
+      + labelAt(pC, arcExt.mid, labelDist(arcExt.span, 42), lblExt, isAskExt ? ASK_TXT : colExt);
   }
   return svgWrap(base + marks + labels, "0 0 240 168", 230, "Buitehoek van 'n driehoek");
 }
@@ -541,22 +585,30 @@ export function triangleFigure(kind, accent = "#ea580c", opt = {}) {
     let labels = "";
     const hide = opt.hide || null;
     const showAll = opt.showAsk === true;
+    /* Feature 4: apex/baseL/baseR elk hulle eie palet-kleur wanneer
+       gewys; die gevraagde hoek ("?") bly oranje. 'n Enkele-bekend-hoek
+       geval (bv. hide:"base" versteek BEIDE basishoeke, net apex bly
+       oor) val outomaties op MULTI_PALETTE[0] terug — dieselfde as die
+       accent wat hierdie hoofstuk deurgaans gebruik. */
+    const [colApex, colL, colR] = MULTI_PALETTE;
     if (opt.showApex !== false) {
-      const isAsk = hide === "apex";
-      const a = vertexAngleArc(pApex, pL, pR, 22, accent);
+      const isAsk = hide === "apex" && !showAll;
+      const col = isAsk ? ASK_COL : colApex;
+      const a = vertexAngleArc(pApex, pL, pR, 22, col);
       marks += a.svg;
-      labels += labelAt(pApex, a.mid, labelDist(a.span, 32), (isAsk && !showAll) ? "?" : `${apex}°`, accent);
+      labels += labelAt(pApex, a.mid, labelDist(a.span, 32), (hide === "apex" && !showAll) ? "?" : `${apex}°`, isAsk ? ASK_TXT : col);
     }
     if (opt.showBase !== false) {
-      const bL = vertexAngleArc(pL, pApex, pR, 19, accent);
-      const bR = vertexAngleArc(pR, pApex, pL, 19, accent);
+      const isAskL = (hide === "base" || hide === "baseL") && !showAll;
+      const isAskR = (hide === "base" || hide === "baseR") && !showAll;
+      const colBL = isAskL ? ASK_COL : colL, colBR = isAskR ? ASK_COL : colR;
+      const bL = vertexAngleArc(pL, pApex, pR, 19, colBL);
+      const bR = vertexAngleArc(pR, pApex, pL, 19, colBR);
       marks += bL.svg + bR.svg;
-      const isAskL = hide === "base" || hide === "baseL";
-      const isAskR = hide === "base" || hide === "baseR";
-      const lblL = (isAskL && !showAll) ? "?" : `${baseAng}°`;
-      const lblR = (isAskR && !showAll) ? "?" : `${baseAng}°`;
-      labels += labelAt(pL, bL.mid, labelDist(bL.span, 30), lblL, accent)
-        + labelAt(pR, bR.mid, labelDist(bR.span, 30), lblR, accent);
+      const lblL = ((hide === "base" || hide === "baseL") && !showAll) ? "?" : `${baseAng}°`;
+      const lblR = ((hide === "base" || hide === "baseR") && !showAll) ? "?" : `${baseAng}°`;
+      labels += labelAt(pL, bL.mid, labelDist(bL.span, 30), lblL, isAskL ? ASK_TXT : colBL)
+        + labelAt(pR, bR.mid, labelDist(bR.span, 30), lblR, isAskR ? ASK_TXT : colBR);
     }
     return svgWrap(tri + marks + labels, "0 0 220 165", 210, "Gelykbenige driehoek");
   }

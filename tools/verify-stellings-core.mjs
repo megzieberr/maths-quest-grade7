@@ -18,6 +18,7 @@
    figKinds gebruik eerder die outo-opsporing hieronder (findCenter). */
 export const CENTERS = {
   vertical: [130, 95],
+  verticalAdjacent: [130, 95],
   straightLine: [130, 120],
   straightLine3: [130, 120],
   aroundPoint: [130, 115],

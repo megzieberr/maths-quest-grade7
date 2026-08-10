@@ -272,6 +272,8 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 .reason-chip.is-wrong .rc-kort{color:#b4145a}
 .q-input-sub{margin-bottom:6px}
 .cr-foot{margin-top:14px}
+/* ---------- Feature 2/3 (2026-08-10): altyd-teenwoordige ontsnap-knoppie ---------- */
+.escape-btn{margin-top:12px}
 .cr-nudge{margin:0 0 8px;padding:8px 12px;border-radius:12px;background:#fef3c7;color:#92400e;font-size:.9rem;font-weight:600}
 .fb-parts{font-family:var(--font-display);font-weight:600;font-size:13.5px;margin:2px 0 8px;opacity:.85}
 

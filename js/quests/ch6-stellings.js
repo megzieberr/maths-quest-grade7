@@ -23,6 +23,24 @@ function otherCodes(correctCode, n) {
 }
 
 /* ============================================================
+   Feature 2/3 (2026-08-10 laat-aand ruling): st2/st3/st4 strikvrae —
+   3-in-10 vrae se gemerkte paar lê NIE regoorstaande nie, maar
+   LANGSAAN mekaar op 'n reguit lyn (som 180°). Dieselfde X-figuur
+   (verticalFigure se opt.adjacent-variant) sodat 'n leerder na die
+   PRENTJIE moet kyk, nie net die woorde herken nie — die prompt bly
+   doelbewus identies tussen normaal en strik. 'n Altyd-teenwoordige
+   ontsnap-knoppie (st2/st4) / pseudo-chip (st3) is die opt-out.
+   ============================================================ */
+/* strik-figure wys BEIDE k EN (180−k) as gemerkte hoeke (die aangrensende
+   paar) — dus moet BEIDE ≥25° bly (haar 2026-08-10 inhoud-reeks-ruling).
+   knownRegoorst() self kan tot 170° gaan (180−170=10°, te klein), so
+   strikvrae kry hulle eie, nouer trekking. */
+function knownRegoorstTrap() { return randInt(5, 31) * 5; }   // 25°…155° → 180−k bly ook 25°…155°
+const ESCAPE_LABEL = "Nie regoorstaande hoeke nie";
+const REGOORST_WRONG_TAP = [{ s: "Hulle lê WEL oorkant mekaar by die snypunt", r: "regoorstaande hoeke is gelyk" }];
+const REGOORST_TRAP_SOL = [{ s: "Hulle lê LANGSAAN mekaar op 'n reguit lyn", r: "som = 180°, nie oorkant die snypunt nie" }];
+
+/* ============================================================
    BLOK 1 — REGOORSTAANDE HOEKE (st1–st4)
    ============================================================ */
 function knownRegoorst() { return randInt(5, 34) * 5; }   // 25° … 170°
@@ -91,27 +109,60 @@ function introRegoorstReason2() {
   });
 }
 
-/* ---- st2/st6/st10 se patroon: R1 = calc, rede IN die prompt ---- */
-function regoorstR1() {
+/* ---- st2/st6/st10 se patroon: R1 = calc, rede IN die prompt ----
+   st2 alleen kry die Feature 2-strikmengsel (7 normaal + 3 strik). */
+function regoorstR1Normal() {
   const k = knownRegoorst();
   return calc(`Gebruik: <b>${REDES.regoorst.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, k, {
     unit: "°", figure: verticalFigure(k, GREEN),
     tip: "Regoorstaande hoeke lê oorkant mekaar by die snypunt — soek 'n GELYKE waarde, nie 'n som nie.",
     hint: `Waar twee lyne sny — regoorstaande hoeke is gelyk. ? = ${k}°.`,
     solution: [{ s: `? = ${k}`, r: "regoorstaande hoeke is gelyk" }],
+    escape: { label: ESCAPE_LABEL, isAnswer: false, wrongTapSolution: REGOORST_WRONG_TAP },
     _chk: { figKind: "vertical", values: [k, k], hideIndex: 1, allShown: false },
   });
 }
-function regoorstR2() {
+/* strik: dieselfde X-figuur, maar die "?" is die AANGRENSENDE hoek langs
+   die reguit lyn (som 180°) — nie regoorstaande nie. Prompt/tip/hint bly
+   in dieselfde styl as die normale vraag (nooit verklap watter een dit is). */
+function regoorstR1Trap() {
+  const k = knownRegoorstTrap(), askVal = 180 - k;
+  return calc(`Gebruik: <b>${REDES.regoorst.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, askVal, {
+    unit: "°", figure: verticalFigure(k, GREEN, { adjacent: true }),
+    tip: "Regoorstaande hoeke lê oorkant mekaar by die snypunt — soek 'n GELYKE waarde, nie 'n som nie.",
+    hint: "Kyk mooi watter TWEE hoeke op die prentjie gemerk is voor jy bereken.",
+    answerLabel: ESCAPE_LABEL,
+    solution: REGOORST_TRAP_SOL,
+    escape: { label: ESCAPE_LABEL, isAnswer: true },
+    _chk: { figKind: "verticalAdjacent", values: [k, askVal], hideIndex: 1, allShown: false },
+  });
+}
+function regoorstR2Normal() {
   const k = knownRegoorst();
+  const offered = shuffled([...otherCodes("regoorst", 2), "geen_regoorst"]);
   return reasonQ(`Op die diagram is die twee gemerkte hoeke albei ${code(k + "°")}. Watter rede verduidelik dit?`,
-    "regoorst", otherCodes("regoorst", 3), verticalFigure(k, GREEN, { showAsk: true }), {
+    "regoorst", offered, verticalFigure(k, GREEN, { showAsk: true }), {
     tip: "Kyk of dit 'n reguitlyn-som, 'n punt-som, of 'n GELYKHEID is.",
     hint: "Waar twee lyne sny — regoorstaande hoeke is gelyk.",
     _chk: { figKind: "vertical", values: [k, k], hideIndex: null, allShown: true },
   });
 }
-function regoorstR3() {
+/* strik: die aangrensende paar; die korrekte antwoord IS die pseudo-chip
+   "geen_regoorst" (altyd aangebode, sien redes.js). "reguitlyn" word
+   NOOIT as afleier aangebied nie — dit sou ook eerlik korrek wees vir
+   hierdie paar (haar wanduidelikheid-wag). */
+function regoorstR2Trap() {
+  const k = knownRegoorstTrap(), other = 180 - k;
+  const distract = shuffled(REDE_CODES.filter(c => c !== "reguitlyn" && c !== "regoorst")).slice(0, 2);
+  const offered = shuffled(["regoorst", ...distract, "geen_regoorst"]);
+  return reasonQ("Kyk na die TWEE gemerkte hoeke. Watter rede pas by hierdie paar?",
+    "geen_regoorst", offered, verticalFigure(k, GREEN, { adjacent: true, showAsk: true }), {
+    tip: "Kyk of dit 'n reguitlyn-som, 'n punt-som, of 'n GELYKHEID is.",
+    hint: "Kyk mooi waar die twee gemerkte hoeke lê voor jy kies.",
+    _chk: { figKind: "verticalAdjacent", values: [k, other], hideIndex: null, allShown: true },
+  });
+}
+function regoorstR3Normal() {
   const k = knownRegoorst();
   return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, k, "regoorst", otherCodes("regoorst", 3),
     verticalFigure(k, GREEN), {
@@ -119,7 +170,24 @@ function regoorstR3() {
     tip: "Regoorstaande hoeke lê oorkant mekaar by die snypunt.",
     hint: `? = ${k}° — regoorstaande hoeke is gelyk.`,
     solution: [{ s: `? = ${k}`, r: "regoorstaande hoeke is gelyk" }],
+    escape: { label: ESCAPE_LABEL, isAnswer: false, wrongTapSolution: REGOORST_WRONG_TAP },
     _chk: { figKind: "vertical", values: [k, k], hideIndex: 1, allShown: false },
+  });
+}
+/* strik: soos regoorstR1Trap, maar calcReason (waarde ÉN rede) — die
+   ontsnap-knoppie is hier "volledig genoeg" (geen waarde/rede nodig nie),
+   dieselfde implementasie as calc (questions.js, Feature 3). */
+function regoorstR3Trap() {
+  const k = knownRegoorstTrap(), askVal = 180 - k;
+  return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, askVal, "regoorst", otherCodes("regoorst", 3),
+    verticalFigure(k, GREEN, { adjacent: true }), {
+    unit: "°",
+    tip: "Regoorstaande hoeke lê oorkant mekaar by die snypunt.",
+    hint: "Kyk mooi watter TWEE hoeke op die prentjie gemerk is voor jy bereken.",
+    answerLabel: ESCAPE_LABEL,
+    solution: REGOORST_TRAP_SOL,
+    escape: { label: ESCAPE_LABEL, isAnswer: true },
+    _chk: { figKind: "verticalAdjacent", values: [k, askVal], hideIndex: 1, allShown: false },
   });
 }
 
@@ -1176,7 +1244,7 @@ export const CH6 = {
       figure: verticalFigure(70, GREEN, { showAsk: true }),
       code: "regoorst",
       body: `<p>Wanneer twee reguit lyne mekaar sny, vorm hulle 'n groot <b>"X"</b>. Die twee hoeke wat <b>regoorskant</b> mekaar lê (nie langsaan nie) is altyd <b>presies ewe groot</b>.</p>
-        <p>Op hierdie prentjie is altwee gemerkte hoeke <b>70°</b> — hulle lê oorkant mekaar by die snypunt. Jy hoef niks te bereken nie, net af te kyk!</p>`,
+        <p>Op hierdie prentjie is altwee gemerkte hoeke <b style="color:#16a34a">70°</b> — hulle lê oorkant mekaar by die snypunt. Jy hoef niks te bereken nie, net af te kyk!</p>`,
     },
     skills: [
       { concept: "regoorst", gen: introRegoorstTF1 }, { concept: "regoorst", gen: introRegoorstMC1 },
@@ -1184,9 +1252,9 @@ export const CH6 = {
       { concept: "regoorst", gen: introRegoorstMC2 }, { concept: "regoorst", gen: introRegoorstReason2 },
     ],
   },
-  st2: { guide: ["regoorst"], skills: rep(10, "regoorst", regoorstR1) },
-  st3: { guide: ["regoorst"], skills: rep(10, "regoorst", regoorstR2) },
-  st4: { guide: ["regoorst"], skills: rep(10, "regoorst", regoorstR3) },
+  st2: { guide: ["regoorst"], skills: shuffled([...rep(7, "regoorst", regoorstR1Normal), ...rep(3, "regoorst", regoorstR1Trap)]) },
+  st3: { guide: ["regoorst"], skills: shuffled([...rep(7, "regoorst", regoorstR2Normal), ...rep(3, "regoorst", regoorstR2Trap)]) },
+  st4: { guide: ["regoorst"], skills: shuffled([...rep(7, "regoorst", regoorstR3Normal), ...rep(3, "regoorst", regoorstR3Trap)]) },
 
   st5: {
     guide: ["reguitlyn"],
@@ -1195,7 +1263,7 @@ export const CH6 = {
       figure: straightLineFigure(130, GREEN, { showAsk: true }),
       code: "reguitlyn",
       body: `<p>As hoeke langs mekaar op <b>een reguit lyn</b> lê, tel hulle altyd saam op tot <b>180°</b> — dis presies 'n gestrekte hoek.</p>
-        <p>Hier is die een hoek <b>130°</b> en die ander <b>50°</b> — saam: <code>130° + 50° = 180°</code>.</p>`,
+        <p>Hier is die een hoek <b style="color:#16a34a">130°</b> en die ander <b style="color:#2563eb">50°</b> — saam: <code>130° + 50° = 180°</code>.</p>`,
     },
     skills: [
       { concept: "reguitlyn", gen: introReguitlynTF1 }, { concept: "reguitlyn", gen: introReguitlynMC1 },
@@ -1211,10 +1279,10 @@ export const CH6 = {
     guide: ["ompunt"],
     lesson: {
       title: "Hoeke om 'n punt",
-      figure: aroundPointFigure(110, 90, GREEN, { showAsk: true }),
+      figure: aroundPointFigureN([110, 90, 160], null, GREEN, { showAsk: true }),
       code: "ompunt",
       body: `<p>Al die hoeke wat rondom <b>een punt</b> saamkom (soos snye van 'n pizza) tel altyd saam op tot 'n <b>volle draai</b> — <b>360°</b>.</p>
-        <p>Hier is die drie hoeke 110°, 90° en 160° — saam: <code>110° + 90° + 160° = 360°</code>.</p>`,
+        <p>Hier is die drie hoeke <b style="color:#16a34a">110°</b>, <b style="color:#2563eb">90°</b> en <b style="color:#7c3aed">160°</b> — saam: <code>110° + 90° + 160° = 360°</code>.</p>`,
     },
     skills: [
       { concept: "ompunt", gen: introOmpuntTF1 }, { concept: "ompunt", gen: introOmpuntMC1 },
@@ -1233,7 +1301,7 @@ export const CH6 = {
       figure: triAnglesFigure(70, 60, GREEN, { showAsk: true }),
       code: "binne",
       body: `<p>Die drie <b>binnehoeke</b> van ENIGE driehoek (skerp, stomp, klein of groot) tel altyd saam op tot <b>180°</b>.</p>
-        <p>Hier is die drie hoeke 70°, 60° en 50° — saam: <code>70° + 60° + 50° = 180°</code>. As een hoek 'n regte hoek (90°) is, trek jy net 90 EN die ander hoek van 180° af.</p>`,
+        <p>Hier is die drie hoeke <b style="color:#2563eb">70°</b>, <b style="color:#7c3aed">60°</b> en <b style="color:#16a34a">50°</b> — saam: <code>70° + 60° + 50° = 180°</code>. As een hoek 'n regte hoek (90°) is, trek jy net 90 EN die ander hoek van 180° af.</p>`,
     },
     skills: [
       { concept: "binne", gen: introBinneTF1 }, { concept: "binne", gen: introBinneMC1 },
@@ -1252,7 +1320,7 @@ export const CH6 = {
       figure: triangleFigure("gelykbenig", GREEN, { apex: 70, showAsk: true }),
       code: "gelykbenig",
       body: `<p>'n <b>Gelykbenige driehoek</b> het twee sye ewe lank (die merkies op die sye wys dit). Die twee hoeke <b>teenoor</b> daardie gelyke sye — die <b>basishoeke</b> — is dan ook altyd <b>presies gelyk</b>.</p>
-        <p>Hier is die tophoek 70° — die twee basishoeke is elk <code>(180 − 70) ÷ 2 = 55°</code>.</p>`,
+        <p>Hier is die tophoek <b style="color:#16a34a">70°</b> — die twee basishoeke is elk <code>(180 − 70) ÷ 2 = </code><b style="color:#2563eb">55°</b>.</p>`,
     },
     skills: [
       { concept: "gelykbenig", gen: introGelykTF1 }, { concept: "gelykbenig", gen: introGelykMC1 },
@@ -1260,10 +1328,36 @@ export const CH6 = {
       { concept: "gelykbenig", gen: introGelykMC2 }, { concept: "gelykbenig", gen: introGelykReason2 },
     ],
   },
-  st18: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1div2) },
-  st19: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1noDiv) },
-  st20: { guide: ["gelykbenig"], skills: shuffled([true, true, true, true, true, false, false, false, false, false])
-    .map(k => ({ concept: "gelykbenig", gen: () => gelykDeelDeur2(k) })) },
+  /* Feature 5 (2026-08-10): st18 ↔ st19 GESWAP — st18 is nou "basishoek
+     gegee" (geen ÷2), st19 is nou "tophoek gegee" (÷2) MET 'n nuwe "só
+     doen jy dit"-leerkaart (titels/blurbs geswap saam in config.js). */
+  st18: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1noDiv) },
+  st19: {
+    guide: ["gelykbenig"],
+    lesson: {
+      title: "Tophoek gegee — só doen jy dit",
+      figure: triangleFigure("gelykbenig", GREEN, { apex: 50 }),
+      code: "gelykbenig",
+      body: `<p>Wanneer die <b>tophoek</b> gegee is, moet jy EERS die tophoek van 180° <b>aftrek</b>, en DAN deur 2 <b>deel</b> om EEN basishoek te kry.</p>
+        <p>Hier is die tophoek <b style="color:#16a34a">50°</b>: eerste <code>180 − 50 = 130</code>, dan <code>130 ÷ 2 = 65</code> — altwee basishoeke is <b style="color:#2563eb">65°</b>.</p>
+        <p>Onthou haar reël: <b>minus EERSTE, en DAN deel deur 2</b> — nooit die ander pad om nie.</p>`,
+    },
+    skills: rep(10, "gelykbenig", gelykR1div2),
+  },
+  st20: {
+    guide: ["gelykbenig"],
+    lesson: {
+      title: "Wanneer deel jy deur 2?",
+      code: "gelykbenig",
+      body: `<p><b>Yay ✔️ — die TOPHOEK is gegee.</b> Trek dit EERS van 180° af, DAN deel deur 2.</p>
+        <div class="lesson-figure">${triangleFigure("gelykbenig", GREEN, { apex: 40 })}</div>
+        <p>Tophoek <b style="color:#16a34a">40°</b>: <code>180 − 40 = 140</code>, dan <code>140 ÷ 2 = 70</code> — altwee basishoeke is <b style="color:#2563eb">70°</b>.</p>
+        <p><b>Nay ✘ — 'n BASISHOEK is gegee.</b> Die ANDER basishoek is REEDS net so groot — jy deel niks nie.</p>
+        <div class="lesson-figure">${triangleFigure("gelykbenig", GREEN, { apex: 80, showApex: false })}</div>
+        <p>EEN basishoek <b style="color:#2563eb">50°</b> is gegee → die ander basishoek is net so groot: <b style="color:#7c3aed">50°</b> — geen deling nodig nie.</p>`,
+    },
+    skills: shuffled([true, true, true, true, true, false, false, false, false, false])
+      .map(k => ({ concept: "gelykbenig", gen: () => gelykDeelDeur2(k) })) },
   st21: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR2) },
   st22: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR3) },
 
@@ -1274,7 +1368,7 @@ export const CH6 = {
       figure: buitehoekFigure(70, 50, GREEN, { showAsk: true }),
       code: "buite",
       body: `<p>Verleng een sy van 'n driehoek verby 'n hoekpunt — die hoek wat daar BUITE gevorm word, is die <b>buitehoek</b>. Dit is altyd gelyk aan die <b>som van die twee ver binnehoeke</b> (die twee wat NIE langsaan die buitehoek lê nie).</p>
-        <p>Hier is die twee ver binnehoeke 70° en 50° — die buitehoek: <code>70° + 50° = 120°</code>.</p>`,
+        <p>Hier is die twee ver binnehoeke <b style="color:#16a34a">70°</b> en <b style="color:#2563eb">50°</b> — die buitehoek: <code>70° + 50° = </code><b style="color:#7c3aed">120°</b>.</p>`,
     },
     skills: [
       { concept: "buite", gen: introBuiteTF1 }, { concept: "buite", gen: introBuiteMC1 },

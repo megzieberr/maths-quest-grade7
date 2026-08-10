@@ -60,8 +60,12 @@ export function mountQuestion(host, q, handlers = {}) {
   const feedback = el("div", "feedback"); feedback.hidden = true;
 
   let answered = false;
-  /* parts (opsioneel) = { okVal, okReason } — vir calcReason se twee-deel terugvoer */
-  function commit(isCorrect, chosen, parts) {
+  /* parts (opsioneel) = { okVal, okReason } — vir calcReason se twee-deel terugvoer.
+     meta (opsioneel) = { answerLabel, solution } — oorskryf q.answerLabel/q.solution
+     vir 'n spesifieke terugvoer-pad (bv. Feature 2/3: 'n normale vraag se ontsnap-
+     knoppie VERKEERD getik — die verduideliking daar is anders as die gewone
+     "hoe bereken jy dit"-oplossing). */
+  function commit(isCorrect, chosen, parts, meta) {
     if (answered) return;
     answered = true;
     handlers.onResult && handlers.onResult(isCorrect, chosen);
@@ -71,9 +75,11 @@ export function mountQuestion(host, q, handlers = {}) {
     feedback.classList.add(isCorrect ? "good" : "bad");
     let html = `<div class="fb-head">${isCorrect ? "✓ Reg!" : "✗ Nie heeltemal nie"}</div>`;
     if (parts) html += `<div class="fb-parts">Waarde ${parts.okVal ? "✓" : "✗"} · Rede ${parts.okReason ? "✓" : "✗"}</div>`;
-    if (q.answerLabel != null) html += `<div class="fb-answer"><b>Antwoord:</b> ${q.answerLabel}</div>`;
-    if (!isCorrect && Array.isArray(q.solution) && q.solution.length) {
-      html += `<div class="sol">` + q.solution.map(s =>
+    const answerLabel = (meta && meta.answerLabel !== undefined) ? meta.answerLabel : q.answerLabel;
+    if (answerLabel != null) html += `<div class="fb-answer"><b>Antwoord:</b> ${answerLabel}</div>`;
+    const solution = (meta && meta.solution !== undefined) ? meta.solution : q.solution;
+    if (!isCorrect && Array.isArray(solution) && solution.length) {
+      html += `<div class="sol">` + solution.map(s =>
         `<div class="sol-step"><span class="s">${s.s}</span>${s.r ? `<span class="r">${s.r}</span>` : ""}</div>`).join("") + `</div>`;
     }
     feedback.innerHTML = html;
@@ -83,6 +89,20 @@ export function mountQuestion(host, q, handlers = {}) {
     foot.appendChild(next);
     feedback.appendChild(foot);
     next.focus();
+  }
+
+  /* Feature 2 (2026-08-10): 'n ALTYD-teenwoordige, vol-breedte ontsnap-
+     knoppie — q.escape = { label, isAnswer, wrongTapSolution }. isAnswer
+     true = 'n strikvraag: TIK die knoppie is reg, enigiets getik is
+     verkeerd. isAnswer false = 'n gewone vraag: die knoppie is verkeerd
+     (wrongTapSolution verduidelik hoekom), tik werk soos gewoonlik.
+     Gedeel deur "calc" ÉN "calcReason" (Feature 3) — EEN implementasie. */
+  function mountEscapeButton(host, onClick) {
+    const btn = el("button", "btn ghost big escape-btn", q.escape.label);
+    btn.type = "button";
+    btn.addEventListener("click", onClick);
+    host.appendChild(btn);
+    return btn;
   }
 
   // ---------- per-type input ----------
@@ -122,15 +142,30 @@ export function mountQuestion(host, q, handlers = {}) {
     const isP = q.type === "protractor";
     const expected = isP ? q.angle : q.expected;
     const tol = isP ? (q.tol != null ? q.tol : TOL.graphRead) : q.tol;
+    let escBtn = null;
     const kp = mountKeypad(inputHost, {
       unit: q.unit || (isP ? "°" : ""), allowNeg: !!q.allowNeg,
       onSubmit: (v) => {
         if (answered) return;
         if (!Number.isFinite(v)) return;
         kp.disable();
-        commit(answerCorrect(v, expected, { dp: q.dp, tol }), fmtComma(v, q.dp));
+        if (escBtn) escBtn.disabled = true;
+        // 'n strikvraag (escape.isAnswer) het GEEN geldige getikte antwoord nie —
+        // die regte stap was die knoppie, so enigiets getik tel as verkeerd.
+        const isTrap = !isP && q.escape && q.escape.isAnswer;
+        const ok = !isTrap && answerCorrect(v, expected, { dp: q.dp, tol });
+        commit(ok, fmtComma(v, q.dp));
       },
     });
+    if (!isP && q.escape) {
+      escBtn = mountEscapeButton(inputHost, () => {
+        if (answered) return;
+        kp.disable();
+        escBtn.disabled = true;
+        const ok = !!q.escape.isAnswer;
+        commit(ok, q.escape.label, null, ok ? undefined : { solution: q.escape.wrongTapSolution });
+      });
+    }
   }
 
   else if (q.type === "multi") {
@@ -196,6 +231,22 @@ export function mountQuestion(host, q, handlers = {}) {
     const kpSubmit = valWrap.querySelector(".key.submit");
     if (kpSubmit) kpSubmit.style.display = "none";   // hierdie tipe stuur saam met die rede, nie apart nie
 
+    // Feature 3 (st4): dieselfde ontsnap-knoppie as "calc", direk onder die
+    // sleutelbord — op 'n strikvraag is 'n TIK hier VOLLEDIG genoeg (geen
+    // waarde of rede nodig nie); op 'n gewone vraag is dit verkeerd.
+    let escBtn = null;
+    if (q.escape) {
+      escBtn = mountEscapeButton(inputHost, () => {
+        if (answered) return;
+        kp.disable();
+        crSubmit.disabled = true;
+        [...grid.children].forEach(c => c.disabled = true);
+        escBtn.disabled = true;
+        const ok = !!q.escape.isAnswer;
+        commit(ok, q.escape.label, null, ok ? undefined : { solution: q.escape.wrongTapSolution });
+      });
+    }
+
     const grid = el("div", "reason-grid cr");
     let chosenCode = null, chosenChip = null;
     q.options.forEach(o => {
@@ -230,14 +281,19 @@ export function mountQuestion(host, q, handlers = {}) {
       crNudge.hidden = true;
       kp.disable();
       crSubmit.disabled = true;
-      const okVal = answerCorrect(v, q.expected, { dp: q.dp, tol: q.tol });
-      const okReason = chosenCode === q.correctCode;
+      if (escBtn) escBtn.disabled = true;
+      // 'n strikvraag (escape.isAnswer) het geen geldige getikte waarde+rede
+      // nie — die regte stap was die ontsnap-knoppie, so tik-en-stuur tel
+      // altyd as verkeerd, ongeag watter waarde/rede gekies is.
+      const isTrap = q.escape && q.escape.isAnswer;
+      const okVal = !isTrap && answerCorrect(v, q.expected, { dp: q.dp, tol: q.tol });
+      const okReason = !isTrap && chosenCode === q.correctCode;
       [...grid.children].forEach((c, i) => {
         c.disabled = true;
-        if (q.options[i].correct) c.classList.add("is-correct");
+        if (!isTrap && q.options[i].correct) c.classList.add("is-correct");
         else if (c === chosenChip) c.classList.add("is-wrong");
       });
-      commit(okVal && okReason, `${fmtComma(v, q.dp)}${q.unit || ""} · ${REDES[chosenCode].kort}`, { okVal, okReason });
+      commit(okVal && okReason, `${fmtComma(v, q.dp)}${q.unit || ""} · ${REDES[chosenCode].kort}`, isTrap ? null : { okVal, okReason });
     });
     foot.appendChild(crNudge);
     foot.appendChild(crSubmit);

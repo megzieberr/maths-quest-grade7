@@ -5,7 +5,7 @@ import { questDef } from "./quests/index.js";
 import { el } from "./ui.js";
 import { installEntryButton } from "./install.js";
 import { dailyTile, markDailyDone } from "./daily.js";
-import { openSetOf, isOpen, progressOf, isChainLocked } from "./chain.js";
+import { openSetOf, isOpen, progressOf, isChainLocked, nextPlayableQuest } from "./chain.js";
 
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
 
@@ -132,7 +132,21 @@ export function renderResults(app, host, params) {
   const mk = (label, primary, fn) => { const b = el("button", "btn " + (primary ? "primary big" : "ghost big"), label); b.addEventListener("click", fn); actions.appendChild(b); };
   const replay = () => app.go("play", { chapter, quest, def: questDef(quest.id) || def, accent });
   const toChapter = () => app.go(chapter.id === "daily" ? "hub" : "chapter", { chapterId: chapter.id });
-  if (passed) { mk("Terug na quests", true, toChapter); mk("Speel weer", false, replay); }
+  /* Feature 1 (2026-08-10): "Volgende rondte →" — net op 'n GESLAAGDE,
+     nie-daaglikse quest, en net wanneer daar regtig 'n volgende
+     speelbare rondte in dieselfde hoofstuk is (chain.js dra dieselfde
+     "juffrou-oop + geketting"-reël wat die hoofstuk-rooster gebruik,
+     sodat hierdie knoppie nooit 'n geslote of gesluite rondte oopmaak). */
+  const isDaily = chapter.id === "daily" || String(quest.id).startsWith("daily-");
+  const next = passed && !isDaily ? nextPlayableQuest(app, chapter, quest.id) : null;
+  if (passed && next) {
+    const builtTotal = (chapter.quests || []).filter(q => q.built).length;
+    const nextAccent = questAccent(chapter, next.n, builtTotal);
+    const goNext = () => app.go("play", { chapter, quest: next, def: questDef(next.id), accent: nextAccent });
+    mk("Volgende rondte →", true, goNext);
+    mk("Terug na quests", false, toChapter);
+    mk("Speel weer", false, replay);
+  } else if (passed) { mk("Terug na quests", true, toChapter); mk("Speel weer", false, replay); }
   else { mk("Probeer weer", true, replay); mk("Terug na quests", false, toChapter); }
   screen.appendChild(card);
   host.appendChild(screen);
