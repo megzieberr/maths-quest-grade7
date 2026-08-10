@@ -12,7 +12,7 @@
    booghoeke teen die vraag se eie wiskunde kan MEET (nie afgekyk nie).
    ============================================================ */
 import { mc, tf, calc, reasonQ, calcReason, randInt, pick, shuffled, code, nearDistractors } from "./_shared.js";
-import { verticalFigure, straightLineFigure, straightLineFigure3, aroundPointFigure, aroundPointFigureN } from "../engine/diagrams.js";
+import { verticalFigure, straightLineFigure, straightLineFigure3, aroundPointFigure, aroundPointFigureN, triAnglesFigure, triangleFigure, buitehoekFigure } from "../engine/diagrams.js";
 import { REDES, REDE_CODES } from "../redes.js";
 
 const GREEN = "#16a34a";
@@ -380,6 +380,453 @@ function ompuntR3() {
 }
 
 /* ============================================================
+   BLOK 4 — BINNEHOEKE VAN 'N DRIEHOEK (st13–st16)
+   ------------------------------------------------------------
+   binnePair(regtehoek) gee die TWEE "basis"-hoeke wat triAnglesFigure
+   gebruik om die driehoek te bou (die derde/tophoek word bereken —
+   dis altyd die "?"). regtehoek=true forseer een van die twee op 90°
+   (die regtehoek-blokkie-variant, 180−90−a, uit haar klasnotas).
+   ============================================================ */
+function binnePair(regtehoek = false) {
+  if (regtehoek) {
+    const other = randInt(5, 12) * 5;                 // 25°…60° (so 90−ander bly ≥30°) — hoër as 60° druk die
+    return Math.random() < 0.5 ? [90, other] : [other, 90];   // twee gegewe etikette te na aan mekaar (verify-toets)
+  }
+  let angB, angC;
+  do { angB = randInt(5, 26) * 5; angC = randInt(5, 26) * 5; } while (angB + angC > 140 || angB + angC < 60);
+  return [angB, angC];                                // elk 25–115°, som 60–140° → derde (tophoek) 40–120°
+  // (som > 145° maak die driehoek te "hoog en smal" — etikette begin oorvleuel; verify-toets vang dit)
+}
+
+function introBinneTF1() {
+  const [b, c] = binnePair(); const a = 180 - b - c;
+  return tf("Tel al drie hoeke van hierdie driehoek saam op tot 180°?", true, {
+    figure: triAnglesFigure(b, c, GREEN, { showAsk: true }),
+    tip: "Tel al drie binnehoeke van 'n driehoek bymekaar — kyk of dit 180° gee.",
+    hint: "Binnehoeke van 'n driehoek tel op tot 180°.",
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+function introBinneMC1() {
+  const [b, c] = binnePair(); const a = 180 - b - c;
+  const distract = nearDistractors(a, 3, 12).filter(d => d > 0 && d < 180);
+  while (distract.length < 3) distract.push(a + 5 * (distract.length + 1));
+  return mc(`Twee hoeke van die driehoek is ${code(b + "°")} en ${code(c + "°")}. Hoe groot is die derde?`,
+    shuffled([{ label: `${a}°`, correct: true }, ...distract.slice(0, 3).map(d => ({ label: `${d}°`, correct: false }))]), {
+    figure: triAnglesFigure(b, c, GREEN, { showAsk: true }),
+    tip: "Lees dit reguit van die prentjie af.",
+    hint: `180 − ${b} − ${c} = ${a}.`,
+    answerLabel: `${a}°`,
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+function introBinneReason1() {
+  const [b, c] = binnePair(); const a = 180 - b - c;
+  return reasonQ("Hoekom tel hierdie drie hoeke saam op tot 180°?", "binne", otherCodes("binne", 1),
+    triAnglesFigure(b, c, GREEN, { showAsk: true }), {
+    tip: "Kyk — is dit die drie binnehoeke van EEN driehoek?",
+    hint: "Binnehoeke van 'n driehoek tel op tot 180°.",
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+function introBinneTF2() {
+  const [b, c] = binnePair(); const a = 180 - b - c;
+  return tf("Die drie binnehoeke van ENIGE driehoek tel altyd saam op tot 180°.", true, {
+    figure: triAnglesFigure(b, c, GREEN, { showAsk: true }),
+    tip: "Maak nie saak hoe die driehoek lyk nie — altyd 180°.",
+    hint: "Binnehoeke van 'n driehoek tel op tot 180°.",
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+function introBinneMC2() {
+  const [b, c] = binnePair(true); const a = 180 - b - c;
+  const distract = nearDistractors(a, 3, 15).filter(d => d > 0 && d < 180);
+  while (distract.length < 3) distract.push(a + 10 * (distract.length + 1));
+  return mc(`Twee hoeke van die driehoek is ${code(b + "°")} en ${code(c + "°")}. Hoe groot is die derde?`,
+    shuffled([{ label: `${a}°`, correct: true }, ...distract.slice(0, 3).map(d => ({ label: `${d}°`, correct: false }))]), {
+    figure: triAnglesFigure(b, c, GREEN, { showAsk: true }),
+    tip: "Al drie hoeke saam maak 180° — een hoek hier is 'n regte hoek (90°).",
+    hint: `180 − ${b} − ${c} = ${a}.`,
+    answerLabel: `${a}°`,
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+function introBinneReason2() {
+  const [b, c] = binnePair(); const a = 180 - b - c;
+  return reasonQ("Watter rede verduidelik hierdie drie hoeke se som?", "binne", otherCodes("binne", 2),
+    triAnglesFigure(b, c, GREEN, { showAsk: true }), {
+    tip: "Dis 'n som van 180°, binne-in EEN driehoek.",
+    hint: "Binnehoeke van 'n driehoek tel op tot 180°.",
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+
+function binneR1() {
+  const regtehoek = Math.random() < 0.4;
+  const [b, c] = binnePair(regtehoek); const a = 180 - b - c;
+  return calc(`Gebruik: <b>${REDES.binne.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, a, {
+    unit: "°", figure: triAnglesFigure(b, c, GREEN, { hide: "A" }),
+    tip: regtehoek ? "Een hoek is 'n regte hoek (90°) — trek 90 EN die ander hoek van 180° af." : "Al drie binnehoeke van 'n driehoek maak saam 180°.",
+    hint: `180 − ${b} − ${c} = ${a}.`,
+    solution: [{ s: `? = 180 − ${b} − ${c} = ${a}`, r: "binnehoeke van 'n driehoek tel op tot 180°" }],
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: 0, allShown: false },
+  });
+}
+function binneR2() {
+  const [b, c] = binnePair(Math.random() < 0.35); const a = 180 - b - c;
+  return reasonQ(`Op die diagram is ${code("?")} = ${a}°. Watter rede verduidelik dit?`, "binne", otherCodes("binne", 3),
+    triAnglesFigure(b, c, GREEN, { hide: "A", showAsk: true }), {
+    tip: "Al drie binnehoeke van die driehoek tel saam op tot 180°.",
+    hint: "Binnehoeke van 'n driehoek tel op tot 180°.",
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: null, allShown: true },
+  });
+}
+function binneR3() {
+  const regtehoek = Math.random() < 0.4;
+  const [b, c] = binnePair(regtehoek); const a = 180 - b - c;
+  return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, a, "binne", otherCodes("binne", 3),
+    triAnglesFigure(b, c, GREEN, { hide: "A" }), {
+    unit: "°",
+    tip: regtehoek ? "Een hoek is 'n regte hoek (90°) — trek 90 EN die ander hoek van 180° af." : "Al drie binnehoeke van 'n driehoek maak saam 180°.",
+    hint: `180 − ${b} − ${c} = ${a}.`,
+    solution: [{ s: `? = 180 − ${b} − ${c} = ${a}`, r: "binnehoeke van 'n driehoek tel op tot 180°" }],
+    _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: 0, allShown: false },
+  });
+}
+
+/* ============================================================
+   BLOK 5 — GELYKBENIGE DRIEHOEK (st17–st22, SES rondtes)
+   ------------------------------------------------------------
+   apexEven(): tophoek altyd 'n EWE getal sodat (180−apex)÷2 'n heelgetal
+   bly. baseGiven(): 'n basishoek (die "geen ÷2 nodig"-rigting).
+   ============================================================ */
+function apexEven() { return randInt(15, 60) * 2; }       // 30°…120°, altyd ewe
+function baseGiven() { return randInt(6, 15) * 5; }        // 30°…75°
+
+function introGelykTF1() {
+  const apex = apexEven(), baseAng = (180 - apex) / 2;
+  return tf("Is die twee basishoeke van hierdie gelykbenige driehoek gelyk?", true, {
+    figure: triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }),
+    tip: "Gelykbenig beteken twee sye is gelyk — die hoeke oor daardie sye is dan OOK gelyk.",
+    hint: "Hoeke teenoor gelyke sye is gelyk.",
+    _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: null, allShown: true },
+  });
+}
+function introGelykMC1() {
+  const apex = apexEven(), baseAng = (180 - apex) / 2;
+  const distract = nearDistractors(baseAng, 3, 10).filter(d => d > 0 && d < 90);
+  while (distract.length < 3) distract.push(baseAng + 5 * (distract.length + 1));
+  return mc(`Die tophoek is ${code(apex + "°")}. Hoe groot is EEN basishoek?`,
+    shuffled([{ label: `${baseAng}°`, correct: true }, ...distract.slice(0, 3).map(d => ({ label: `${d}°`, correct: false }))]), {
+    figure: triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }),
+    tip: "Lees dit reguit van die prentjie af — albei basishoeke wys dieselfde getal.",
+    hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+    answerLabel: `${baseAng}°`,
+    _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: null, allShown: true },
+  });
+}
+function introGelykReason1() {
+  const apex = apexEven();
+  return reasonQ("Hoekom is die twee basishoeke van hierdie driehoek gelyk?", "gelykbenig", otherCodes("gelykbenig", 1),
+    triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
+    tip: "Twee sye is gelyk — kyk watter rede oor GELYKE SYE praat.",
+    hint: "Hoeke teenoor gelyke sye is gelyk.",
+    _chk: { figKind: "gelykbenig", values: [apex, (180 - apex) / 2, (180 - apex) / 2], apex, hideIndex: null, allShown: true },
+  });
+}
+function introGelykTF2() {
+  const apex = apexEven();
+  return tf("In 'n gelykbenige driehoek is die twee hoeke teenoor die gelyke sye altyd gelyk.", true, {
+    figure: triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }),
+    tip: "Dis presies wat 'gelykbenig' beteken — twee sye gelyk, twee hoeke gelyk.",
+    hint: "Hoeke teenoor gelyke sye is gelyk.",
+    _chk: { figKind: "gelykbenig", values: [apex, (180 - apex) / 2, (180 - apex) / 2], apex, hideIndex: null, allShown: true },
+  });
+}
+function introGelykMC2() {
+  const apex = apexEven(), baseAng = (180 - apex) / 2;
+  const distract = nearDistractors(baseAng, 3, 14).filter(d => d > 0 && d < 90);
+  while (distract.length < 3) distract.push(baseAng + 8 * (distract.length + 1));
+  return mc(`Die tophoek is ${code(apex + "°")}. Hoe groot is die ANDER basishoek?`,
+    shuffled([{ label: `${baseAng}°`, correct: true }, ...distract.slice(0, 3).map(d => ({ label: `${d}°`, correct: false }))]), {
+    figure: triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }),
+    tip: "Beide basishoeke wys dieselfde getal.",
+    hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+    answerLabel: `${baseAng}°`,
+    _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: null, allShown: true },
+  });
+}
+function introGelykReason2() {
+  const apex = apexEven();
+  return reasonQ("Watter rede verduidelik hoekom die twee basishoeke gelyk is (nie 'n som nie)?", "gelykbenig", otherCodes("gelykbenig", 2),
+    triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
+    tip: "Dis 'n GELYKHEID tussen twee hoeke, oor gelyke sye.",
+    hint: "Hoeke teenoor gelyke sye is gelyk.",
+    _chk: { figKind: "gelykbenig", values: [apex, (180 - apex) / 2, (180 - apex) / 2], apex, hideIndex: null, allShown: true },
+  });
+}
+
+/* st18 — R1-÷2: tophoek gegee, bereken EEN basishoek */
+function gelykR1div2() {
+  const apex = apexEven(), baseAng = (180 - apex) / 2;
+  return calc(`Gebruik: <b>${REDES.gelykbenig.vol}</b>. Die tophoek is ${code(apex + "°")}. Bereken EEN basishoek (${code("?")}).`, baseAng, {
+    unit: "°", figure: triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }),
+    tip: "Minus EERSTE (trek die tophoek van 180° af), en DAN deel deur 2.",
+    hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+    solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+    _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
+  });
+}
+/* st19 — R1-geen-÷2: EEN basishoek gegee → ander is net gelyk; apex=180−2b variant */
+function gelykR1noDiv() {
+  const b = baseGiven(), apex = 180 - 2 * b;
+  if (Math.random() < 0.35) {
+    return calc(`Gebruik: <b>${REDES.gelykbenig.vol}</b>. Altwee basishoeke is ${code(b + "°")}. Bereken die tophoek (${code("?")}).`, apex, {
+      unit: "°", figure: triangleFigure("gelykbenig", GREEN, { apex, hide: "apex" }),
+      tip: "Tel die twee basishoeke bymekaar en trek dit van 180° af — geen deling hier nie.",
+      hint: `180 − ${b} − ${b} = ${apex}.`,
+      solution: [{ s: `? = 180 − ${b} − ${b} = ${apex}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+      _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 0, allShown: false },
+    });
+  }
+  const hideSide = Math.random() < 0.5 ? "baseR" : "baseL";
+  return calc(`Gebruik: <b>${REDES.gelykbenig.vol}</b>. EEN basishoek is ${code(b + "°")}. Bereken die ANDER basishoek (${code("?")}).`, b, {
+    unit: "°", figure: triangleFigure("gelykbenig", GREEN, { apex, hide: hideSide, showApex: false }),
+    tip: "Geen deling hier nie — die ander basishoek is net EWE GROOT (gelyke sye, gelyke hoeke).",
+    hint: `? = ${b} — die basishoeke is altyd gelyk.`,
+    solution: [{ s: `? = ${b}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+    _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
+  });
+}
+/* st20 — "Deel jy deur 2?": Yay (tophoek gegee) / Nay (basishoek gegee) */
+function gelykDeelDeur2() {
+  if (Math.random() < 0.5) {
+    const apex = apexEven();
+    return tf("Moet jy deur 2 deel om die onbekende basishoek te kry?", true, {
+      figure: triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }),
+      labels: ["Yay ✔️", "Nay ✘"],
+      tip: "Kyk wat REEDS gegee is — as dit die TOPHOEK is, moet jy die res deel deur 2 om EEN basishoek te kry.",
+      hint: "Tophoek gegee? Trek dit van 180° af, dan deel deur 2 — Yay.",
+      _chk: { figKind: "gelykbenig", values: [apex, (180 - apex) / 2, (180 - apex) / 2], apex, hideIndex: 1, allShown: false },
+    });
+  }
+  const b = baseGiven(), apex = 180 - 2 * b;
+  const hideSide = Math.random() < 0.5 ? "baseR" : "baseL";
+  return tf("Moet jy deur 2 deel om die onbekende basishoek te kry?", false, {
+    figure: triangleFigure("gelykbenig", GREEN, { apex, hide: hideSide, showApex: false }),
+    labels: ["Yay ✔️", "Nay ✘"],
+    tip: "Kyk wat REEDS gegee is — as dit 'n BASISHOEK is, is die ander basishoek net EWE GROOT. Geen deling nie.",
+    hint: "Basishoek gegee? Die ander een is net gelyk — Nay.",
+    _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
+  });
+}
+/* st21 — R2 reasonQ, beide rigtings */
+function gelykR2() {
+  if (Math.random() < 0.5) {
+    const apex = apexEven(), baseAng = (180 - apex) / 2;
+    return reasonQ(`Op die diagram is EEN basishoek ${code(baseAng + "°")}. Watter rede verduidelik hoekom dit gelyk is aan die ander basishoek?`,
+      "gelykbenig", otherCodes("gelykbenig", 3), triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
+      tip: "Dis 'n GELYKHEID tussen twee hoeke, oor gelyke sye — nie 'n som nie.",
+      hint: "Hoeke teenoor gelyke sye is gelyk.",
+      _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: null, allShown: true },
+    });
+  }
+  const b = baseGiven(), apex = 180 - 2 * b;
+  return reasonQ(`Op die diagram is EEN basishoek ${code(b + "°")}. Watter rede sê die ANDER basishoek is ook ${code(b + "°")}?`,
+    "gelykbenig", otherCodes("gelykbenig", 3), triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
+    tip: "Dis 'n GELYKHEID tussen twee hoeke, oor gelyke sye.",
+    hint: "Hoeke teenoor gelyke sye is gelyk.",
+    _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: null, allShown: true },
+  });
+}
+/* st22 — R3 calcReason, beide rigtings */
+function gelykR3() {
+  const roll = Math.random();
+  if (roll < 0.4) {
+    const apex = apexEven(), baseAng = (180 - apex) / 2;
+    return calcReason(`Bereken EEN basishoek (${code("?")}), en kies die rede.`, baseAng, "gelykbenig", otherCodes("gelykbenig", 3),
+      triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }), {
+      unit: "°",
+      tip: "Minus EERSTE (trek die tophoek van 180° af), en DAN deel deur 2.",
+      hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+      solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+      _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
+    });
+  }
+  const b = baseGiven(), apex = 180 - 2 * b;
+  if (roll < 0.75) {
+    const hideSide = Math.random() < 0.5 ? "baseR" : "baseL";
+    return calcReason(`Bereken die ANDER basishoek (${code("?")}), en kies die rede.`, b, "gelykbenig", otherCodes("gelykbenig", 3),
+      triangleFigure("gelykbenig", GREEN, { apex, hide: hideSide, showApex: false }), {
+      unit: "°",
+      tip: "Geen deling nodig nie — die ander basishoek is net EWE GROOT.",
+      hint: `? = ${b} — die basishoeke is altyd gelyk.`,
+      solution: [{ s: `? = ${b}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+      _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
+    });
+  }
+  return calcReason(`Altwee basishoeke is ${code(b + "°")}. Bereken die tophoek (${code("?")}), en kies die rede.`, apex, "gelykbenig", otherCodes("gelykbenig", 3),
+    triangleFigure("gelykbenig", GREEN, { apex, hide: "apex" }), {
+    unit: "°",
+    tip: "Tel die twee basishoeke bymekaar en trek dit van 180° af.",
+    hint: `180 − ${b} − ${b} = ${apex}.`,
+    solution: [{ s: `? = 180 − ${b} − ${b} = ${apex}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+    _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 0, allShown: false },
+  });
+}
+
+/* ============================================================
+   BLOK 6 — BUITEHOEK VAN 'N DRIEHOEK (st23–st27)
+   ------------------------------------------------------------
+   buitePair() gee angA, angB (die twee VER binnehoeke); die buitehoek
+   = angA + angB, gemerk by C op die verlengde sy.
+   ============================================================ */
+function buitePair() {
+  let a, b;
+  do { a = randInt(5, 26) * 5; b = randInt(5, 26) * 5; } while (a + b > 140 || a + b < 60);
+  return [a, b];                                      // elk 25–115°, som (=buitehoek) 60–140°
+  // (som > 140° maak die driehoek te "hoog en smal" — etikette begin oorvleuel; verify-toets vang dit)
+}
+
+function introBuiteTF1() {
+  const [a, b] = buitePair();
+  return tf("Is die buitehoek gelyk aan die SOM van die twee ver binnehoeke?", true, {
+    figure: buitehoekFigure(a, b, GREEN, { showAsk: true }),
+    tip: "Die buitehoek (buite die driehoek, op die verlengde sy) is altyd = die som van die twee ANDER (ver) binnehoeke.",
+    hint: "Buitehoek van 'n driehoek = som van die 2 ver binnehoeke.",
+    _chk: { figKind: "buitehoek", values: [a, b, a + b], hideIndex: null, allShown: true },
+  });
+}
+function introBuiteMC1() {
+  const [a, b] = buitePair(); const ext = a + b;
+  const distract = nearDistractors(ext, 3, 15).filter(d => d > 0 && d < 180);
+  while (distract.length < 3) distract.push(ext + 8 * (distract.length + 1));
+  return mc(`Die twee ver binnehoeke is ${code(a + "°")} en ${code(b + "°")}. Hoe groot is die buitehoek?`,
+    shuffled([{ label: `${ext}°`, correct: true }, ...distract.slice(0, 3).map(d => ({ label: `${d}°`, correct: false }))]), {
+    figure: buitehoekFigure(a, b, GREEN, { showAsk: true }),
+    tip: "Lees dit reguit van die prentjie af — tel die twee ver hoeke bymekaar.",
+    hint: `${a} + ${b} = ${ext}.`,
+    answerLabel: `${ext}°`,
+    _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: null, allShown: true },
+  });
+}
+function introBuiteReason1() {
+  const [a, b] = buitePair();
+  return reasonQ("Hoekom is die buitehoek gelyk aan die som van die twee ver binnehoeke?", "buite", otherCodes("buite", 1),
+    buitehoekFigure(a, b, GREEN, { showAsk: true }), {
+    tip: "Kyk — is dit 'n buitehoek OP die verlengde sy?",
+    hint: "Buitehoek van 'n driehoek = som van die 2 ver binnehoeke.",
+    _chk: { figKind: "buitehoek", values: [a, b, a + b], hideIndex: null, allShown: true },
+  });
+}
+function introBuiteTF2() {
+  const [a, b] = buitePair();
+  return tf("'n Buitehoek van 'n driehoek lê OP die verlengde sy, buite die driehoek.", true, {
+    figure: buitehoekFigure(a, b, GREEN, { showAsk: true }),
+    tip: "Verleng een sy verby 'n hoekpunt — die hoek daar buite is die buitehoek.",
+    hint: "Buite = op die verlengde sy, buite die driehoek.",
+    _chk: { figKind: "buitehoek", values: [a, b, a + b], hideIndex: null, allShown: true },
+  });
+}
+function introBuiteMC2() {
+  const [a, b] = buitePair(); const ext = a + b;
+  const distract = nearDistractors(ext, 3, 18).filter(d => d > 0 && d < 180);
+  while (distract.length < 3) distract.push(ext + 10 * (distract.length + 1));
+  return mc(`Die twee ver binnehoeke is ${code(a + "°")} en ${code(b + "°")}. Hoe groot is die buitehoek?`,
+    shuffled([{ label: `${ext}°`, correct: true }, ...distract.slice(0, 3).map(d => ({ label: `${d}°`, correct: false }))]), {
+    figure: buitehoekFigure(a, b, GREEN, { showAsk: true }),
+    tip: "Tel die twee ver binnehoeke bymekaar.",
+    hint: `${a} + ${b} = ${ext}.`,
+    answerLabel: `${ext}°`,
+    _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: null, allShown: true },
+  });
+}
+function introBuiteReason2() {
+  const [a, b] = buitePair();
+  return reasonQ("Watter rede verduidelik die buitehoek se waarde (nie 180° of 'gelyke sye' nie)?", "buite", otherCodes("buite", 2),
+    buitehoekFigure(a, b, GREEN, { showAsk: true }), {
+    tip: "Dis 'n SOM van die twee VER binnehoeke.",
+    hint: "Buitehoek van 'n driehoek = som van die 2 ver binnehoeke.",
+    _chk: { figKind: "buitehoek", values: [a, b, a + b], hideIndex: null, allShown: true },
+  });
+}
+
+/* st24 — "Binne of buite?": een hoek gemerk, kies binnehoek/buitehoek */
+function binneOfBuite() {
+  const [a, b] = buitePair();
+  const which = pick(["A", "B", "C", "ext"]);
+  const isBuite = which === "ext";
+  const vals = { A: a, B: b, C: 180 - a - b, ext: a + b };
+  return mc("Watter TIPE hoek is gemerk?",
+    shuffled([{ label: "Binnehoek", correct: !isBuite }, { label: "Buitehoek", correct: isBuite }]), {
+    figure: buitehoekFigure(a, b, GREEN, { markOnly: which }),
+    tip: "Buite = OP die verlengde sy, buite die driehoek. Enigiets tussen die driehoek se drie hoekpunte is 'n binnehoek.",
+    hint: isBuite ? "Dié hoek lê op die verlengde sy — buitehoek." : "Dié hoek lê binne die driehoek se drie hoeke — binnehoek.",
+    answerLabel: isBuite ? "Buitehoek" : "Binnehoek",
+    _chk: { figKind: "buitehoek", values: [vals[which]], hideIndex: null, allShown: true },
+  });
+}
+
+/* st25 — R1: twee ver binnehoeke → buitehoek, EN die omgekeerde rigting */
+function buiteR1() {
+  const [a, b] = buitePair(); const ext = a + b;
+  if (Math.random() < 0.5) {
+    return calc(`Gebruik: <b>${REDES.buite.vol}</b>. Bereken die buitehoek (${code("?")}).`, ext, {
+      unit: "°", figure: buitehoekFigure(a, b, GREEN, { hide: "ext" }),
+      tip: "Tel die twee VER binnehoeke bymekaar.",
+      hint: `${a} + ${b} = ${ext}.`,
+      solution: [{ s: `? = ${a} + ${b} = ${ext}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+      _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: 2, allShown: false },
+    });
+  }
+  const hideOne = Math.random() < 0.5 ? "A" : "B";
+  const known = hideOne === "A" ? b : a, askVal = hideOne === "A" ? a : b;
+  return calc(`Gebruik: <b>${REDES.buite.vol}</b>. Die buitehoek is ${code(ext + "°")} en die een ver binnehoek is ${code(known + "°")}. Bereken die ander ver binnehoek (${code("?")}).`, askVal, {
+    unit: "°", figure: buitehoekFigure(a, b, GREEN, { hide: hideOne }),
+    tip: "Trek die bekende ver binnehoek van die buitehoek af.",
+    hint: `${ext} − ${known} = ${askVal}.`,
+    solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+    _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
+  });
+}
+/* st26 — R2 reasonQ, "binne" as versoekende afleier */
+function buiteR2() {
+  const [a, b] = buitePair(); const ext = a + b;
+  const extra = shuffled(REDE_CODES.filter(c => c !== "buite" && c !== "binne")).slice(0, 2);
+  const offered = shuffled(["binne", ...extra]);
+  return reasonQ(`Op die diagram is die buitehoek ${code(ext + "°")}. Watter rede verduidelik dit?`, "buite", offered,
+    buitehoekFigure(a, b, GREEN, { showAsk: true }), {
+    tip: "Dit gaan oor 'n hoek BUITE die driehoek — nie die binnehoeke se som nie.",
+    hint: "Buitehoek van 'n driehoek = som van die 2 ver binnehoeke.",
+    _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: null, allShown: true },
+  });
+}
+/* st27 — R3 calcReason */
+function buiteR3() {
+  const [a, b] = buitePair(); const ext = a + b;
+  if (Math.random() < 0.5) {
+    return calcReason(`Bereken die buitehoek (${code("?")}), en kies die rede.`, ext, "buite", otherCodes("buite", 3),
+      buitehoekFigure(a, b, GREEN, { hide: "ext" }), {
+      unit: "°",
+      tip: "Tel die twee VER binnehoeke bymekaar.",
+      hint: `${a} + ${b} = ${ext}.`,
+      solution: [{ s: `? = ${a} + ${b} = ${ext}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+      _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: 2, allShown: false },
+    });
+  }
+  const hideOne = Math.random() < 0.5 ? "A" : "B";
+  const known = hideOne === "A" ? b : a, askVal = hideOne === "A" ? a : b;
+  return calcReason(`Gebruik: <b>${REDES.buite.vol}</b>. Die buitehoek is ${code(ext + "°")}. Bereken die ander ver binnehoek (${code("?")}), en kies die rede.`, askVal, "buite", otherCodes("buite", 3),
+    buitehoekFigure(a, b, GREEN, { hide: hideOne }), {
+    unit: "°",
+    tip: "Trek die bekende ver binnehoek van die buitehoek af.",
+    hint: `${ext} − ${known} = ${askVal}.`,
+    solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+    _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
+  });
+}
+
+/* ============================================================
    REGISTER
    ============================================================ */
 const rep = (n, concept, gen) => Array.from({ length: n }, () => ({ concept, gen }));
@@ -441,4 +888,64 @@ export const CH6 = {
   st10: { guide: ["ompunt"], skills: rep(10, "ompunt", ompuntR1) },
   st11: { guide: ["ompunt"], skills: rep(10, "ompunt", ompuntR2) },
   st12: { guide: ["ompunt"], skills: rep(10, "ompunt", ompuntR3) },
+
+  st13: {
+    guide: ["binne"],
+    lesson: {
+      title: "Binnehoeke van 'n driehoek",
+      figure: triAnglesFigure(70, 60, GREEN, { showAsk: true }),
+      code: "binne",
+      body: `<p>Die drie <b>binnehoeke</b> van ENIGE driehoek (skerp, stomp, klein of groot) tel altyd saam op tot <b>180°</b>.</p>
+        <p>Hier is die drie hoeke 70°, 60° en 50° — saam: <code>70° + 60° + 50° = 180°</code>. As een hoek 'n regte hoek (90°) is, trek jy net 90 EN die ander hoek van 180° af.</p>`,
+    },
+    skills: [
+      { concept: "binne", gen: introBinneTF1 }, { concept: "binne", gen: introBinneMC1 },
+      { concept: "binne", gen: introBinneReason1 }, { concept: "binne", gen: introBinneTF2 },
+      { concept: "binne", gen: introBinneMC2 }, { concept: "binne", gen: introBinneReason2 },
+    ],
+  },
+  st14: { guide: ["binne"], skills: rep(10, "binne", binneR1) },
+  st15: { guide: ["binne"], skills: rep(10, "binne", binneR2) },
+  st16: { guide: ["binne"], skills: rep(10, "binne", binneR3) },
+
+  st17: {
+    guide: ["gelykbenig"],
+    lesson: {
+      title: "Gelykbenige driehoek",
+      figure: triangleFigure("gelykbenig", GREEN, { apex: 70, showAsk: true }),
+      code: "gelykbenig",
+      body: `<p>'n <b>Gelykbenige driehoek</b> het twee sye ewe lank (die merkies op die sye wys dit). Die twee hoeke <b>teenoor</b> daardie gelyke sye — die <b>basishoeke</b> — is dan ook altyd <b>presies gelyk</b>.</p>
+        <p>Hier is die tophoek 70° — die twee basishoeke is elk <code>(180 − 70) ÷ 2 = 55°</code>.</p>`,
+    },
+    skills: [
+      { concept: "gelykbenig", gen: introGelykTF1 }, { concept: "gelykbenig", gen: introGelykMC1 },
+      { concept: "gelykbenig", gen: introGelykReason1 }, { concept: "gelykbenig", gen: introGelykTF2 },
+      { concept: "gelykbenig", gen: introGelykMC2 }, { concept: "gelykbenig", gen: introGelykReason2 },
+    ],
+  },
+  st18: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1div2) },
+  st19: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1noDiv) },
+  st20: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykDeelDeur2) },
+  st21: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR2) },
+  st22: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR3) },
+
+  st23: {
+    guide: ["buite", "binne"],
+    lesson: {
+      title: "Buitehoek van 'n driehoek",
+      figure: buitehoekFigure(70, 50, GREEN, { showAsk: true }),
+      code: "buite",
+      body: `<p>Verleng een sy van 'n driehoek verby 'n hoekpunt — die hoek wat daar BUITE gevorm word, is die <b>buitehoek</b>. Dit is altyd gelyk aan die <b>som van die twee ver binnehoeke</b> (die twee wat NIE langsaan die buitehoek lê nie).</p>
+        <p>Hier is die twee ver binnehoeke 70° en 50° — die buitehoek: <code>70° + 50° = 120°</code>.</p>`,
+    },
+    skills: [
+      { concept: "buite", gen: introBuiteTF1 }, { concept: "buite", gen: introBuiteMC1 },
+      { concept: "buite", gen: introBuiteReason1 }, { concept: "buite", gen: introBuiteTF2 },
+      { concept: "buite", gen: introBuiteMC2 }, { concept: "buite", gen: introBuiteReason2 },
+    ],
+  },
+  st24: { guide: ["buite", "binne"], skills: rep(10, "buite", binneOfBuite) },
+  st25: { guide: ["buite"], skills: rep(10, "buite", buiteR1) },
+  st26: { guide: ["buite", "binne"], skills: rep(10, "buite", buiteR2) },
+  st27: { guide: ["buite"], skills: rep(10, "buite", buiteR3) },
 };

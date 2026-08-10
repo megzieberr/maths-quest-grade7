@@ -187,6 +187,21 @@ const C = {
     <p><b>Voorbeeld:</b> twee hoeke is 90° en 150°. Die derde is <code>360 − 90 − 150 = 120°</code>.</p>
     <p>Meer hoeke rondom die punt? Trek elkeen een-vir-een van 360° af.</p>
     <p><b>Rede om te skryf:</b> "Hoeke rondom 'n punt tel op tot 360°".</p>` },
+  binne: { title: "Binnehoeke van 'n driehoek", body: `
+    <p>Die drie <b>binnehoeke</b> van ENIGE driehoek — skerp, stomp, groot of klein — tel altyd saam op tot <b>180°</b>.</p>
+    <p><b>Voorbeeld:</b> twee hoeke is 70° en 60°. Die derde is <code>180 − 70 − 60 = 50°</code>.</p>
+    <p>Is een hoek 'n regte hoek (90°, met 'n blokkie gemerk)? Trek net 90 EN die ander hoek van 180° af: <code>180 − 90 − 35 = 55°</code>.</p>
+    <p><b>Rede om te skryf:</b> "Binnehoeke van 'n driehoek tel op tot 180°".</p>` },
+  gelykbenig: { title: "Gelykbenige driehoek", body: `
+    <p>'n <b>Gelykbenige driehoek</b> het twee sye ewe lank (die merkies op die sye wys dit). Die twee hoeke <b>teenoor</b> daardie gelyke sye — die <b>basishoeke</b> — is dan ook altyd presies <b>gelyk</b> aan mekaar.</p>
+    <p><b>Tophoek gegee?</b> Minus EERSTE (trek van 180° af), DAN deel deur 2: tophoek 70° → basishoeke elk <code>(180 − 70) ÷ 2 = 55°</code>.</p>
+    <p><b>EEN basishoek gegee?</b> Die ander is net EWE GROOT — geen deling nodig nie! Basishoek 55° → die ander basishoek is ook 55°, en die tophoek is <code>180 − 55 − 55 = 70°</code>.</p>
+    <p><b>Rede om te skryf:</b> "Hoeke teenoor gelyke sye is gelyk".</p>` },
+  buite: { title: "Buitehoek van 'n driehoek", body: `
+    <p>Verleng een sy van 'n driehoek verby 'n hoekpunt — die hoek wat daar BUITE (op die verlengde sy) gevorm word, is die <b>buitehoek</b>. Dit is altyd gelyk aan die <b>som van die twee ver binnehoeke</b> (die twee wat NIE langsaan die buitehoek lê nie).</p>
+    <p><b>Voorbeeld:</b> die twee ver binnehoeke is 70° en 50°. Die buitehoek: <code>70 + 50 = 120°</code>.</p>
+    <p>Buitehoek en EEN ver binnehoek gegee? Trek die bekende een van die buitehoek af: <code>120 − 70 = 50°</code>.</p>
+    <p><b>Rede om te skryf:</b> "Buitehoek van Δ = som van die 2 binne teenoorstaande hoeke".</p>` },
 };
 
 export const CONCEPTS = C;                 // gebruik deur die admin-dashboard

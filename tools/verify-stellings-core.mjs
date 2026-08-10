@@ -12,12 +12,18 @@
    watter een as "?" gewys word (null as almal gewys word).
    ============================================================ */
 
-/* vaste middelpunt (OX,OY) per figuur-soort — reguit uit diagrams.js */
+/* vaste middelpunt (OX,OY) per figuur-soort — reguit uit diagrams.js.
+   Net 'n FALLBACK: driehoek-gebaseerde figure (triAngles/gelykbenig/
+   buitehoek) het 'n ANDER hoekpunt vir elke gemerkte hoek, so dié
+   figKinds gebruik eerder die outo-opsporing hieronder (findCenter). */
 export const CENTERS = {
   vertical: [130, 95],
   straightLine: [130, 120],
   straightLine3: [130, 120],
   aroundPoint: [130, 115],
+  triAngles: [110, 95],
+  gelykbenig: [110, 90],
+  buitehoek: [110, 90],
 };
 
 function parsePolylines(svg) {
@@ -35,6 +41,30 @@ function parseTexts(svg) {
   let m;
   while ((m = re.exec(svg))) out.push({ x: Number(m[1]), y: Number(m[2]), text: m[3] });
   return out;
+}
+/* elke ch6-figuur teken 'n klein "hoekpunt"-kolletjie (<circle .../>) by
+   elke plek waar 'n hoek gemeet word — een vir sirkel-tipe figure (die
+   snypunt/middelpunt), EEN PER HOEKPUNT vir driehoek-tipe figure. Ons
+   ontgin dit: vir elke geTEKENDE booghoek (of regtehoek-blokkie) soek
+   ons die kolletjie waarvandaan sy TWEE eindpunte EWE VER is — dis sy
+   werklike hoekpunt, ongeag hoeveel hoekpunte die figuur het. */
+function parseDots(svg) {
+  const out = [];
+  const re = /<circle cx="([-\d.]+)" cy="([-\d.]+)" r="([\d.]+)"/g;
+  let m;
+  while ((m = re.exec(svg))) { const r = Number(m[3]); if (r <= 8) out.push({ x: Number(m[1]), y: Number(m[2]) }); }
+  return out;
+}
+function findCenter(poly, dots, fallback) {
+  if (!dots.length || poly.pts.length < 2) return fallback;
+  const [x0, y0] = poly.pts[0], [x1, y1] = poly.pts[poly.pts.length - 1];
+  let best = fallback, bestScore = Infinity;
+  dots.forEach(d => {
+    const r0 = Math.hypot(x0 - d.x, y0 - d.y), r1 = Math.hypot(x1 - d.x, y1 - d.y);
+    const score = Math.abs(r0 - r1) + Math.min(r0, r1) * 0.02;   // gelyke radius + naaste
+    if (score < bestScore) { bestScore = score; best = [d.x, d.y]; }
+  });
+  return best;
 }
 function angleOf(cx, cy, x, y) {
   let d = Math.atan2(-(y - cy), x - cx) * 180 / Math.PI;
@@ -57,15 +87,20 @@ export function checkQuestion(label, q) {
   if (!chk || !q.figure) return { issues, stats };
   stats.diagrams = 1;
   const svg = q.figure;
-  const [cx, cy] = CENTERS[chk.figKind] || [130, 115];
+  const fallback = CENTERS[chk.figKind] || [130, 115];
+  const dots = parseDots(svg);
 
   const polys = parsePolylines(svg);
   const texts = parseTexts(svg).filter(t => /^\d+°$|^\?$/.test(t.text.trim()));
 
-  /* 1) elke geteken booghoek (polyline) moet by 'n DECLARED waarde pas */
+  /* 1) elke geteken booghoek (polyline) moet by 'n DECLARED waarde pas —
+     die middelpunt word per booghoek OUTOMATIES opgespoor (findCenter),
+     so dit werk ewe goed vir 'n sirkel-tipe figuur (een middelpunt) as
+     vir 'n driehoek-tipe figuur (elke hoekpunt sy EIE middelpunt). */
   const remaining = chk.values.slice();
   polys.forEach(p => {
     if (p.pts.length < 2) return;
+    const [cx, cy] = findCenter(p, dots, fallback);
     const [x0, y0] = p.pts[0], [x1, y1] = p.pts[p.pts.length - 1];
     const span = circSpan(angleOf(cx, cy, x0, y0), angleOf(cx, cy, x1, y1));
     stats.angleChecks++;
@@ -90,8 +125,13 @@ export function checkQuestion(label, q) {
     }
   }
 
-  /* 3) etiket-afstand (rowwe venster — vang los/vasgedrukte etikette) + botsings */
-  const withPos = texts.map(t => ({ ...t, dist: Math.hypot(t.x - cx, t.y - cy) }));
+  /* 3) etiket-afstand van sy EIE naaste hoekpunt af (rowwe venster — vang
+     los/vasgedrukte etikette) + botsings tussen ENIGE twee etikette */
+  const withPos = texts.map(t => {
+    let best = fallback, bestD = Infinity;
+    dots.forEach(d => { const dd = Math.hypot(t.x - d.x, t.y - d.y); if (dd < bestD) { bestD = dd; best = [d.x, d.y]; } });
+    return { ...t, dist: dots.length ? bestD : Math.hypot(t.x - fallback[0], t.y - fallback[1]) };
+  });
   withPos.forEach(t => {
     stats.labelChecks++;
     if (t.dist < 18 || t.dist > 90) {
@@ -106,6 +146,16 @@ export function checkQuestion(label, q) {
         issues.push(`${label}: etikette "${withPos[i].text}" & "${withPos[j].text}" is net ${d.toFixed(1)}px uitmekaar`);
       }
     }
+  }
+
+  /* 4) inhoud-hoekreeks (haar 2026-08-10 ruling, bindend op alle sessies):
+     ELKE gemerkte hoek moet ≥25° wees; 'n gelykbenige tophoek moet
+     30°–120° wees. Dié is HARDE wanpassings, nes 'n verkeerde hoek. */
+  (chk.values || []).forEach(v => {
+    if (v < 25) issues.push(`${label}: gemerkte hoek ${v}° is < 25° (buite die toegelate inhoud-reeks)`);
+  });
+  if (chk.apex != null && (chk.apex < 30 || chk.apex > 120)) {
+    issues.push(`${label}: gelykbenige tophoek ${chk.apex}° is buite 30°–120°`);
   }
 
   return { issues, stats };
