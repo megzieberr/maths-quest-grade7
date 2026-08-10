@@ -1,12 +1,13 @@
-# Project status — updated 2026-08-10
+# Project status — updated 2026-08-10 (SHIPPED same night)
 
 ## Where we are
 Live at **https://megzieberr.github.io/maths-quest-grade7/** (+ `/admin.html`), repo
 `megzieberr/maths-quest-grade7` (PUBLIC, GitHub Pages).
 
 **2026-08-10 was a Fable foreman build night (Megan out for dinner, Fable ran six Sonnet
-sessions with reviews between each).** Built, verified, committed locally — **NOT yet
-pushed, migration NOT yet run**:
+sessions with reviews between each).** Her "ship it" came the same evening: **migration
+RUN on Homework Hub (verified: 79 quest rows, new rounds closed, in_revision live) and
+PUSHED — deploy verified serving the new files.** What shipped:
 - **Hoofstuk 6 "Meetkunde Stellings"** — 32 rounds (st1–st32): six theorem blocks
   (regoorst · reguitlyn · om 'n punt · binnehoeke Δ · gelykbenig · buitehoek Δ), each
   intro ("Leer:" teaching card for the absent learner) → R1 (reason given, type value) →
@@ -42,15 +43,13 @@ pushed, migration NOT yet run**:
   def; no new tables; "Hersiening" is a separate flag from open/close.
 
 ## Pending on Megan
-- 💻 5 min **[blocking]**: open `tools/verify-stellings.html` in the repo (or the chat
-  review page) → scroll the figures → if happy, tell the Fable session "ship it" → it runs
-  `supabase/migration-stellings-daily.sql` on Homework Hub and pushes.
-- 📱 3 min **[whenever, after ship]**: on your phone on live — open one st round as a test
-  learner, tick one round "Hersiening" in admin, check the Daaglikse Quest tile appears.
+- 📱 5 min **[whenever]**: phone test on live — close & reopen the PWA twice (service-
+  worker double-load), open st1 in admin → play a bit as a test learner, tick one round
+  "🗓️ Hersiening" → check the Daaglikse Quest tile appears on the hub.
+- 📱 1 min **[whenever]**: new rounds are ALL CLOSED — open each st round in admin as the
+  class covers that theorem.
 
 ## Next up
-- Ship ritual (Fable session): run migration-stellings-daily.sql → push → live verify →
-  she opens st1 (Leer: Regoorstaande hoeke) for the class when ready.
 - **Deel 2 build day — Sessions 7–11** (one chapter per session, 45 b-rounds, new question
   styles, seed OPEN): full prompts ready in `RUN-PLAN-2026-08-10.md` §"Queued for the next
   build day". Session 11 also writes migration-deel2.sql.
