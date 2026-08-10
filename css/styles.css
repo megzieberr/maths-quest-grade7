@@ -374,3 +374,13 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 
 @media (min-width:560px){.modal-scrim,.inst-scrim{align-items:center}}
 @media (max-width:360px){.quest-grid{grid-template-columns:1fr}}
+
+/* ---------- ADMIN · round rows (open/close + hersiening tick) ---------- */
+.adm-qrow{display:flex;align-items:center;flex-wrap:wrap;gap:20px;padding:6px 4px;border-radius:10px}
+.adm-qrow.on{background:color-mix(in srgb,var(--good) 6%,transparent)}
+.adm-qopen,.adm-qrev{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:14px}
+.adm-qrev{color:var(--muted);font-size:13px}
+.adm-qrev.on{color:#b45309;font-weight:700}
+
+/* ---------- HUB · daily-quest tile ---------- */
+.daily-card{cursor:pointer}

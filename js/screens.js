@@ -4,6 +4,7 @@ import { CHAPTERS, chapterById, questAccent, PASS } from "./config.js";
 import { questDef } from "./quests/index.js";
 import { el } from "./ui.js";
 import { installEntryButton } from "./install.js";
+import { dailyTile, markDailyDone } from "./daily.js";
 
 const progressOf = (app, id) => (app.state && app.state.progress && app.state.progress[id]) || { best_score: 0, attempts: 0, passed: false, total_xp: 0 };
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
@@ -24,6 +25,8 @@ export function renderHub(app, host) {
 
   const openSet = openSetOf(app);
   const cards = el("div", "chapter-cards");
+  const dt = dailyTile(app);
+  if (dt) cards.appendChild(dt);
   CHAPTERS.forEach(ch => {
     const openQ = (ch.quests || []).filter(q => q.built && isOpen(openSet, q.id));
     const live = ch.open && openQ.length > 0;
@@ -100,9 +103,10 @@ export function renderChapter(app, host, params) {
 
 /* ---------------- UITSLAE ---------------- */
 export function renderResults(app, host, params) {
-  const { chapter, quest, accent, score, xp, firstTry, total, badgeEarned, alreadyPassed } = params;
+  const { chapter, quest, def, accent, score, xp, firstTry, total, badgeEarned, alreadyPassed } = params;
   const pct = Math.round(score * 100);
   const passed = score >= PASS;
+  if (passed && String(quest.id).startsWith("daily-")) markDailyDone();
 
   const screen = el("div", "results");
   setAccent(screen, accent);
@@ -118,8 +122,8 @@ export function renderResults(app, host, params) {
     <div class="result-actions"></div>`;
   const actions = card.querySelector(".result-actions");
   const mk = (label, primary, fn) => { const b = el("button", "btn " + (primary ? "primary big" : "ghost big"), label); b.addEventListener("click", fn); actions.appendChild(b); };
-  const replay = () => app.go("play", { chapter, quest, def: questDef(quest.id), accent });
-  const toChapter = () => app.go("chapter", { chapterId: chapter.id });
+  const replay = () => app.go("play", { chapter, quest, def: questDef(quest.id) || def, accent });
+  const toChapter = () => app.go(chapter.id === "daily" ? "hub" : "chapter", { chapterId: chapter.id });
   if (passed) { mk("Terug na quests", true, toChapter); mk("Speel weer", false, replay); }
   else { mk("Probeer weer", true, replay); mk("Terug na quests", false, toChapter); }
   screen.appendChild(card);

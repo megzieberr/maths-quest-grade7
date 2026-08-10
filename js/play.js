@@ -128,7 +128,7 @@ export function renderPlay(app, host, params) {
     try { res = await api.submitQuest(sess.username, sess.password, quest.id, { score, xp: st.xp, total: st.total, correct: st.firstTry }); }
     catch { /* vanlyn — wys steeds plaaslike uitslag */ }
     await app.refresh();
-    app.go("results", { chapter, quest, accent, score, xp: st.xp, firstTry: st.firstTry, total: st.total,
+    app.go("results", { chapter, quest, def, accent, score, xp: st.xp, firstTry: st.firstTry, total: st.total,
       badgeEarned: !!(res && res.badgeEarned), alreadyPassed: !!(res && res.alreadyPassed) });
   }
 

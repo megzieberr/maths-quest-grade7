@@ -71,6 +71,12 @@ function questGateSection(quests) {
   }
   sec.appendChild(el("p", "muted small", "Learners only see rounds that are open. Everything starts open — close the ones you haven’t taught yet."));
   const openById = {}; quests.forEach(q => { openById[q.quest_id] = !!q.is_open; });
+  // "🗓️ Hersiening" only exists once the daily-quest migration has run — the
+  // dashboard payload carries an `in_revision` key per quest once it has.
+  // Before that (current live), just don't render the column — no RPC call
+  // that would fail, no error, nothing missing that was there before.
+  const hasRevision = quests.some(q => Object.prototype.hasOwnProperty.call(q, "in_revision"));
+  const revisionById = {}; quests.forEach(q => { revisionById[q.quest_id] = !!q.in_revision; });
 
   CHAPTERS.forEach(ch => {
     const built = (ch.quests || []).filter(q => q.built);
@@ -90,11 +96,21 @@ function questGateSection(quests) {
 
     const list = el("div", "adm-qlist");
     built.forEach(q => {
-      const row = el("label", "adm-qrow" + (openById[q.id] ? " on" : ""));
+      const row = el("div", "adm-qrow" + (openById[q.id] ? " on" : ""));
+      const openLabel = el("label", "adm-qopen");
       const cb = el("input"); cb.type = "checkbox"; cb.checked = !!openById[q.id];
       cb.addEventListener("change", async () => { cb.disabled = true; await api.adminSetQuestOpen(pw, q.id, cb.checked); reload(); });
-      row.appendChild(cb);
-      row.appendChild(el("span", "adm-qname", `${q.n}. ${q.title}`));
+      openLabel.appendChild(cb);
+      openLabel.appendChild(el("span", "adm-qname", `${q.n}. ${q.title}`));
+      row.appendChild(openLabel);
+      if (hasRevision) {
+        const revLabel = el("label", "adm-qrev" + (revisionById[q.id] ? " on" : ""));
+        const rcb = el("input"); rcb.type = "checkbox"; rcb.checked = !!revisionById[q.id];
+        rcb.addEventListener("change", async () => { rcb.disabled = true; await api.adminSetRevision(pw, q.id, rcb.checked); reload(); });
+        revLabel.appendChild(rcb);
+        revLabel.appendChild(el("span", "adm-qrevname", "🗓️ Hersiening"));
+        row.appendChild(revLabel);
+      }
       list.appendChild(row);
     });
     block.appendChild(list);

@@ -19,12 +19,16 @@ function seed() {
   if (!read(LS.meta, null)) write(LS.meta, { adminPassword: "admin" });
   if (!read(LS.xpevents, null)) write(LS.xpevents, {});
   const m = read(LS.meta, {}); if (m.weeklyAnchor == null) { m.weeklyAnchor = 0; write(LS.meta, m); }
-  // verseker elke rondte het 'n inskrywing (verstek: oop)
+  // verseker elke rondte het 'n inskrywing (verstek: oop, nie in hersiening nie)
   const q = read(LS.quests, {}); let changed = false;
-  ALL_QUESTS.forEach((it, i) => { if (!q[it.id]) { q[it.id] = { is_open: true, chapter: it.chapter, sort: i + 1 }; changed = true; } });
+  ALL_QUESTS.forEach((it, i) => {
+    if (!q[it.id]) { q[it.id] = { is_open: true, in_revision: false, chapter: it.chapter, sort: i + 1 }; changed = true; }
+    else if (q[it.id].in_revision == null) { q[it.id].in_revision = false; changed = true; }
+  });
   if (changed) write(LS.quests, q);
 }
 const openQuests = () => { const q = read(LS.quests, {}); return ALL_QUESTS.filter(it => q[it.id] && q[it.id].is_open).map(it => it.id); };
+const revisionQuests = () => { const q = read(LS.quests, {}); return ALL_QUESTS.filter(it => q[it.id] && q[it.id].in_revision).map(it => it.id); };
 const findByUser = u => Object.values(read(LS.students, {})).find(s => s.username === String(u).toLowerCase()) || null;
 function verify(u, pw) { const s = findByUser(u); return (s && s.password != null && s.password === pw) ? s : null; }
 function touch(id) { const st = read(LS.students, {}); if (st[id]) { st[id].last_active_at = Date.now(); write(LS.students, st); } }
@@ -69,7 +73,7 @@ export const LocalBackend = {
     touch(s.id);
     const progress = read(LS.progress, {})[s.id] || {};
     const totalXp = Object.values(progress).reduce((a, p) => a + (p.total_xp || 0), 0);
-    return { ok: true, student: { id: s.id, name: s.display_name, username: s.username }, progress, totalXp, openQuests: openQuests() };
+    return { ok: true, student: { id: s.id, name: s.display_name, username: s.username }, progress, totalXp, openQuests: openQuests(), revision: revisionQuests() };
   },
   async submitQuest(username, password, quest, { score, xp }) {
     const s = verify(username, password);
@@ -113,12 +117,20 @@ export const LocalBackend = {
       g.count += v.count; g.students += 1;
     }));
     const qmap = read(LS.quests, {});
-    const quests = ALL_QUESTS.map(it => ({ quest_id: it.id, chapter: it.chapter, is_open: !!(qmap[it.id] && qmap[it.id].is_open) }));
+    const quests = ALL_QUESTS.map(it => ({
+      quest_id: it.id, chapter: it.chapter,
+      is_open: !!(qmap[it.id] && qmap[it.id].is_open),
+      in_revision: !!(qmap[it.id] && qmap[it.id].in_revision),
+    }));
     return { ok: true, rows, struggles: Object.values(cByConcept).sort((a, b) => b.count - a.count), quests, inactiveDays: 7 };
   },
   async adminSetQuestOpen(pw, quest, open) {
     if (read(LS.meta, {}).adminPassword !== pw) return { ok: false, error: "auth" };
     const q = read(LS.quests, {}); if (q[quest]) { q[quest].is_open = !!open; write(LS.quests, q); } return { ok: true };
+  },
+  async adminSetRevision(pw, quest, flag) {
+    if (read(LS.meta, {}).adminPassword !== pw) return { ok: false, error: "auth" };
+    const q = read(LS.quests, {}); if (q[quest]) { q[quest].in_revision = !!flag; write(LS.quests, q); } return { ok: true };
   },
   async adminSetChapterOpen(pw, chapter, open) {
     if (read(LS.meta, {}).adminPassword !== pw) return { ok: false, error: "auth" };
