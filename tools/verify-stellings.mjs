@@ -10,7 +10,7 @@
 import { CH6 } from "../js/quests/ch6-stellings.js";
 import { runSuite } from "./verify-stellings-core.mjs";
 
-const ROUNDS = Array.from({ length: 27 }, (_, i) => `st${i + 1}`);
+const ROUNDS = Array.from({ length: 32 }, (_, i) => `st${i + 1}`);
 const TRIES = 60;
 
 const { diagrams, angleChecks, labelChecks, collisionChecks, fails, perRound } = runSuite(CH6, ROUNDS, TRIES);

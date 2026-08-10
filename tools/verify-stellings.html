@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meetkunde Stellings — verify &amp; preview (st1–st27)</title>
+<title>Meetkunde Stellings — verify &amp; preview (st1–st32)</title>
 <link rel="stylesheet" href="../css/styles.css">
 <style>
   body { padding: 18px; max-width: 1300px; margin: 0 auto; background: var(--bg, #f6f4ee); }
@@ -41,7 +41,7 @@ import { CH6 } from "../js/quests/ch6-stellings.js";
 import { checkQuestion } from "./verify-stellings-core.mjs";
 import { REDES } from "../js/redes.js";
 
-const ROUNDS = Array.from({ length: 27 }, (_, i) => `st${i + 1}`);
+const ROUNDS = Array.from({ length: 32 }, (_, i) => `st${i + 1}`);
 const PER_SKILL = 3;   // klein genoeg om vinnig te blaai; node-runner doen die swaar herhaling
 
 let diagrams = 0, angleChecks = 0, labelChecks = 0, collisionChecks = 0;
