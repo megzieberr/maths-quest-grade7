@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="af">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meetkunde Stellings — verify &amp; preview (st1–st12)</title>
+<link rel="stylesheet" href="../css/styles.css">
+<style>
+  body { padding: 18px; max-width: 1300px; margin: 0 auto; background: var(--bg, #f6f4ee); }
+  h1 { font-size: 1.3rem; margin-bottom: 2px; }
+  .lede { font-size: .92rem; color: #6b6656; margin: 0 0 12px; max-width: 900px; }
+  #summary { font-size: 1.05rem; font-weight: 700; margin: 12px 0; padding: 12px 14px; border: 2px solid #252a4a; border-radius: 12px; background: #fff; }
+  #summary.pass { border-color: #0ea271; background: #e8f8f1; }
+  #summary.fail { border-color: #e64980; background: #fdeef4; }
+  .ok { color: #0ea271; } .bad { color: #e64980; font-weight: 700; }
+  #fails { max-height: 260px; overflow: auto; font-size: .8rem; background: #fff; border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; }
+  #fails .row { padding: 3px 0; border-bottom: 1px dashed #eee; }
+  .round-head { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; margin: 22px 0 8px; padding-top: 10px; border-top: 2px dashed #ddd; }
+  .round-head .rn { color: #8a8676; font-weight: 600; font-size: .85rem; margin-left: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 8px; }
+  .vcard { border: 1.5px solid #e4ddcb; border-radius: 14px; padding: 12px 14px; background: #fff; }
+  .vcard.err { border-color: #e64980; box-shadow: 0 0 0 2px #fbdbe8; }
+  .tag { display: inline-block; font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; background: #eef4fb; color: #0d6b74; }
+  .sid { color: #8a8676; font-size: .7rem; font-weight: 700; float: right; }
+  .vprompt { font-weight: 700; font-size: .92rem; margin: 2px 0 8px; }
+  .vcard svg { width: 100%; max-width: 250px; height: auto; display: block; margin: 0 auto 8px; }
+  .ans { font-size: .85rem; margin: 4px 0; background: #f6f4ee; border-radius: 8px; padding: 6px 9px; }
+  .vcheck { font-size: .72rem; margin-top: 6px; color: #0ea271; }
+  .vcheck.bad { color: #e64980; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>Meetkunde Stellings — verify &amp; preview</h1>
+<p class="lede">Rondtes st1–st12 (regoorstaande hoeke · hoeke op 'n reguitlyn · hoeke om 'n punt). Elke gemerkte hoek word van die geTEKENDE SVG-koördinate af GEMEET en vergelyk met die vraag se eie wiskunde — dis nie 'n oogklap-toets nie. Hierdie bladsy is 'n dev-nutsding vir Megan om deur te blaai; dit word nooit aan leerders gekoppel nie.</p>
+<div id="summary">Loop tans…</div>
+<div id="fails"></div>
+<div id="rounds"></div>
+
+<script type="module">
+import { CH6 } from "../js/quests/ch6-stellings.js";
+import { checkQuestion } from "./verify-stellings-core.mjs";
+import { REDES } from "../js/redes.js";
+
+const ROUNDS = Array.from({ length: 12 }, (_, i) => `st${i + 1}`);
+const PER_SKILL = 3;   // klein genoeg om vinnig te blaai; node-runner doen die swaar herhaling
+
+let diagrams = 0, angleChecks = 0, labelChecks = 0, collisionChecks = 0;
+const fails = [];
+const roundsHost = document.getElementById("rounds");
+
+function answerText(q) {
+  if (q.type === "reason") return `Rede: <b>${REDES[q.correctCode]?.kort ?? q.correctCode}</b>`;
+  if (q.type === "calcReason") return `Waarde: <b>${q.expected}${q.unit || "°"}</b> · Rede: <b>${REDES[q.correctCode]?.kort ?? q.correctCode}</b>`;
+  if (q.answerLabel != null) return `Antwoord: <b>${q.answerLabel}</b>`;
+  return "";
+}
+
+ROUNDS.forEach(id => {
+  const def = CH6[id];
+  const head = document.createElement("div");
+  head.className = "round-head";
+  if (!def) {
+    head.innerHTML = `${id} <span class="rn">— ONTBREEK in die CH6-register</span>`;
+    roundsHost.appendChild(head);
+    fails.push(`${id}: ontbreek in die CH6-register`);
+    return;
+  }
+  head.innerHTML = `${id} <span class="rn">${def.skills.length} vaardighede${def.lesson ? " · def.lesson" : ""}${def.guide ? ` · gids: ${def.guide.join(", ")}` : ""}</span>`;
+  roundsHost.appendChild(head);
+
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  roundsHost.appendChild(grid);
+
+  def.skills.forEach((skill, si) => {
+    for (let t = 0; t < PER_SKILL; t++) {
+      const q = skill.gen();
+      const label = `${id} skill${si + 1} probeer${t + 1}`;
+      const { issues, stats } = checkQuestion(label, q);
+      diagrams += stats.diagrams; angleChecks += stats.angleChecks;
+      labelChecks += stats.labelChecks; collisionChecks += stats.collisionChecks;
+      fails.push(...issues);
+
+      const card = document.createElement("div");
+      card.className = "vcard" + (issues.length ? " err" : "");
+      let html = `<span class="tag">${q.type}</span><span class="sid">${id}·s${si + 1}</span>`
+        + `<div class="vprompt">${q.prompt || ""}</div>`
+        + (q.figure || "")
+        + `<div class="ans">${answerText(q)}</div>`;
+      html += issues.length
+        ? `<div class="vcheck bad">✗ ${issues.length} probleem: ${issues.map(i => i.split(": ").slice(1).join(": ")).join(" · ")}</div>`
+        : `<div class="vcheck">✓ hoeke + etikette op skaal</div>`;
+      card.innerHTML = html;
+      grid.appendChild(card);
+    }
+  });
+});
+
+const summary = document.getElementById("summary");
+if (fails.length === 0) {
+  summary.className = "pass";
+  summary.innerHTML = `<span class="ok">✓ ALMAL OP SKAAL — ${diagrams} diagramme, ${angleChecks} hoeke, ${labelChecks} etikette getoets (${collisionChecks} etiket-pare, almal ≥18px), 0 wanpassings.</span>
+    <div style="font-weight:500;font-size:.85rem;margin-top:4px">(Hierdie bladsy toets net ${PER_SKILL}× per vaardigheid vir 'n vinnige blaai — <code>node tools/verify-stellings.mjs</code> doen 60× per vaardigheid.)</div>`;
+} else {
+  summary.className = "fail";
+  summary.innerHTML = `<span class="bad">✗ ${fails.length} wanpassing(s) — kyk die kaarte hieronder met 'n rooi rand.</span>`;
+  const fb = document.getElementById("fails");
+  fails.forEach(f => { const d = document.createElement("div"); d.className = "row bad"; d.textContent = f; fb.appendChild(d); });
+}
+window.__VERIFY__ = { diagrams, angleChecks, labelChecks, collisionChecks, fails };
+console.log("VERIFY_STELLINGS", JSON.stringify(window.__VERIFY__));
+</script>
+</body>
+</html>

@@ -24,6 +24,26 @@ function guideCard(def) {
   return d;
 }
 
+/* big, ALTYD-oop leerkaart bo-aan 'n INTRO-rondte — def.lesson = {title,
+   figure, body, code}. figure + reasonkode is opsioneel. 'n Rondte kies
+   in deur def.lesson te verskaf (nie 'n toggle nie — "pinned open"). */
+function lessonCard(def) {
+  const L = def.lesson;
+  if (!L) return null;
+  const card = el("div", "card lesson-card");
+  const fig = L.figure ? `<div class="lesson-figure">${L.figure}</div>` : "";
+  const rede = L.code && REDES[L.code];
+  const redeHtml = rede
+    ? `<div class="reason-chip lesson-rede is-correct"><span class="rc-kort">${rede.kort}</span><span class="rc-vol">${rede.vol}</span></div>`
+    : "";
+  card.innerHTML = `<div class="lesson-eyebrow">📖 Leer</div>
+    ${L.title ? `<h3 class="lesson-title">${L.title}</h3>` : ""}
+    ${fig}
+    ${L.body ? `<div class="lesson-body">${L.body}</div>` : ""}
+    ${redeHtml}`;
+  return card;
+}
+
 export function renderPlay(app, host, params) {
   const { chapter, quest, def, accent } = params;
   const skills = def.skills;
@@ -43,6 +63,8 @@ export function renderPlay(app, host, params) {
   mount(screen, top, bar, xpPop, qhost);
   const guide = guideCard(def);
   if (guide) screen.insertBefore(guide, qhost);
+  const lesson = lessonCard(def);
+  if (lesson) screen.insertBefore(lesson, guide || qhost);
   host.appendChild(screen);
 
   const logStruggle = (concept) => { try { sess && api.logStruggle(sess.username, sess.password, concept).catch(() => {}); } catch { /* fire and forget */ } };

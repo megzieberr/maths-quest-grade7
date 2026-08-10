@@ -224,6 +224,21 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 .help-row{display:flex;gap:10px;margin-top:14px}
 .help-row .btn{flex:1}
 
+/* ---------- ch6: "Leer:" les-kaart (pinned open, intro-rondtes) ---------- */
+.lesson-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:18px 20px;
+  margin-bottom:14px;border:2px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.lesson-eyebrow{font-family:var(--font-display);font-weight:600;font-size:12.5px;letter-spacing:.4px;
+  color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+.lesson-title{font-family:var(--font-display);font-weight:600;font-size:18px;margin:0 0 10px;color:var(--ink)}
+.lesson-figure{display:flex;justify-content:center;margin:4px 0 12px}
+.lesson-body{font-size:14.5px;line-height:1.5;color:var(--ink)}
+.lesson-body p{margin:0 0 8px}
+.lesson-body p:last-child{margin-bottom:0}
+.lesson-body b{color:var(--accent)}
+.lesson-rede{margin-top:12px;cursor:default;pointer-events:none}
+.lesson-rede.is-correct{border-color:var(--good);background:var(--good-bg)}
+.lesson-rede .rc-kort{color:#0d7a3a}
+
 /* ---------- ch6: "Watter rede? 🧭" gids (collapsible) ---------- */
 .guide-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:0;
   margin-bottom:14px;overflow:hidden;border:2px solid color-mix(in srgb,var(--accent) 22%,transparent)}

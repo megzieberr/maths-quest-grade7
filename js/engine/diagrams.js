@@ -197,42 +197,115 @@ export function angleFigure(deg, accent = "#0d9488", opt = {}) {
     "0 0 252 168", 250, "'n Hoek");
 }
 
-/* ---------- m6/m7: hoeke op 'n reguitlyn (som = 180°) ---------- */
-export function straightLineFigure(givenDeg, accent = "#0d9488") {
+/* ---------- m6/m7: hoeke op 'n reguitlyn (som = 180°) ----------
+   opt.showAsk: label the second angle with its real value (180−givenDeg)
+   i.p.v. "?" — vir ch6 se INTRO-rondtes waar alle waardes gewys word. */
+export function straightLineFigure(givenDeg, accent = "#0d9488", opt = {}) {
   const OX = 130, OY = 120, L = 112;
   const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
   const base = `<line x1="${OX - L}" y1="${OY}" x2="${OX + L}" y2="${OY}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`
     + arrowHead(OX - L, OY, 180, INK) + arrowHead(OX + L, OY, 0, INK);
   const ray = arm(givenDeg, L);
   const rayLine = `<line x1="${OX}" y1="${OY}" x2="${ray[0]}" y2="${ray[1]}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`;
+  const askDeg = 180 - givenDeg;
   const givenArc = arcPoly(OX, OY, 30, 0, givenDeg, accent);
-  const askArc = arcPoly(OX, OY, 30, givenDeg, 180, "#f59e0b");
+  const askArc = arcPoly(OX, OY, 30, givenDeg, 180, opt.showAsk ? accent : "#f59e0b");
   const givenLbl = txt(arm(givenDeg / 2, 48), `${givenDeg}°`, accent, 13);
-  const askLbl = txt(arm((givenDeg + 180) / 2, 48), "?", "#d97706", 16);
+  const askLbl = opt.showAsk
+    ? txt(arm((givenDeg + 180) / 2, 48), `${askDeg}°`, accent, 13)
+    : txt(arm((givenDeg + 180) / 2, 48), "?", "#d97706", 16);
   return svgWrap(`${base}${rayLine}${givenArc}${askArc}${givenLbl}${askLbl}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
     "0 0 260 150", 260, "Hoeke op 'n reguitlyn");
 }
 
-/* ---------- m8: hoeke rondom 'n punt (3 strale, som = 360°) ---------- */
-export function aroundPointFigure(a, b, accent = "#0d9488") {
+/* ---------- ch6: DRIE hoeke op 'n reguitlyn (x = 180 − a − b) ----------
+   angA, angB gegewe (in volgorde van links af); die derde (angC) is
+   die verstek "onbekende" — opt.hide = "A"|"B"|"C" skuif watter een
+   as "?" gewys word; opt.showAsk wys ALMAL (intro-rondtes). */
+export function straightLineFigure3(angA, angB, accent = "#0d9488", opt = {}) {
+  const angC = 180 - angA - angB;
+  const OX = 130, OY = 120, L = 110;
+  const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
+  const base = `<line x1="${OX - L}" y1="${OY}" x2="${OX + L}" y2="${OY}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`
+    + arrowHead(OX - L, OY, 180, INK) + arrowHead(OX + L, OY, 0, INK);
+  const r1 = arm(angA, L), r2 = arm(angA + angB, L);
+  const rays = `<line x1="${OX}" y1="${OY}" x2="${r1[0]}" y2="${r1[1]}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`
+    + `<line x1="${OX}" y1="${OY}" x2="${r2[0]}" y2="${r2[1]}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`;
+  const hide = opt.hide || "C";
+  const vals = { A: angA, B: angB, C: angC };
+  const cols = { A: "#16a34a", B: "#2563eb", C: "#7c3aed" };
+  const ranges = { A: [0, angA], B: [angA, angA + angB], C: [angA + angB, 180] };
+  let arcs = "", labels = "";
+  ["A", "B", "C"].forEach((key, i) => {
+    const [d0, d1] = ranges[key];
+    const isAsk = key === hide;
+    const col = isAsk ? "#f59e0b" : cols[key];
+    const r = 26 + i * 8;
+    const mid = (d0 + d1) / 2;
+    const showVal = !isAsk || opt.showAsk;
+    arcs += arcPoly(OX, OY, r, d0, d1, col);
+    labels += txt(arm(mid, r + 18), showVal ? `${vals[key]}°` : "?", isAsk ? "#d97706" : col, showVal ? 13 : 16);
+  });
+  return svgWrap(`${base}${rays}${arcs}${labels}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
+    "0 0 260 155", 260, "Hoeke op 'n reguitlyn (drie hoeke)");
+}
+
+/* ---------- m8: hoeke rondom 'n punt (3 strale, som = 360°) ----------
+   opt.showAsk: label die derde hoek met sy werklike waarde (360−a−b)
+   i.p.v. "?" — vir ch6 se INTRO-rondtes. */
+export function aroundPointFigure(a, b, accent = "#0d9488", opt = {}) {
   const OX = 130, OY = 115, L = 95;
   const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
   const rays = [0, a, a + b];
+  const c = 360 - a - b;
   const lines = rays.map(d => { const p = arm(d, L); return `<line x1="${OX}" y1="${OY}" x2="${p[0]}" y2="${p[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` + arrowHead(p[0], p[1], d < 90 || d > 270 ? 0 : 180, INK, 7); }).join("");
   const arcA = arcPoly(OX, OY, 30, 0, a, accent) + txt(arm(a / 2, 46), `${a}°`, accent, 13);
   const arcB = arcPoly(OX, OY, 38, a, a + b, "#2563eb") + txt(arm(a + b / 2, 54), `${b}°`, "#2563eb", 13);
-  const arcC = arcPoly(OX, OY, 30, a + b, 360, "#f59e0b") + txt(arm((a + b + 360) / 2, 46), "?", "#d97706", 16);
+  const arcC = arcPoly(OX, OY, 30, a + b, 360, opt.showAsk ? accent : "#f59e0b")
+    + txt(arm((a + b + 360) / 2, 46), opt.showAsk ? `${c}°` : "?", opt.showAsk ? accent : "#d97706", opt.showAsk ? 13 : 16);
   return svgWrap(`${lines}${arcA}${arcB}${arcC}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
     "0 0 260 200", 250, "Hoeke rondom 'n punt");
 }
 
-/* ---------- m9: regoorstaande (vertikaal-teenoorgestelde) hoeke ---------- */
-export function verticalFigure(known, accent = "#0d9488") {
+/* ---------- ch6: hoeke rondom 'n punt met N (2-4) sektore ----------
+   values = AL die sektor-grade rondom die punt (som = 360), in volgorde;
+   hideIndex = watter een as "?" gewys word (null/opt.showAsk = wys almal —
+   ch6 se INTRO-rondtes). Veralgemeen die 2-gegewe-hoek geval hierbo na
+   1-3 gegewe hoeke (dus 2-4 hoeke totaal rondom die punt). */
+export function aroundPointFigureN(values, hideIndex, accent = "#16a34a", opt = {}) {
+  const OX = 130, OY = 115, L = 95;
+  const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
+  const n = values.length;
+  const rays = []; let cum = 0;
+  for (let i = 0; i < n; i++) { rays.push(cum); cum += values[i]; }
+  const palette = ["#16a34a", "#2563eb", "#7c3aed", "#0d9488", "#ea580c"];
+  let lines = "";
+  rays.forEach(d => { const p = arm(d, L); lines += `<line x1="${OX}" y1="${OY}" x2="${p[0]}" y2="${p[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` + arrowHead(p[0], p[1], d < 90 || d > 270 ? 0 : 180, INK, 7); });
+  let arcs = "", labels = "";
+  for (let i = 0; i < n; i++) {
+    const d0 = rays[i], d1 = i + 1 < n ? rays[i + 1] : 360;
+    const isAsk = i === hideIndex;
+    const col = isAsk ? "#f59e0b" : palette[i % palette.length];
+    const r = 24 + (i % 2) * 12;
+    const mid = (d0 + d1) / 2;
+    const showVal = !isAsk || opt.showAsk;
+    arcs += arcPoly(OX, OY, r, d0, d1, col);
+    labels += txt(arm(mid, r + 20), showVal ? `${values[i]}°` : "?", isAsk ? "#d97706" : col, showVal ? 13 : 16);
+  }
+  return svgWrap(`${lines}${arcs}${labels}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
+    "0 0 260 200", 250, "Hoeke rondom 'n punt");
+}
+
+/* ---------- m9: regoorstaande (vertikaal-teenoorgestelde) hoeke ----------
+   opt.showAsk: label die regoorstaande hoek met sy werklike (gelyke)
+   waarde i.p.v. "?" — vir ch6 se INTRO-rondtes. */
+export function verticalFigure(known, accent = "#0d9488", opt = {}) {
   const OX = 130, OY = 95, L = 105;
   const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
   const line = d => { const p1 = arm(d, L), p2 = arm(d + 180, L); return `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`; };
   const givenArc = arcPoly(OX, OY, 26, 0, known, accent) + txt(arm(known / 2, 42), `${known}°`, accent, 13);
-  const askArc = arcPoly(OX, OY, 26, 180, 180 + known, "#f59e0b") + txt(arm(180 + known / 2, 42), "?", "#d97706", 16);
+  const askArc = arcPoly(OX, OY, 26, 180, 180 + known, opt.showAsk ? accent : "#f59e0b")
+    + txt(arm(180 + known / 2, 42), opt.showAsk ? `${known}°` : "?", opt.showAsk ? accent : "#d97706", opt.showAsk ? 13 : 16);
   return svgWrap(`${line(0)}${line(known)}${givenArc}${askArc}<circle cx="${OX}" cy="${OY}" r="4" fill="${INK}"/>`,
     "0 0 260 190", 250, "Regoorstaande hoeke");
 }

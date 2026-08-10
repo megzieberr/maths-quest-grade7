@@ -171,6 +171,22 @@ const C = {
       <li>Faktor 3: elke sy word 3× langer.</li>
       <li>Skaalfaktor = <code>nuwe lengte ÷ ou lengte</code>. Van 4 na 12? Faktor = <code>12 ÷ 4 = 3</code>.</li>
     </ul>` },
+
+  /* ---- Hoofstuk 6: Meetkunde Stellings ---- */
+  regoorst: { title: "Regoorstaande hoeke", body: `
+    <p>Wanneer twee reguit lyne mekaar sny, vorm hulle 'n groot <b>"X"</b>. Die twee hoeke wat <b>regoorskant</b> mekaar lê (nie langsaan nie) is altyd <b>presies ewe groot</b>.</p>
+    <p><b>Voorbeeld:</b> een hoek is 70°. Die hoek reg oorkant hom (deur die snypunt) is ook <code>70°</code> — jy hoef niks te bereken nie, net af te kyk!</p>
+    <p><b>Rede om te skryf:</b> "Regoorstaande hoeke is gelyk".</p>` },
+  reguitlyn: { title: "Hoeke op 'n reguitlyn", body: `
+    <p>As die hoeke langs mekaar op <b>een reguit lyn</b> lê, tel hulle altyd saam op tot <b>180°</b> (dis 'n gestrekte hoek).</p>
+    <p><b>Voorbeeld:</b> een hoek is 130°. Die ander op dieselfde lyn is <code>180 − 130 = 50°</code>.</p>
+    <p>Lê daar drie hoeke op die lyn? Trek almal van 180° af: <code>180 − 40 − 90 = 50°</code>.</p>
+    <p><b>Rede om te skryf:</b> "Hoeke op 'n reguit lyn tel op tot 180°".</p>` },
+  ompunt: { title: "Hoeke om 'n punt", body: `
+    <p>Al die hoeke wat <b>rondom een punt</b> saamkom (soos snye van 'n pizza) maak altyd 'n <b>volle draai</b> — <b>360°</b>.</p>
+    <p><b>Voorbeeld:</b> twee hoeke is 90° en 150°. Die derde is <code>360 − 90 − 150 = 120°</code>.</p>
+    <p>Meer hoeke rondom die punt? Trek elkeen een-vir-een van 360° af.</p>
+    <p><b>Rede om te skryf:</b> "Hoeke rondom 'n punt tel op tot 360°".</p>` },
 };
 
 export const CONCEPTS = C;                 // gebruik deur die admin-dashboard
