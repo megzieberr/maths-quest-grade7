@@ -215,12 +215,19 @@ export function mountQuestion(host, q, handlers = {}) {
     inputHost.appendChild(grid);
 
     const foot = el("div", "cr-foot");
+    const crNudge = el("div", "cr-nudge"); crNudge.hidden = true;
     const crSubmit = el("button", "btn primary big", "Stuur ✓");
     crSubmit.disabled = true;   // eers aktief sodra 'n rede gekies is
     crSubmit.addEventListener("click", () => {
       if (answered) return;
       const v = kp.value;
-      if (!Number.isFinite(v) || chosenCode == null) return;
+      if (!Number.isFinite(v) || chosenCode == null) {
+        // stil-dooie knoppie verwar 'n 12-jarige — sê wat kortkom
+        crNudge.hidden = false;
+        crNudge.textContent = !Number.isFinite(v) ? "💡 Tik eers die hoek se waarde in." : "💡 Kies eers 'n rede.";
+        return;
+      }
+      crNudge.hidden = true;
       kp.disable();
       crSubmit.disabled = true;
       const okVal = answerCorrect(v, q.expected, { dp: q.dp, tol: q.tol });
@@ -232,6 +239,7 @@ export function mountQuestion(host, q, handlers = {}) {
       });
       commit(okVal && okReason, `${fmtComma(v, q.dp)}${q.unit || ""} · ${REDES[chosenCode].kort}`, { okVal, okReason });
     });
+    foot.appendChild(crNudge);
     foot.appendChild(crSubmit);
     inputHost.appendChild(foot);
   }

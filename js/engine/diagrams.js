@@ -301,11 +301,16 @@ function vertexAngleArc(p, q1, q2, r, col, w = 2.4) {
   const a1 = angleOfVec([q1[0] - p[0], q1[1] - p[1]]);
   const a2 = angleOfVec([q2[0] - p[0], q2[1] - p[1]]);
   const lo = Math.min(a1, a2), hi = Math.max(a1, a2);
-  return { svg: arcPoly(p[0], p[1], r, lo, hi, col, w), mid: (lo + hi) / 2 };
+  return { svg: arcPoly(p[0], p[1], r, lo, hi, col, w), mid: (lo + hi) / 2, span: hi - lo };
 }
-/* plaas 'n label 'n gegewe afstand van p af, in rigting midDeg (grade) */
+/* label-afstand: nou hoeke (< 40°) kry die etiket VERDER uit, anders sit die
+   teks bo-op albei bene (die CQ nou-wig-les). Gewone hoeke bly naby (CQ 33–46-reël). */
+const labelDist = (span, base = 36) => span >= 40 ? base : Math.min(58, base + (40 - span) * 1.4);
+/* plaas 'n label 'n gegewe afstand van p af, in rigting midDeg (grade) — met 'n
+   wit halo sodat dit leesbaar bly waar dit 'n lyn of boog raak */
 function labelAt(p, midDeg, dist, s, col, size = 13) {
-  return txt([f(p[0] + dist * Math.cos(rd(midDeg))), f(p[1] - dist * Math.sin(rd(midDeg)))], s, col, size);
+  const x = f(p[0] + dist * Math.cos(rd(midDeg))), y = f(p[1] - dist * Math.sin(rd(midDeg)));
+  return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-family="Fredoka, sans-serif" font-weight="600" font-size="${size}" fill="${col}" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${s}</text>`;
 }
 
 /* ---------- buitehoek van 'n driehoek (buitehoek-stelling) ----------
@@ -335,9 +340,9 @@ export function buitehoekFigure(angA, angB, accent = "#16a34a", opt = {}) {
   const inner = line(pA, pB) + line(pB, pC) + line(pA, pC) + line(pC, pD)
     + arrowHead(pD[0], pD[1], angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK)
     + arcA.svg + arcB.svg + arcExt.svg
-    + labelAt(pA, arcA.mid, 36, lblA, accent)
-    + labelAt(pB, arcB.mid, 36, lblB, accent)
-    + labelAt(pC, arcExt.mid, 42, lblExt, "#d97706")
+    + labelAt(pA, arcA.mid, labelDist(arcA.span), lblA, accent)
+    + labelAt(pB, arcB.mid, labelDist(arcB.span), lblB, accent)
+    + labelAt(pC, arcExt.mid, labelDist(arcExt.span, 42), lblExt, "#d97706")
     + dot(pA) + dot(pB) + dot(pC);
   return svgWrap(inner, "0 0 240 168", 230, "Buitehoek van 'n driehoek");
 }
@@ -388,14 +393,15 @@ export function triangleFigure(kind, accent = "#ea580c", opt = {}) {
     if (opt.showApex !== false) {
       const a = vertexAngleArc(pApex, pL, pR, 22, accent);
       marks += a.svg;
-      labels += labelAt(pApex, a.mid, 32, opt.hide === "apex" ? "?" : `${apex}°`, accent);
+      labels += labelAt(pApex, a.mid, labelDist(a.span, 32), opt.hide === "apex" ? "?" : `${apex}°`, accent);
     }
     if (opt.showBase !== false) {
       const bL = vertexAngleArc(pL, pApex, pR, 19, accent);
       const bR = vertexAngleArc(pR, pApex, pL, 19, accent);
       marks += bL.svg + bR.svg;
       const bLbl = opt.hide === "base" ? "?" : `${baseAng}°`;
-      labels += labelAt(pL, bL.mid, 30, bLbl, accent) + labelAt(pR, bR.mid, 30, bLbl, accent);
+      labels += labelAt(pL, bL.mid, labelDist(bL.span, 30), bLbl, accent)
+        + labelAt(pR, bR.mid, labelDist(bR.span, 30), bLbl, accent);
     }
     return svgWrap(tri + marks + labels, "0 0 220 165", 210, "Gelykbenige driehoek");
   }
