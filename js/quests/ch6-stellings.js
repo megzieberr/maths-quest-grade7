@@ -1708,3 +1708,10 @@ export const CH6 = {
   st31: { guide: REDE_CODES, skills: mixSkills(MIX_CALCREASON) },
   st32: { guide: REDE_CODES, skills: mixSkills(MIX_CALCREASON_32) },
 };
+
+/* strik-rondtes (7 gewoon + 3 strik): skommel die VOLGORDE elke speelslag,
+   sodat herspeel nie strik-posisies kan memoriseer nie (sien play.js). */
+for (const id of ["st2", "st3", "st4", "st6", "st7", "st8", "st10", "st11", "st12",
+  "st14", "st15", "st16", "st18", "st19", "st21", "st22", "st25", "st26", "st27"]) {
+  CH6[id].shuffleSkills = true;
+}

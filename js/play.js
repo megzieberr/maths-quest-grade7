@@ -7,7 +7,7 @@ import { api } from "./api.js";
 import { getSession } from "./session.js";
 import { mountQuestion } from "./questions.js";
 import { openConcept } from "./modal.js";
-import { el, clear, mount } from "./ui.js";
+import { el, clear, mount, shuffled } from "./ui.js";
 import { REDES } from "./redes.js";
 import { isChainLocked } from "./chain.js";
 
@@ -54,7 +54,10 @@ export function renderPlay(app, host, params) {
     app.go("chapter", { chapterId: chapter.id });
     return;
   }
-  const skills = def.skills;
+  /* strik-rondtes skommel hul vaardigheids-VOLGORDE elke speelslag, anders
+     leer 'n kind by herspeel "vraag 3 is die knoppie-een" i.p.v. die
+     diagram te lees (die skills-lys word net EEN keer by laai geskommel). */
+  const skills = def.shuffleSkills ? shuffled([...def.skills]) : def.skills;
   const sess = getSession();
 
   clear(host);
