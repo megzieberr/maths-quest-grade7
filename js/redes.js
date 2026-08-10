@@ -17,6 +17,14 @@ export const REDES = {
      Word altyd as 'n ekstra chip aangebied langs REDES op st3, en is
      self die korrekte antwoord op die 3 strikvrae per rondte. */
   geen_regoorst: { kort: "✋ Nie regoorstaande hoeke nie", vol: "Die twee gemerkte hoeke lê langsaan mekaar, nie oorkant die snypunt nie" },
+  /* Feature 2b (2026-08-10 laat-aand, tweede rondte): dieselfde pseudo-kode
+     patroon, een per orige vyf stellings — sien RUN-PLAN-2026-08-10.md
+     "Queued next agent" vir die presiese ontwerp per blok. */
+  geen_reguitlyn:  { kort: "✋ Nie hoeke op 'n reguitlyn nie", vol: "Die gemerkte hoeke lê nie saam op EEN reguit lyn nie" },
+  geen_ompunt:     { kort: "✋ Nie hoeke om 'n punt nie",      vol: "Die gemerkte hoeke lê nie almal rondom EEN punt nie" },
+  geen_binne:      { kort: "✋ Nie al drie binnehoeke nie",    vol: "Een van die gemerkte hoeke is nie 'n binnehoek van die driehoek nie" },
+  geen_gelykbenig: { kort: "✋ Nie 'n gelykbenige driehoek nie", vol: "Die driehoek het geen merkies wat gelyke sye wys nie" },
+  geen_buite:      { kort: "✋ Nie 'n buitehoek nie",          vol: "Die gemerkte hoek lê nie op die verlengde sy, buite die driehoek nie" },
 };
 
 /* al die kodes, in klasnotas-volgorde (vir "kies almal ses" gemengde rondtes) —

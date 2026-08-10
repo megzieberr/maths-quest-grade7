@@ -510,8 +510,9 @@ export function buitehoekFigure(angA, angB, accent = "#16a34a", opt = {}) {
       ext: { arc: vertexAngleArc(pC, pD, pA, 27, accent), p: pC, val: ext, base: 42 },
     };
     const s = specs[opt.markOnly] || specs.ext;
+    const markAsk = !!opt.markAsk;   // strik (2026-08-10 laat-aand): wys "?" i.p.v. die waarde
     marks = s.arc.svg;
-    labels = labelAt(s.p, s.arc.mid, labelDist(s.arc.span, s.base), `${s.val}°`, accent);
+    labels = labelAt(s.p, s.arc.mid, labelDist(s.arc.span, s.base), markAsk ? "?" : `${s.val}°`, markAsk ? ASK_TXT : accent);
   } else {
     /* Feature 4: A/B/ext elk hulle eie palet-kleur; die gevraagde hoek
        ("?") bly oranje — ongeag WATTER een (A, B of ext) versteek is. */
@@ -533,6 +534,64 @@ export function buitehoekFigure(angA, angB, accent = "#16a34a", opt = {}) {
       + labelAt(pC, arcExt.mid, labelDist(arcExt.span, 42), lblExt, isAskExt ? ASK_TXT : colExt);
   }
   return svgWrap(base + marks + labels, "0 0 240 168", 230, "Buitehoek van 'n driehoek");
+}
+
+/* ---------- ch6 strik (2026-08-10 laat-aand): buitehoek "verbuigde-lyn" ----------
+   Haar ontwerp: die ekstra lyn by C is NIE die sy se ware verlenging nie —
+   'n ewekansige straal wat 15°-25° van die kollineêre rigting af BUIG
+   (steeds op skaal getrek, met EGTE hoeke — geen skattings nie). Leer dat
+   'n buitehoek NET op die verlengde sy bestaan, nooit op enige lyn wat
+   naastenby daar lyk nie. Gee { svg, markedAngle } terug — markedAngle is
+   die WERKLIKE hoek wat geteken is (tussen die gebuigde straal en CA),
+   sodat _chk presies kan pas by wat verify-stellings MEET. */
+export function buitehoekBentFigure(angA, angB, accent = "#16a34a", opt = {}) {
+  const angC = 180 - angA - angB;
+  const { A, B, C } = triFromBaseAngles(angB, angC);
+  /* BELANGRIK: vertexAngleArc (wat werklik teken) gebruik 'n NAÏEWE
+     lo=min(a1,a2)/hi=max(a1,a2)-spanwydte — GEEN "kort pad om die sirkel"-
+     korreksie nie. As ons hier 'n "slimmer" wrap-veilige hoek gebruik om
+     die bui te aanvaar, kan dit van wat werklik GETEKEN word verskil
+     (die twee strale "oorspan" dan 0°/360°, en die boog swaai die LANG
+     pad om — 'n growwe hoek soos 200°). Die wag hier MOET dus presies
+     dieselfde hi-lo-som bereken as vertexAngleArc, sodat 'n aanvaarde
+     buiging altyd 'n klein, sinvolle boog gee. */
+  let bentDir = [0, 0], estAngle = 0, guard = 0;
+  do {
+    const bendSign = Math.random() < 0.5 ? 1 : -1;
+    const bendDeg = bendSign * (15 + Math.random() * 10);        // 15°-25°, ewekansige kant
+    const trueDir = [C[0] - B[0], C[1] - B[1]];
+    const br = rd(bendDeg);
+    bentDir = [
+      trueDir[0] * Math.cos(br) - trueDir[1] * Math.sin(br),
+      trueDir[0] * Math.sin(br) + trueDir[1] * Math.cos(br),
+    ];
+    const angCD = angleOfVec(bentDir), angCA = angleOfVec([A[0] - C[0], A[1] - C[1]]);
+    estAngle = Math.max(angCD, angCA) - Math.min(angCD, angCA);   // presies vertexAngleArc se eie som
+    guard++;
+  } while ((estAngle < 25 || estAngle > 165) && guard < 60);
+
+  const D = [C[0] + bentDir[0] * 0.55, C[1] + bentDir[1] * 0.55];
+  const [pA, pB, pC, pD] = fitPoints([A, B, C, D], 188, 116, 26, 24);
+
+  const line = (p1, p2) => `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
+  const dot = p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="${INK}"/>`;
+
+  const base = line(pA, pB) + line(pB, pC) + line(pA, pC) + line(pC, pD)
+    + arrowHead(pD[0], pD[1], angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK)
+    + dot(pA) + dot(pB) + dot(pC);
+
+  const ask = !!opt.ask;
+  const colA = MULTI_PALETTE[0], colB = MULTI_PALETTE[1], colBent = ask ? ASK_COL : MULTI_PALETTE[2];
+  const arcA = vertexAngleArc(pA, pB, pC, 22, colA);
+  const arcB = vertexAngleArc(pB, pA, pC, 22, colB);
+  const arcBent = vertexAngleArc(pC, pD, pA, 27, colBent);
+  const markedAngle = f(arcBent.span);   // die hoek soos GETEKEN — dieselfde getal wat verify sal meet
+  const marks = arcA.svg + arcB.svg + arcBent.svg;
+  const labels = labelAt(pA, arcA.mid, labelDist(arcA.span), `${angA}°`, colA)
+    + labelAt(pB, arcB.mid, labelDist(arcB.span), `${angB}°`, colB)
+    + labelAt(pC, arcBent.mid, labelDist(arcBent.span, 42), ask ? "?" : `${markedAngle}°`, colBent);
+
+  return { svg: svgWrap(base + marks + labels, "0 0 240 168", 230, "Buitehoek — strikvraag"), markedAngle };
 }
 
 /* ---------- ch4: driehoeke (met merkies / regtehoek-blokkie) ---------- */

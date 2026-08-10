@@ -12,7 +12,7 @@
    booghoeke teen die vraag se eie wiskunde kan MEET (nie afgekyk nie).
    ============================================================ */
 import { mc, tf, calc, reasonQ, calcReason, randInt, pick, shuffled, code, nearDistractors } from "./_shared.js";
-import { verticalFigure, straightLineFigure, straightLineFigure3, aroundPointFigure, aroundPointFigureN, triAnglesFigure, triangleFigure, buitehoekFigure } from "../engine/diagrams.js";
+import { verticalFigure, straightLineFigure, straightLineFigure3, aroundPointFigure, aroundPointFigureN, triAnglesFigure, triangleFigure, buitehoekFigure, buitehoekBentFigure } from "../engine/diagrams.js";
 import { REDES, REDE_CODES } from "../redes.js";
 
 const GREEN = "#16a34a";
@@ -266,6 +266,31 @@ function introReguitlynReason2() {
   });
 }
 
+/* ============================================================
+   Feature (2026-08-10 laat-aand, tweede rondte) — reguitlyn strikvrae:
+   dieselfde 7 normaal + 3 strik-patroon as regoorst (st2/3/4) hierbo.
+   Strik-figuur is OF 'n regoorstaande paar (GELYK, nie 'n som nie) OF 'n
+   om-'n-punt-paar (som 360, nie 180 nie) — nooit werklik saam op EEN
+   reguitlyn. Dieselfde wanduidelikheid-wag: die kode wat EGTER by die
+   strik-figuur pas (regoorst / ompunt) word nooit as afleier aangebied nie.
+   ============================================================ */
+const ESCAPE_LABEL_REGUITLYN = "Nie hoeke op 'n reguitlyn nie";
+const REGUITLYN_WRONG_TAP = [{ s: "Die hoeke lê WEL saam op EEN reguit lyn", r: "hoeke op 'n reguit lyn tel op tot 180°" }];
+function reguitlynTrapPick(showAsk = false) {
+  const known = randInt(6, 34) * 5;   // 30°…170°
+  if (Math.random() < 0.5) {
+    return { figKind: "vertical", values: [known, known], fitCode: "regoorst",
+      svg: verticalFigure(known, GREEN, { showAsk }),
+      sol: [{ s: "Hulle lê OORKANT mekaar by die snypunt, nie langsaan op EEN reguit lyn nie", r: "regoorstaande hoeke is gelyk" }] };
+  }
+  const other = 360 - known;
+  return { figKind: "aroundPoint", values: [known, other], fitCode: "ompunt",
+    svg: aroundPointFigureN([known, other], 1, GREEN, { showAsk }),
+    sol: [{ s: "Hulle lê saam rondom EEN punt, nie op EEN reguit lyn nie", r: "hoeke rondom 'n punt tel op tot 360°" }] };
+}
+/* naïewe leerder pas die reguitlyn-formule (180−gegewe) toe, al pas dit nie */
+const reguitlynNaive = t => 180 - t.values[0];
+
 function reguitlynR1() {
   if (Math.random() < 0.45) {
     const [a, b] = pair3(), c = 180 - a - b;
@@ -274,6 +299,7 @@ function reguitlynR1() {
       tip: "Drie hoeke op EEN reguit lyn? Almal saam maak steeds 180°.",
       hint: `180 − ${a} − ${b} = ${c}.`,
       solution: [{ s: `? = 180 − ${a} − ${b} = ${c}`, r: "hoeke op 'n reguitlyn tel op tot 180°" }],
+      escape: { label: ESCAPE_LABEL_REGUITLYN, isAnswer: false, wrongTapSolution: REGUITLYN_WRONG_TAP },
       _chk: { figKind: "straightLine3", values: [a, b, c], hideIndex: 2, allShown: false },
     });
   }
@@ -283,13 +309,27 @@ function reguitlynR1() {
     tip: "Hoeke op 'n reguit lyn tel altyd op tot 180°.",
     hint: `180 − ${a} = ${c}.`,
     solution: [{ s: `? = 180 − ${a} = ${c}`, r: "hoeke op 'n reguitlyn tel op tot 180°" }],
+    escape: { label: ESCAPE_LABEL_REGUITLYN, isAnswer: false, wrongTapSolution: REGUITLYN_WRONG_TAP },
     _chk: { figKind: "straightLine", values: [a, c], hideIndex: 1, allShown: false },
+  });
+}
+function reguitlynR1Trap() {
+  const t = reguitlynTrapPick(false);
+  return calc(`Gebruik: <b>${REDES.reguitlyn.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, reguitlynNaive(t), {
+    unit: "°", figure: t.svg,
+    tip: "Hoeke op 'n reguit lyn tel altyd op tot 180°.",
+    hint: "Kyk mooi watter TWEE hoeke op die prentjie gemerk is voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_REGUITLYN,
+    solution: t.sol,
+    escape: { label: ESCAPE_LABEL_REGUITLYN, isAnswer: true },
+    _chk: { figKind: t.figKind, values: t.values, hideIndex: 1, allShown: false },
   });
 }
 function reguitlynR2() {
   if (Math.random() < 0.45) {
     const [a, b] = pair3(), c = 180 - a - b;
-    return reasonQ(`Op die diagram is ${code("?")} = ${c}°. Watter rede verduidelik dit?`, "reguitlyn", otherCodes("reguitlyn", 3),
+    return reasonQ(`Op die diagram is ${code("?")} = ${c}°. Watter rede verduidelik dit?`, "reguitlyn",
+      shuffled([...otherCodes("reguitlyn", 2), "geen_reguitlyn"]),
       straightLineFigure3(a, b, GREEN, { showAsk: true }), {
       tip: "Al drie hoeke lê saam op EEN reguit lyn.",
       hint: "Hoeke op 'n reguit lyn tel op tot 180°.",
@@ -297,11 +337,22 @@ function reguitlynR2() {
     });
   }
   const a = pair2(), c = 180 - a;
-  return reasonQ(`Op die diagram is ${code("?")} = ${c}°. Watter rede verduidelik dit?`, "reguitlyn", otherCodes("reguitlyn", 3),
+  return reasonQ(`Op die diagram is ${code("?")} = ${c}°. Watter rede verduidelik dit?`, "reguitlyn",
+    shuffled([...otherCodes("reguitlyn", 2), "geen_reguitlyn"]),
     straightLineFigure(a, GREEN, { showAsk: true }), {
     tip: "Die twee hoeke lê saam op EEN reguit lyn.",
     hint: "Hoeke op 'n reguit lyn tel op tot 180°.",
     _chk: { figKind: "straightLine", values: [a, c], hideIndex: null, allShown: true },
+  });
+}
+function reguitlynR2Trap() {
+  const t = reguitlynTrapPick(true);
+  const distract = shuffled(REDE_CODES.filter(c => c !== "reguitlyn" && c !== t.fitCode)).slice(0, 2);
+  const offered = shuffled(["reguitlyn", ...distract, "geen_reguitlyn"]);
+  return reasonQ("Kyk na die TWEE gemerkte hoeke. Watter rede pas by hierdie paar?", "geen_reguitlyn", offered, t.svg, {
+    tip: "Kyk of dit 'n reguitlyn-som, 'n punt-som, of 'n GELYKHEID is.",
+    hint: "Kyk mooi waar die twee gemerkte hoeke lê voor jy kies.",
+    _chk: { figKind: t.figKind, values: t.values, hideIndex: null, allShown: true },
   });
 }
 function reguitlynR3() {
@@ -313,6 +364,7 @@ function reguitlynR3() {
       tip: "Drie hoeke op EEN reguit lyn? Almal saam maak steeds 180°.",
       hint: `180 − ${a} − ${b} = ${c}.`,
       solution: [{ s: `? = 180 − ${a} − ${b} = ${c}`, r: "hoeke op 'n reguitlyn tel op tot 180°" }],
+      escape: { label: ESCAPE_LABEL_REGUITLYN, isAnswer: false, wrongTapSolution: REGUITLYN_WRONG_TAP },
       _chk: { figKind: "straightLine3", values: [a, b, c], hideIndex: 2, allShown: false },
     });
   }
@@ -323,7 +375,20 @@ function reguitlynR3() {
     tip: "Hoeke op 'n reguit lyn tel altyd op tot 180°.",
     hint: `180 − ${a} = ${c}.`,
     solution: [{ s: `? = 180 − ${a} = ${c}`, r: "hoeke op 'n reguitlyn tel op tot 180°" }],
+    escape: { label: ESCAPE_LABEL_REGUITLYN, isAnswer: false, wrongTapSolution: REGUITLYN_WRONG_TAP },
     _chk: { figKind: "straightLine", values: [a, c], hideIndex: 1, allShown: false },
+  });
+}
+function reguitlynR3Trap() {
+  const t = reguitlynTrapPick(false);
+  return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, reguitlynNaive(t), "reguitlyn", otherCodes("reguitlyn", 3), t.svg, {
+    unit: "°",
+    tip: "Hoeke op 'n reguit lyn tel altyd op tot 180°.",
+    hint: "Kyk mooi watter TWEE hoeke op die prentjie gemerk is voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_REGUITLYN,
+    solution: t.sol,
+    escape: { label: ESCAPE_LABEL_REGUITLYN, isAnswer: true },
+    _chk: { figKind: t.figKind, values: t.values, hideIndex: 1, allShown: false },
   });
 }
 
@@ -414,6 +479,29 @@ function introOmpuntReason2() {
   });
 }
 
+/* ============================================================
+   Feature (2026-08-10 laat-aand, tweede rondte) — ompunt strikvrae:
+   7 normaal + 3 strik. Strik-figuur is 'n reguitlyn-paar/drie (som 180°,
+   nie 360° nie) — dus is die egte-passende kode altyd "reguitlyn", nooit
+   as afleier aangebied nie.
+   ============================================================ */
+const ESCAPE_LABEL_OMPUNT = "Nie hoeke om 'n punt nie";
+const OMPUNT_WRONG_TAP = [{ s: "Die hoeke lê WEL almal rondom EEN punt", r: "hoeke rondom 'n punt tel op tot 360°" }];
+function ompuntTrapPick(showAsk = false) {
+  if (Math.random() < 0.45) {
+    const [a, b] = pair3(), c = 180 - a - b;
+    return { figKind: "straightLine3", values: [a, b, c],
+      svg: straightLineFigure3(a, b, GREEN, { showAsk, hide: "C" }),
+      sol: [{ s: "Hulle lê saam op EEN reguit lyn, nie rondom 'n punt nie", r: "hoeke op 'n reguit lyn tel op tot 180°" }],
+      naive: 360 - a - b };
+  }
+  const a = pair2(), c = 180 - a;
+  return { figKind: "straightLine", values: [a, c],
+    svg: straightLineFigure(a, GREEN, { showAsk }),
+    sol: [{ s: "Hulle lê saam op EEN reguit lyn, nie rondom 'n punt nie", r: "hoeke op 'n reguit lyn tel op tot 180°" }],
+    naive: 360 - a };
+}
+
 function ompuntR1() {
   const { values, hideIndex, unknown } = ompuntSet();
   const sumStr = values.slice(0, hideIndex).join(" − ");
@@ -422,16 +510,40 @@ function ompuntR1() {
     tip: "Al die hoeke rondom 'n punt maak saam 'n volle draai — 360°.",
     hint: `360 − ${sumStr} = ${unknown}.`,
     solution: [{ s: `? = 360 − ${sumStr} = ${unknown}`, r: "hoeke rondom 'n punt tel op tot 360°" }],
+    escape: { label: ESCAPE_LABEL_OMPUNT, isAnswer: false, wrongTapSolution: OMPUNT_WRONG_TAP },
     _chk: { figKind: "aroundPoint", values, hideIndex, allShown: false },
+  });
+}
+function ompuntR1Trap() {
+  const t = ompuntTrapPick(false);
+  return calc(`Gebruik: <b>${REDES.ompunt.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, t.naive, {
+    unit: "°", figure: t.svg,
+    tip: "Al die hoeke rondom 'n punt maak saam 'n volle draai — 360°.",
+    hint: "Kyk mooi hoeveel hoeke — en of hulle rondom 'n PUNT lê — voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_OMPUNT,
+    solution: t.sol,
+    escape: { label: ESCAPE_LABEL_OMPUNT, isAnswer: true },
+    _chk: { figKind: t.figKind, values: t.values, hideIndex: t.values.length - 1, allShown: false },
   });
 }
 function ompuntR2() {
   const { values, hideIndex, unknown } = ompuntSet();
-  return reasonQ(`Op die diagram is ${code("?")} = ${unknown}°. Watter rede verduidelik dit?`, "ompunt", otherCodes("ompunt", 3),
+  return reasonQ(`Op die diagram is ${code("?")} = ${unknown}°. Watter rede verduidelik dit?`, "ompunt",
+    shuffled([...otherCodes("ompunt", 2), "geen_ompunt"]),
     aroundPointFigureN(values, hideIndex, GREEN, { showAsk: true }), {
     tip: "Al die hoeke rondom die punt tel saam op tot 'n volle draai.",
     hint: "Hoeke rondom 'n punt tel op tot 360°.",
     _chk: { figKind: "aroundPoint", values, hideIndex: null, allShown: true },
+  });
+}
+function ompuntR2Trap() {
+  const t = ompuntTrapPick(true);
+  const distract = shuffled(REDE_CODES.filter(c => c !== "ompunt" && c !== "reguitlyn")).slice(0, 2);
+  const offered = shuffled(["ompunt", ...distract, "geen_ompunt"]);
+  return reasonQ("Kyk na die gemerkte hoeke. Watter rede pas hierby?", "geen_ompunt", offered, t.svg, {
+    tip: "Kom al die hoeke by EEN punt saam, of lê hulle op EEN reguit lyn?",
+    hint: "Kyk mooi hoeveel hoeke — en waar hulle lê — voor jy kies.",
+    _chk: { figKind: t.figKind, values: t.values, hideIndex: null, allShown: true },
   });
 }
 function ompuntR3() {
@@ -443,7 +555,20 @@ function ompuntR3() {
     tip: "Al die hoeke rondom 'n punt maak saam 'n volle draai — 360°.",
     hint: `360 − ${sumStr} = ${unknown}.`,
     solution: [{ s: `? = 360 − ${sumStr} = ${unknown}`, r: "hoeke rondom 'n punt tel op tot 360°" }],
+    escape: { label: ESCAPE_LABEL_OMPUNT, isAnswer: false, wrongTapSolution: OMPUNT_WRONG_TAP },
     _chk: { figKind: "aroundPoint", values, hideIndex, allShown: false },
+  });
+}
+function ompuntR3Trap() {
+  const t = ompuntTrapPick(false);
+  return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, t.naive, "ompunt", otherCodes("ompunt", 3), t.svg, {
+    unit: "°",
+    tip: "Al die hoeke rondom 'n punt maak saam 'n volle draai — 360°.",
+    hint: "Kyk mooi hoeveel hoeke — en of hulle rondom 'n PUNT lê — voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_OMPUNT,
+    solution: t.sol,
+    escape: { label: ESCAPE_LABEL_OMPUNT, isAnswer: true },
+    _chk: { figKind: t.figKind, values: t.values, hideIndex: t.values.length - 1, allShown: false },
   });
 }
 
@@ -537,12 +662,14 @@ function binneR1() {
     tip: regtehoek ? "Een hoek is 'n regte hoek (90°) — trek 90 EN die ander hoek van 180° af." : "Al drie binnehoeke van 'n driehoek maak saam 180°.",
     hint: `180 − ${b} − ${c} = ${a}.`,
     solution: [{ s: `? = 180 − ${b} − ${c} = ${a}`, r: "binnehoeke van 'n driehoek tel op tot 180°" }],
+    escape: { label: ESCAPE_LABEL_BINNE, isAnswer: false, wrongTapSolution: BINNE_WRONG_TAP },
     _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: 0, allShown: false },
   });
 }
 function binneR2() {
   const [b, c] = binnePair(Math.random() < 0.35); const a = 180 - b - c;
-  return reasonQ(`Op die diagram is ${code("?")} = ${a}°. Watter rede verduidelik dit?`, "binne", otherCodes("binne", 3),
+  return reasonQ(`Op die diagram is ${code("?")} = ${a}°. Watter rede verduidelik dit?`, "binne",
+    shuffled([...otherCodes("binne", 2), "geen_binne"]),
     triAnglesFigure(b, c, GREEN, { hide: "A", showAsk: true }), {
     tip: "Al drie binnehoeke van die driehoek tel saam op tot 180°.",
     hint: "Binnehoeke van 'n driehoek tel op tot 180°.",
@@ -558,7 +685,66 @@ function binneR3() {
     tip: regtehoek ? "Een hoek is 'n regte hoek (90°) — trek 90 EN die ander hoek van 180° af." : "Al drie binnehoeke van 'n driehoek maak saam 180°.",
     hint: `180 − ${b} − ${c} = ${a}.`,
     solution: [{ s: `? = 180 − ${b} − ${c} = ${a}`, r: "binnehoeke van 'n driehoek tel op tot 180°" }],
+    escape: { label: ESCAPE_LABEL_BINNE, isAnswer: false, wrongTapSolution: BINNE_WRONG_TAP },
     _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: 0, allShown: false },
+  });
+}
+
+/* ============================================================
+   Feature (2026-08-10 laat-aand, tweede rondte) — binne strikvrae:
+   7 normaal + 3 strik. Strik-figuur = buitehoekFigure met die BUITEhoek
+   onder die "drie gemerkte hoeke" ingesluit (dus is die set NIE die drie
+   binnehoeke van die driehoek nie) — die egte-passende kode is altyd
+   "buite" (die hoeke se somme volg presies die buitehoek-stelling),
+   nooit as afleier aangebied nie.
+   ============================================================ */
+const ESCAPE_LABEL_BINNE = "Nie al drie binnehoeke nie";
+const BINNE_WRONG_TAP = [{ s: "Dit WAS al drie binnehoeke van die driehoek", r: "binnehoeke van 'n driehoek tel op tot 180°" }];
+const BINNE_TRAP_SOL = [{ s: "Een van die gemerkte hoeke is die BUITEhoek, nie 'n binnehoek nie", r: "buitehoek van Δ = som van die 2 binne teenoorstaande hoeke" }];
+function binneTrapAngles() {
+  const [a, b] = buitePair();
+  const keys = ["A", "B", "ext"];
+  const hide = pick(keys);
+  const vals = { A: a, B: b, ext: a + b };
+  const visible = keys.filter(k => k !== hide);
+  const naive = 180 - visible.reduce((s, k) => s + vals[k], 0);
+  return { a, b, keys, hide, vals, naive };
+}
+
+function binneR1Trap() {
+  const t = binneTrapAngles();
+  return calc(`Gebruik: <b>${REDES.binne.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, t.naive, {
+    unit: "°", figure: buitehoekFigure(t.a, t.b, GREEN, { hide: t.hide }),
+    tip: "Al drie binnehoeke van 'n driehoek maak saam 180°.",
+    hint: "Kyk mooi of al DRIE gemerkte hoeke werklik BINNE die driehoek lê voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_BINNE,
+    solution: BINNE_TRAP_SOL,
+    escape: { label: ESCAPE_LABEL_BINNE, isAnswer: true },
+    _chk: { figKind: "buitehoek", values: [t.a, t.b, t.vals.ext], hideIndex: t.keys.indexOf(t.hide), allShown: false },
+  });
+}
+function binneR2Trap() {
+  const [a, b] = buitePair(); const ext = a + b;
+  const distract = shuffled(REDE_CODES.filter(c => c !== "binne" && c !== "buite")).slice(0, 2);
+  const offered = shuffled(["binne", ...distract, "geen_binne"]);
+  return reasonQ("Kyk na die DRIE gemerkte hoeke. Watter rede pas hierby?", "geen_binne", offered,
+    buitehoekFigure(a, b, GREEN, { showAsk: true }), {
+    tip: "Lê al drie gemerkte hoeke werklik BINNE die driehoek?",
+    hint: "Kyk mooi of al drie gemerkte hoeke regtig binnehoeke is voor jy kies.",
+    _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: null, allShown: true },
+  });
+}
+function binneR3Trap() {
+  const t = binneTrapAngles();
+  return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, t.naive, "binne", otherCodes("binne", 3),
+    buitehoekFigure(t.a, t.b, GREEN, { hide: t.hide }), {
+    unit: "°",
+    tip: "Al drie binnehoeke van 'n driehoek maak saam 180°.",
+    hint: "Kyk mooi of al DRIE gemerkte hoeke werklik BINNE die driehoek lê voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_BINNE,
+    solution: BINNE_TRAP_SOL,
+    escape: { label: ESCAPE_LABEL_BINNE, isAnswer: true },
+    _chk: { figKind: "buitehoek", values: [t.a, t.b, t.vals.ext], hideIndex: t.keys.indexOf(t.hide), allShown: false },
   });
 }
 
@@ -634,6 +820,29 @@ function introGelykReason2() {
   });
 }
 
+/* ============================================================
+   Feature (2026-08-10 laat-aand, tweede rondte) — gelykbenig strikvrae:
+   7 normaal + 3 strik. Strik-figuur = 'n SKALENE driehoek SONDER merkies
+   (triAnglesFigure, twee ongelyke gegewe hoeke) — die skil is om die
+   ONTBREKENDE merkies op te merk. Die egte-passende kode vir so 'n gewone
+   2-gegee-1-gevra-driehoek is altyd "binne" (180−gegewe1−gegewe2), nooit
+   as afleier aangebied nie.
+   ============================================================ */
+const ESCAPE_LABEL_GELYK = "Nie 'n gelykbenige driehoek nie";
+const GELYK_WRONG_TAP = [{ s: "Die driehoek IS wel gelykbenig — kyk na die merkies op die sye", r: "hoeke teenoor gelyke sye is gelyk" }];
+const GELYK_TRAP_SOL = [{ s: "Die driehoek het GEEN merkies wat gelyke sye wys nie — dis nie gelykbenig nie", r: "binnehoeke van 'n driehoek tel op tot 180°" }];
+function gelykTrapPick(showAsk = false) {
+  let b, c;
+  do { [b, c] = binnePair(false); } while (b === c);
+  const a = 180 - b - c;
+  const keys = ["A", "B", "C"];
+  const hide = pick(keys);
+  const vals = { A: a, B: b, C: c };
+  const visible = keys.filter(k => k !== hide);
+  const naive = vals[visible[0]];   // naïewe leerder KOPIEER net 'n gegewe hoek (gelykbenig se kortpad)
+  return { a, b, c, keys, hide, naive, svg: triAnglesFigure(b, c, GREEN, { hide, showAsk }) };
+}
+
 /* st18 — R1-÷2: tophoek gegee, bereken EEN basishoek */
 function gelykR1div2() {
   const apex = apexEven(), baseAng = (180 - apex) / 2;
@@ -642,6 +851,7 @@ function gelykR1div2() {
     tip: "Minus EERSTE (trek die tophoek van 180° af), en DAN deel deur 2.",
     hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
     solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+    escape: { label: ESCAPE_LABEL_GELYK, isAnswer: false, wrongTapSolution: GELYK_WRONG_TAP },
     _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
   });
 }
@@ -654,6 +864,7 @@ function gelykR1noDiv() {
       tip: "Tel die twee basishoeke bymekaar en trek dit van 180° af — geen deling hier nie.",
       hint: `180 − ${b} − ${b} = ${apex}.`,
       solution: [{ s: `? = 180 − ${b} − ${b} = ${apex}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+      escape: { label: ESCAPE_LABEL_GELYK, isAnswer: false, wrongTapSolution: GELYK_WRONG_TAP },
       _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 0, allShown: false },
     });
   }
@@ -663,7 +874,21 @@ function gelykR1noDiv() {
     tip: "Geen deling hier nie — die ander basishoek is net EWE GROOT (gelyke sye, gelyke hoeke).",
     hint: `? = ${b} — die basishoeke is altyd gelyk.`,
     solution: [{ s: `? = ${b}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+    escape: { label: ESCAPE_LABEL_GELYK, isAnswer: false, wrongTapSolution: GELYK_WRONG_TAP },
     _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
+  });
+}
+/* st18/st19 se strik: dieselfde skalene-geen-merkies-figuur vir albei rondtes */
+function gelykR1Trap() {
+  const t = gelykTrapPick(false);
+  return calc(`Gebruik: <b>${REDES.gelykbenig.vol}</b>. Bereken die hoek wat met ${code("?")} gemerk is.`, t.naive, {
+    unit: "°", figure: t.svg,
+    tip: "Gelykbenig beteken twee sye is gelyk — kyk na die MERKIES op die sye.",
+    hint: "Kyk mooi of hierdie driehoek regtig merkies het wat gelyke sye wys voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_GELYK,
+    solution: GELYK_TRAP_SOL,
+    escape: { label: ESCAPE_LABEL_GELYK, isAnswer: true },
+    _chk: { figKind: "triAngles", values: [t.a, t.b, t.c], hideIndex: t.keys.indexOf(t.hide), allShown: false },
   });
 }
 /* st20 — "Deel jy deur 2?": Yay (tophoek gegee) / Nay (basishoek gegee).
@@ -695,7 +920,7 @@ function gelykR2() {
   if (Math.random() < 0.5) {
     const apex = apexEven(), baseAng = (180 - apex) / 2;
     return reasonQ(`Op die diagram is EEN basishoek ${code(baseAng + "°")}. Watter rede verduidelik hoekom dit gelyk is aan die ander basishoek?`,
-      "gelykbenig", otherCodes("gelykbenig", 3), triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
+      "gelykbenig", shuffled([...otherCodes("gelykbenig", 2), "geen_gelykbenig"]), triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
       tip: "Dis 'n GELYKHEID tussen twee hoeke, oor gelyke sye — nie 'n som nie.",
       hint: "Hoeke teenoor gelyke sye is gelyk.",
       _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: null, allShown: true },
@@ -703,10 +928,20 @@ function gelykR2() {
   }
   const b = baseGiven(), apex = 180 - 2 * b;
   return reasonQ(`Op die diagram is EEN basishoek ${code(b + "°")}. Watter rede sê die ANDER basishoek is ook ${code(b + "°")}?`,
-    "gelykbenig", otherCodes("gelykbenig", 3), triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
+    "gelykbenig", shuffled([...otherCodes("gelykbenig", 2), "geen_gelykbenig"]), triangleFigure("gelykbenig", GREEN, { apex, showAsk: true }), {
     tip: "Dis 'n GELYKHEID tussen twee hoeke, oor gelyke sye.",
     hint: "Hoeke teenoor gelyke sye is gelyk.",
     _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: null, allShown: true },
+  });
+}
+function gelykR2Trap() {
+  const t = gelykTrapPick(true);
+  const distract = shuffled(REDE_CODES.filter(c => c !== "gelykbenig" && c !== "binne")).slice(0, 2);
+  const offered = shuffled(["gelykbenig", ...distract, "geen_gelykbenig"]);
+  return reasonQ("Kyk na hierdie driehoek. Watter rede pas hier?", "geen_gelykbenig", offered, t.svg, {
+    tip: "Het die driehoek merkies wat twee sye ewe lank wys?",
+    hint: "Kyk mooi vir merkies op die sye voor jy kies.",
+    _chk: { figKind: "triAngles", values: [t.a, t.b, t.c], hideIndex: null, allShown: true },
   });
 }
 /* st22 — R3 calcReason, beide rigtings */
@@ -720,6 +955,7 @@ function gelykR3() {
       tip: "Minus EERSTE (trek die tophoek van 180° af), en DAN deel deur 2.",
       hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
       solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+      escape: { label: ESCAPE_LABEL_GELYK, isAnswer: false, wrongTapSolution: GELYK_WRONG_TAP },
       _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
     });
   }
@@ -732,6 +968,7 @@ function gelykR3() {
       tip: "Geen deling nodig nie — die ander basishoek is net EWE GROOT.",
       hint: `? = ${b} — die basishoeke is altyd gelyk.`,
       solution: [{ s: `? = ${b}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+      escape: { label: ESCAPE_LABEL_GELYK, isAnswer: false, wrongTapSolution: GELYK_WRONG_TAP },
       _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
     });
   }
@@ -741,7 +978,20 @@ function gelykR3() {
     tip: "Tel die twee basishoeke bymekaar en trek dit van 180° af.",
     hint: `180 − ${b} − ${b} = ${apex}.`,
     solution: [{ s: `? = 180 − ${b} − ${b} = ${apex}`, r: "hoeke teenoor gelyke sye is gelyk" }],
+    escape: { label: ESCAPE_LABEL_GELYK, isAnswer: false, wrongTapSolution: GELYK_WRONG_TAP },
     _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 0, allShown: false },
+  });
+}
+function gelykR3Trap() {
+  const t = gelykTrapPick(false);
+  return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, t.naive, "gelykbenig", otherCodes("gelykbenig", 3), t.svg, {
+    unit: "°",
+    tip: "Gelykbenig beteken twee sye is gelyk — kyk na die MERKIES op die sye.",
+    hint: "Kyk mooi of hierdie driehoek regtig merkies het wat gelyke sye wys voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_GELYK,
+    solution: GELYK_TRAP_SOL,
+    escape: { label: ESCAPE_LABEL_GELYK, isAnswer: true },
+    _chk: { figKind: "triAngles", values: [t.a, t.b, t.c], hideIndex: t.keys.indexOf(t.hide), allShown: false },
   });
 }
 
@@ -847,6 +1097,7 @@ function buiteR1() {
       tip: "Tel die twee VER binnehoeke bymekaar.",
       hint: `${a} + ${b} = ${ext}.`,
       solution: [{ s: `? = ${a} + ${b} = ${ext}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+      escape: { label: ESCAPE_LABEL_BUITE, isAnswer: false, wrongTapSolution: BUITE_WRONG_TAP },
       _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: 2, allShown: false },
     });
   }
@@ -857,14 +1108,15 @@ function buiteR1() {
     tip: "Trek die bekende ver binnehoek van die buitehoek af.",
     hint: `${ext} − ${known} = ${askVal}.`,
     solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+    escape: { label: ESCAPE_LABEL_BUITE, isAnswer: false, wrongTapSolution: BUITE_WRONG_TAP },
     _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
   });
 }
 /* st26 — R2 reasonQ, "binne" as versoekende afleier */
 function buiteR2() {
   const [a, b] = buitePair(); const ext = a + b;
-  const extra = shuffled(REDE_CODES.filter(c => c !== "buite" && c !== "binne")).slice(0, 2);
-  const offered = shuffled(["binne", ...extra]);
+  const extra = shuffled(REDE_CODES.filter(c => c !== "buite" && c !== "binne")).slice(0, 1);
+  const offered = shuffled(["binne", ...extra, "geen_buite"]);
   return reasonQ(`Op die diagram is die buitehoek ${code(ext + "°")}. Watter rede verduidelik dit?`, "buite", offered,
     buitehoekFigure(a, b, GREEN, { showAsk: true }), {
     tip: "Dit gaan oor 'n hoek BUITE die driehoek — nie die binnehoeke se som nie.",
@@ -882,6 +1134,7 @@ function buiteR3() {
       tip: "Tel die twee VER binnehoeke bymekaar.",
       hint: `${a} + ${b} = ${ext}.`,
       solution: [{ s: `? = ${a} + ${b} = ${ext}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+      escape: { label: ESCAPE_LABEL_BUITE, isAnswer: false, wrongTapSolution: BUITE_WRONG_TAP },
       _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: 2, allShown: false },
     });
   }
@@ -893,7 +1146,74 @@ function buiteR3() {
     tip: "Trek die bekende ver binnehoek van die buitehoek af.",
     hint: `${ext} − ${known} = ${askVal}.`,
     solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: "buitehoek van 'n driehoek = som van die 2 ver binnehoeke" }],
+    escape: { label: ESCAPE_LABEL_BUITE, isAnswer: false, wrongTapSolution: BUITE_WRONG_TAP },
     _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
+  });
+}
+
+/* ============================================================
+   Feature (2026-08-10 laat-aand, tweede rondte) — buite strikvrae:
+   7 normaal + 3 strik, TWEE strik-variante gemeng (haar ontwerp):
+   (a) "verbuigde lyn" — die ekstra lyn by die hoekpunt is NIE die sy se
+       ware verlenging nie, 'n straal wat 15°-25° van kollineêr af buig
+       (buitehoekBentFigure in diagrams.js, op skaal, EGTE hoeke);
+   (b) die gemerkte hoek IS 'n binnehoek (buitehoekFigure markOnly:"C").
+   Geen egte REDES-kode pas werklik by hierdie strikke nie (variant (a)
+   se som ≠ angA+angB juis omdat dit gebuig is; variant (b) wys net EEN
+   geïsoleerde hoek) — so "buite" self mag as verleidende afleier bly.
+   ============================================================ */
+const ESCAPE_LABEL_BUITE = "Nie 'n buitehoek nie";
+const BUITE_WRONG_TAP = [{ s: "Dit IS wel 'n buitehoek — dit lê op die verlengde sy", r: "buitehoek van Δ = som van die 2 ver binnehoeke" }];
+const BUITE_TRAP_SOL_BENT = [{ s: "Die ekstra lyn is NIE die sy se ware verlenging nie — dis 'n straal wat effens buig", r: "'n buitehoek bestaan NET op die verlengde sy" }];
+const BUITE_TRAP_SOL_INNER = [{ s: "Die gemerkte hoek lê BINNE die driehoek, langsaan die buitehoek", r: "'n buitehoek lê BUITE die driehoek, op die verlengde sy" }];
+function buiteTrapPick(ask) {
+  const [a, b] = buitePair();
+  if (Math.random() < 0.5) {
+    const { svg, markedAngle } = buitehoekBentFigure(a, b, GREEN, { ask });
+    return { kind: "bent", a, b, markedAngle, svg, sol: BUITE_TRAP_SOL_BENT, single: false };
+  }
+  const angC = 180 - a - b;
+  return { kind: "inner", a, b, markedAngle: angC,
+    svg: buitehoekFigure(a, b, GREEN, { markOnly: "C", markAsk: ask }), sol: BUITE_TRAP_SOL_INNER, single: true };
+}
+
+function buiteR1Trap() {
+  const t = buiteTrapPick(true);
+  const naive = t.a + t.b;
+  const values = t.single ? [t.markedAngle] : [t.a, t.b, t.markedAngle];
+  return calc(`Gebruik: <b>${REDES.buite.vol}</b>. Bereken die buitehoek (${code("?")}).`, naive, {
+    unit: "°", figure: t.svg,
+    tip: "Tel die twee VER binnehoeke bymekaar.",
+    hint: "Kyk mooi of die ekstra lyn regtig die sy se verlenging is voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_BUITE,
+    solution: t.sol,
+    escape: { label: ESCAPE_LABEL_BUITE, isAnswer: true },
+    _chk: { figKind: "buitehoek", values, hideIndex: values.length - 1, allShown: false },
+  });
+}
+function buiteR2Trap() {
+  const t = buiteTrapPick(false);
+  const distract = shuffled(REDE_CODES.filter(c => c !== "buite")).slice(0, 2);
+  const offered = shuffled(["buite", ...distract, "geen_buite"]);
+  const values = t.single ? [t.markedAngle] : [t.a, t.b, t.markedAngle];
+  return reasonQ("Kyk na die gemerkte hoek(e). Watter rede pas hierby?", "geen_buite", offered, t.svg, {
+    tip: "Lê die gemerkte hoek regtig BUITE die driehoek, op die verlengde sy?",
+    hint: "Kyk mooi of die ekstra lyn presies reguit met die sy is voor jy kies.",
+    _chk: { figKind: "buitehoek", values, hideIndex: null, allShown: true },
+  });
+}
+function buiteR3Trap() {
+  const t = buiteTrapPick(true);
+  const naive = t.a + t.b;
+  const values = t.single ? [t.markedAngle] : [t.a, t.b, t.markedAngle];
+  return calcReason(`Bereken die buitehoek (${code("?")}), en kies die rede.`, naive, "buite", otherCodes("buite", 3), t.svg, {
+    unit: "°",
+    tip: "Tel die twee VER binnehoeke bymekaar.",
+    hint: "Kyk mooi of die ekstra lyn regtig die sy se verlenging is voor jy bereken.",
+    answerLabel: ESCAPE_LABEL_BUITE,
+    solution: t.sol,
+    escape: { label: ESCAPE_LABEL_BUITE, isAnswer: true },
+    _chk: { figKind: "buitehoek", values, hideIndex: values.length - 1, allShown: false },
   });
 }
 
@@ -1271,9 +1591,9 @@ export const CH6 = {
       { concept: "reguitlyn", gen: introReguitlynMC2 }, { concept: "reguitlyn", gen: introReguitlynReason2 },
     ],
   },
-  st6: { guide: ["reguitlyn"], skills: rep(10, "reguitlyn", reguitlynR1) },
-  st7: { guide: ["reguitlyn"], skills: rep(10, "reguitlyn", reguitlynR2) },
-  st8: { guide: ["reguitlyn"], skills: rep(10, "reguitlyn", reguitlynR3) },
+  st6: { guide: ["reguitlyn"], skills: shuffled([...rep(7, "reguitlyn", reguitlynR1), ...rep(3, "reguitlyn", reguitlynR1Trap)]) },
+  st7: { guide: ["reguitlyn"], skills: shuffled([...rep(7, "reguitlyn", reguitlynR2), ...rep(3, "reguitlyn", reguitlynR2Trap)]) },
+  st8: { guide: ["reguitlyn"], skills: shuffled([...rep(7, "reguitlyn", reguitlynR3), ...rep(3, "reguitlyn", reguitlynR3Trap)]) },
 
   st9: {
     guide: ["ompunt"],
@@ -1290,9 +1610,9 @@ export const CH6 = {
       { concept: "ompunt", gen: introOmpuntMC2 }, { concept: "ompunt", gen: introOmpuntReason2 },
     ],
   },
-  st10: { guide: ["ompunt"], skills: rep(10, "ompunt", ompuntR1) },
-  st11: { guide: ["ompunt"], skills: rep(10, "ompunt", ompuntR2) },
-  st12: { guide: ["ompunt"], skills: rep(10, "ompunt", ompuntR3) },
+  st10: { guide: ["ompunt"], skills: shuffled([...rep(7, "ompunt", ompuntR1), ...rep(3, "ompunt", ompuntR1Trap)]) },
+  st11: { guide: ["ompunt"], skills: shuffled([...rep(7, "ompunt", ompuntR2), ...rep(3, "ompunt", ompuntR2Trap)]) },
+  st12: { guide: ["ompunt"], skills: shuffled([...rep(7, "ompunt", ompuntR3), ...rep(3, "ompunt", ompuntR3Trap)]) },
 
   st13: {
     guide: ["binne"],
@@ -1309,9 +1629,9 @@ export const CH6 = {
       { concept: "binne", gen: introBinneMC2 }, { concept: "binne", gen: introBinneReason2 },
     ],
   },
-  st14: { guide: ["binne"], skills: rep(10, "binne", binneR1) },
-  st15: { guide: ["binne"], skills: rep(10, "binne", binneR2) },
-  st16: { guide: ["binne"], skills: rep(10, "binne", binneR3) },
+  st14: { guide: ["binne"], skills: shuffled([...rep(7, "binne", binneR1), ...rep(3, "binne", binneR1Trap)]) },
+  st15: { guide: ["binne"], skills: shuffled([...rep(7, "binne", binneR2), ...rep(3, "binne", binneR2Trap)]) },
+  st16: { guide: ["binne"], skills: shuffled([...rep(7, "binne", binneR3), ...rep(3, "binne", binneR3Trap)]) },
 
   st17: {
     guide: ["gelykbenig"],
@@ -1331,7 +1651,7 @@ export const CH6 = {
   /* Feature 5 (2026-08-10): st18 ↔ st19 GESWAP — st18 is nou "basishoek
      gegee" (geen ÷2), st19 is nou "tophoek gegee" (÷2) MET 'n nuwe "só
      doen jy dit"-leerkaart (titels/blurbs geswap saam in config.js). */
-  st18: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR1noDiv) },
+  st18: { guide: ["gelykbenig"], skills: shuffled([...rep(7, "gelykbenig", gelykR1noDiv), ...rep(3, "gelykbenig", gelykR1Trap)]) },
   st19: {
     guide: ["gelykbenig"],
     lesson: {
@@ -1342,7 +1662,7 @@ export const CH6 = {
         <p>Hier is die tophoek <b style="color:#16a34a">50°</b>: eerste <code>180 − 50 = 130</code>, dan <code>130 ÷ 2 = 65</code> — altwee basishoeke is <b style="color:#2563eb">65°</b>.</p>
         <p>Onthou haar reël: <b>minus EERSTE, en DAN deel deur 2</b> — nooit die ander pad om nie.</p>`,
     },
-    skills: rep(10, "gelykbenig", gelykR1div2),
+    skills: shuffled([...rep(7, "gelykbenig", gelykR1div2), ...rep(3, "gelykbenig", gelykR1Trap)]),
   },
   st20: {
     guide: ["gelykbenig"],
@@ -1358,8 +1678,8 @@ export const CH6 = {
     },
     skills: shuffled([true, true, true, true, true, false, false, false, false, false])
       .map(k => ({ concept: "gelykbenig", gen: () => gelykDeelDeur2(k) })) },
-  st21: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR2) },
-  st22: { guide: ["gelykbenig"], skills: rep(10, "gelykbenig", gelykR3) },
+  st21: { guide: ["gelykbenig"], skills: shuffled([...rep(7, "gelykbenig", gelykR2), ...rep(3, "gelykbenig", gelykR2Trap)]) },
+  st22: { guide: ["gelykbenig"], skills: shuffled([...rep(7, "gelykbenig", gelykR3), ...rep(3, "gelykbenig", gelykR3Trap)]) },
 
   st23: {
     guide: ["buite", "binne"],
@@ -1378,9 +1698,9 @@ export const CH6 = {
   },
   st24: { guide: ["buite", "binne"], skills: shuffled(["ext", "ext", "ext", "ext", "ext", "A", "B", "C", "A", "B"])
     .map(w => ({ concept: "buite", gen: () => binneOfBuite(w) })) },
-  st25: { guide: ["buite"], skills: rep(10, "buite", buiteR1) },
-  st26: { guide: ["buite", "binne"], skills: rep(10, "buite", buiteR2) },
-  st27: { guide: ["buite"], skills: rep(10, "buite", buiteR3) },
+  st25: { guide: ["buite"], skills: shuffled([...rep(7, "buite", buiteR1), ...rep(3, "buite", buiteR1Trap)]) },
+  st26: { guide: ["buite", "binne"], skills: shuffled([...rep(7, "buite", buiteR2), ...rep(3, "buite", buiteR2Trap)]) },
+  st27: { guide: ["buite"], skills: shuffled([...rep(7, "buite", buiteR3), ...rep(3, "buite", buiteR3Trap)]) },
 
   st28: { guide: REDE_CODES, skills: mixSkills(MIX_CALC) },
   st29: { guide: REDE_CODES, skills: mixSkills(MIX_REASON) },
