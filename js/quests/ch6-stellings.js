@@ -863,7 +863,7 @@ function calcMixedRegoorst() {
   const k = knownRegoorst();
   return calc(mixCalcPrompt("regoorst"), k, {
     unit: "°", figure: verticalFigure(k, GREEN),
-    tip: pick(MIX_TIPS), hint: `? = ${k}°.`,
+    tip: pick(MIX_TIPS), hint: `Vergelyk die twee gemerkte hoeke by die snypunt — wat merk jy op?`,
     solution: [{ s: `? = ${k}`, r: REDES.regoorst.vol }],
     _chk: { figKind: "vertical", values: [k, k], hideIndex: 1, allShown: false },
   });
@@ -873,7 +873,7 @@ function calcMixedReguitlyn() {
     const [a, b] = pair3(), c = 180 - a - b;
     return calc(mixCalcPrompt("reguitlyn"), c, {
       unit: "°", figure: straightLineFigure3(a, b, GREEN),
-      tip: pick(MIX_TIPS), hint: `180 − ${a} − ${b} = ${c}.`,
+      tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${a} − ${b} = ?`,
       solution: [{ s: `? = 180 − ${a} − ${b} = ${c}`, r: REDES.reguitlyn.vol }],
       _chk: { figKind: "straightLine3", values: [a, b, c], hideIndex: 2, allShown: false },
     });
@@ -881,7 +881,7 @@ function calcMixedReguitlyn() {
   const a = pair2(), c = 180 - a;
   return calc(mixCalcPrompt("reguitlyn"), c, {
     unit: "°", figure: straightLineFigure(a, GREEN),
-    tip: pick(MIX_TIPS), hint: `180 − ${a} = ${c}.`,
+    tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${a} = ?`,
     solution: [{ s: `? = 180 − ${a} = ${c}`, r: REDES.reguitlyn.vol }],
     _chk: { figKind: "straightLine", values: [a, c], hideIndex: 1, allShown: false },
   });
@@ -891,7 +891,7 @@ function calcMixedOmpunt() {
   const sumStr = values.slice(0, hideIndex).join(" − ");
   return calc(mixCalcPrompt("ompunt"), unknown, {
     unit: "°", figure: aroundPointFigureN(values, hideIndex, GREEN),
-    tip: pick(MIX_TIPS), hint: `360 − ${sumStr} = ${unknown}.`,
+    tip: pick(MIX_TIPS), hint: `Probeer: 360 − ${sumStr} = ?`,
     solution: [{ s: `? = 360 − ${sumStr} = ${unknown}`, r: REDES.ompunt.vol }],
     _chk: { figKind: "aroundPoint", values, hideIndex, allShown: false },
   });
@@ -901,7 +901,7 @@ function calcMixedBinne() {
   const [b, c] = binnePair(regtehoek); const a = 180 - b - c;
   return calc(mixCalcPrompt("binne"), a, {
     unit: "°", figure: triAnglesFigure(b, c, GREEN, { hide: "A" }),
-    tip: pick(MIX_TIPS), hint: `180 − ${b} − ${c} = ${a}.`,
+    tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${b} − ${c} = ?`,
     solution: [{ s: `? = 180 − ${b} − ${c} = ${a}`, r: REDES.binne.vol }],
     _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: 0, allShown: false },
   });
@@ -912,7 +912,7 @@ function calcMixedGelyk() {
     const apex = apexEven(), baseAng = (180 - apex) / 2;
     return calc(mixCalcPrompt("gelykbenig"), baseAng, {
       unit: "°", figure: triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }),
-      tip: pick(MIX_TIPS), hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+      tip: pick(MIX_TIPS), hint: `Probeer: (180 − ${apex}) ÷ 2 = ?`,
       solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: REDES.gelykbenig.vol }],
       _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
     });
@@ -922,7 +922,7 @@ function calcMixedGelyk() {
     const hideSide = Math.random() < 0.5 ? "baseR" : "baseL";
     return calc(mixCalcPrompt("gelykbenig"), b, {
       unit: "°", figure: triangleFigure("gelykbenig", GREEN, { apex, hide: hideSide, showApex: false }),
-      tip: pick(MIX_TIPS), hint: `? = ${b}.`,
+      tip: pick(MIX_TIPS), hint: `Kyk na die merkies op die twee sye — wat sê dit van die twee basishoeke?`,
       solution: [{ s: `? = ${b}`, r: REDES.gelykbenig.vol }],
       _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
     });
@@ -930,7 +930,7 @@ function calcMixedGelyk() {
   const b = baseGiven(), apex = 180 - 2 * b;
   return calc(mixCalcPrompt("gelykbenig"), apex, {
     unit: "°", figure: triangleFigure("gelykbenig", GREEN, { apex, hide: "apex" }),
-    tip: pick(MIX_TIPS), hint: `180 − ${b} − ${b} = ${apex}.`,
+    tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${b} − ${b} = ?`,
     solution: [{ s: `? = 180 − ${b} − ${b} = ${apex}`, r: REDES.gelykbenig.vol }],
     _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 0, allShown: false },
   });
@@ -940,7 +940,7 @@ function calcMixedBuite() {
   if (Math.random() < 0.5) {
     return calc(mixCalcPrompt("buite"), ext, {
       unit: "°", figure: buitehoekFigure(a, b, GREEN, { hide: "ext" }),
-      tip: pick(MIX_TIPS), hint: `${a} + ${b} = ${ext}.`,
+      tip: pick(MIX_TIPS), hint: `Probeer: ${a} + ${b} = ?`,
       solution: [{ s: `? = ${a} + ${b} = ${ext}`, r: REDES.buite.vol }],
       _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: 2, allShown: false },
     });
@@ -949,7 +949,7 @@ function calcMixedBuite() {
   const known = hideOne === "A" ? b : a, askVal = hideOne === "A" ? a : b;
   return calc(mixCalcPrompt("buite"), askVal, {
     unit: "°", figure: buitehoekFigure(a, b, GREEN, { hide: hideOne }),
-    tip: pick(MIX_TIPS), hint: `${ext} − ${known} = ${askVal}.`,
+    tip: pick(MIX_TIPS), hint: `Probeer: ${ext} − ${known} = ?`,
     solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: REDES.buite.vol }],
     _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
   });
@@ -1026,7 +1026,7 @@ function calcReasonMixedRegoorst() {
   const k = knownRegoorst();
   return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, k, "regoorst", otherCodes("regoorst", 3),
     verticalFigure(k, GREEN), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `? = ${k}°.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Vergelyk die twee gemerkte hoeke by die snypunt — wat merk jy op?`,
     solution: [{ s: `? = ${k}`, r: REDES.regoorst.vol }],
     _chk: { figKind: "vertical", values: [k, k], hideIndex: 1, allShown: false },
   });
@@ -1036,7 +1036,7 @@ function calcReasonMixedReguitlyn() {
     const [a, b] = pair3(), c = 180 - a - b;
     return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, c, "reguitlyn", otherCodes("reguitlyn", 3),
       straightLineFigure3(a, b, GREEN), {
-      unit: "°", tip: pick(MIX_TIPS), hint: `180 − ${a} − ${b} = ${c}.`,
+      unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${a} − ${b} = ?`,
       solution: [{ s: `? = 180 − ${a} − ${b} = ${c}`, r: REDES.reguitlyn.vol }],
       _chk: { figKind: "straightLine3", values: [a, b, c], hideIndex: 2, allShown: false },
     });
@@ -1044,7 +1044,7 @@ function calcReasonMixedReguitlyn() {
   const a = pair2(), c = 180 - a;
   return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, c, "reguitlyn", otherCodes("reguitlyn", 3),
     straightLineFigure(a, GREEN), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `180 − ${a} = ${c}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${a} = ?`,
     solution: [{ s: `? = 180 − ${a} = ${c}`, r: REDES.reguitlyn.vol }],
     _chk: { figKind: "straightLine", values: [a, c], hideIndex: 1, allShown: false },
   });
@@ -1054,7 +1054,7 @@ function calcReasonMixedOmpunt() {
   const sumStr = values.slice(0, hideIndex).join(" − ");
   return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, unknown, "ompunt", otherCodes("ompunt", 3),
     aroundPointFigureN(values, hideIndex, GREEN), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `360 − ${sumStr} = ${unknown}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: 360 − ${sumStr} = ?`,
     solution: [{ s: `? = 360 − ${sumStr} = ${unknown}`, r: REDES.ompunt.vol }],
     _chk: { figKind: "aroundPoint", values, hideIndex, allShown: false },
   });
@@ -1064,7 +1064,7 @@ function calcReasonMixedBinne() {
   const [b, c] = binnePair(regtehoek); const a = 180 - b - c;
   return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, a, "binne", otherCodes("binne", 3),
     triAnglesFigure(b, c, GREEN, { hide: "A" }), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `180 − ${b} − ${c} = ${a}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${b} − ${c} = ?`,
     solution: [{ s: `? = 180 − ${b} − ${c} = ${a}`, r: REDES.binne.vol }],
     _chk: { figKind: "triAngles", values: [a, b, c], hideIndex: 0, allShown: false },
   });
@@ -1075,7 +1075,7 @@ function calcReasonMixedGelyk() {
     const apex = apexEven(), baseAng = (180 - apex) / 2;
     return calcReason(`Bereken EEN basishoek (${code("?")}), en kies die rede.`, baseAng, "gelykbenig", otherCodes("gelykbenig", 3),
       triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }), {
-      unit: "°", tip: pick(MIX_TIPS), hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+      unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: (180 − ${apex}) ÷ 2 = ?`,
       solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: REDES.gelykbenig.vol }],
       _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
     });
@@ -1085,14 +1085,14 @@ function calcReasonMixedGelyk() {
     const hideSide = Math.random() < 0.5 ? "baseR" : "baseL";
     return calcReason(`Bereken die ANDER basishoek (${code("?")}), en kies die rede.`, b, "gelykbenig", otherCodes("gelykbenig", 3),
       triangleFigure("gelykbenig", GREEN, { apex, hide: hideSide, showApex: false }), {
-      unit: "°", tip: pick(MIX_TIPS), hint: `? = ${b}.`,
+      unit: "°", tip: pick(MIX_TIPS), hint: `Kyk na die merkies op die twee sye — wat sê dit van die twee basishoeke?`,
       solution: [{ s: `? = ${b}`, r: REDES.gelykbenig.vol }],
       _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 1, allShown: false },
     });
   }
   return calcReason(`Altwee basishoeke is ${code(b + "°")}. Bereken die tophoek (${code("?")}), en kies die rede.`, apex, "gelykbenig", otherCodes("gelykbenig", 3),
     triangleFigure("gelykbenig", GREEN, { apex, hide: "apex" }), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `180 − ${b} − ${b} = ${apex}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${b} − ${b} = ?`,
     solution: [{ s: `? = 180 − ${b} − ${b} = ${apex}`, r: REDES.gelykbenig.vol }],
     _chk: { figKind: "gelykbenig", values: [apex, b, b], apex, hideIndex: 0, allShown: false },
   });
@@ -1102,7 +1102,7 @@ function calcReasonMixedBuite() {
   if (Math.random() < 0.5) {
     return calcReason(`Bereken die buitehoek (${code("?")}), en kies die rede.`, ext, "buite", otherCodes("buite", 3),
       buitehoekFigure(a, b, GREEN, { hide: "ext" }), {
-      unit: "°", tip: pick(MIX_TIPS), hint: `${a} + ${b} = ${ext}.`,
+      unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: ${a} + ${b} = ?`,
       solution: [{ s: `? = ${a} + ${b} = ${ext}`, r: REDES.buite.vol }],
       _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: 2, allShown: false },
     });
@@ -1111,7 +1111,7 @@ function calcReasonMixedBuite() {
   const known = hideOne === "A" ? b : a, askVal = hideOne === "A" ? a : b;
   return calcReason(`Die buitehoek is ${code(ext + "°")}. Bereken die ander ver binnehoek (${code("?")}), en kies die rede.`, askVal, "buite", otherCodes("buite", 3),
     buitehoekFigure(a, b, GREEN, { hide: hideOne }), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `${ext} − ${known} = ${askVal}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: ${ext} − ${known} = ?`,
     solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: REDES.buite.vol }],
     _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
   });
@@ -1125,7 +1125,7 @@ function calcReasonMixedReguitlynTwoStep() {
   const [a, b] = pair3(), c = 180 - a - b;
   return calcReason(`Bereken die hoek wat met ${code("?")} gemerk is, en kies die rede.`, c, "reguitlyn", otherCodes("reguitlyn", 3),
     straightLineFigure3(a, b, GREEN), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `180 − ${a} − ${b} = ${c}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: 180 − ${a} − ${b} = ?`,
     solution: [{ s: `? = 180 − ${a} − ${b} = ${c}`, r: REDES.reguitlyn.vol }],
     _chk: { figKind: "straightLine3", values: [a, b, c], hideIndex: 2, allShown: false },
   });
@@ -1134,7 +1134,7 @@ function calcReasonMixedGelykTwoStep() {
   const apex = apexEven(), baseAng = (180 - apex) / 2;
   return calcReason(`Bereken EEN basishoek (${code("?")}), en kies die rede.`, baseAng, "gelykbenig", otherCodes("gelykbenig", 3),
     triangleFigure("gelykbenig", GREEN, { apex, hide: "base" }), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `(180 − ${apex}) ÷ 2 = ${baseAng}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: (180 − ${apex}) ÷ 2 = ?`,
     solution: [{ s: `? = (180 − ${apex}) ÷ 2 = ${baseAng}`, r: REDES.gelykbenig.vol }],
     _chk: { figKind: "gelykbenig", values: [apex, baseAng, baseAng], apex, hideIndex: 1, allShown: false },
   });
@@ -1145,7 +1145,7 @@ function calcReasonMixedBuiteReverse() {
   const known = hideOne === "A" ? b : a, askVal = hideOne === "A" ? a : b;
   return calcReason(`Die buitehoek is ${code(ext + "°")}. Bereken die ander ver binnehoek (${code("?")}), en kies die rede.`, askVal, "buite", otherCodes("buite", 3),
     buitehoekFigure(a, b, GREEN, { hide: hideOne }), {
-    unit: "°", tip: pick(MIX_TIPS), hint: `${ext} − ${known} = ${askVal}.`,
+    unit: "°", tip: pick(MIX_TIPS), hint: `Probeer: ${ext} − ${known} = ?`,
     solution: [{ s: `? = ${ext} − ${known} = ${askVal}`, r: REDES.buite.vol }],
     _chk: { figKind: "buitehoek", values: [a, b, ext], hideIndex: hideOne === "A" ? 0 : 1, allShown: false },
   });
