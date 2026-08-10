@@ -137,6 +137,9 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 .quest .qstate .led{width:9px;height:9px;border-radius:99px;background:var(--qc)}
 .quest .qcheck{position:absolute;top:13px;right:13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
   color:#fff;font-size:15px;background:var(--good);box-shadow:0 4px 10px -3px rgba(22,163,74,.6)}
+.quest .qcheck.qlock{background:#94a3b8;box-shadow:0 4px 10px -3px rgba(100,116,139,.55);font-size:13px}
+@keyframes qwiggle{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.quest.wiggle{animation:qwiggle .35s ease}
 
 /* ---------- PLAY screen ---------- */
 .play{--accent:#7c3aed}

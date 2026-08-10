@@ -9,6 +9,7 @@ import { mountQuestion } from "./questions.js";
 import { openConcept } from "./modal.js";
 import { el, clear, mount } from "./ui.js";
 import { REDES } from "./redes.js";
+import { isChainLocked } from "./chain.js";
 
 /* collapsible "Watter rede? 🧭" gids — 'n rondte kies in via def.guide = [kodes].
    Lys elke rede se kort + vol bewoording; toe by verstek, oop met 'n tik. */
@@ -46,6 +47,13 @@ function lessonCard(def) {
 
 export function renderPlay(app, host, params) {
   const { chapter, quest, def, accent } = params;
+  /* Navigasie-wag: 'n verouderde teël of 'n diep skakel mag nie die
+     sekwensiële slot (chapter 6 "Meetkunde Stellings" ALLEEN) omseil nie —
+     dieselfde reël as die hoofstuk-rooster se teël-slot (chain.js). */
+  if (chapter && isChainLocked(app, chapter, quest.id)) {
+    app.go("chapter", { chapterId: chapter.id });
+    return;
+  }
   const skills = def.skills;
   const sess = getSession();
 

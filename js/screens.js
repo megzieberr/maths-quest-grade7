@@ -5,14 +5,9 @@ import { questDef } from "./quests/index.js";
 import { el } from "./ui.js";
 import { installEntryButton } from "./install.js";
 import { dailyTile, markDailyDone } from "./daily.js";
+import { openSetOf, isOpen, progressOf, isChainLocked } from "./chain.js";
 
-const progressOf = (app, id) => (app.state && app.state.progress && app.state.progress[id]) || { best_score: 0, attempts: 0, passed: false, total_xp: 0 };
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
-
-/* Quest-hek: app.state.openQuests is 'n lys oop rondte-id's. As dit ontbreek
-   (bv. agterkant nog nie opgedateer nie) → behandel ALLES as oop (null). */
-const openSetOf = app => { const oq = app.state && app.state.openQuests; return Array.isArray(oq) ? new Set(oq) : null; };
-const isOpen = (set, id) => set === null || set.has(id);
 
 /* ---------------- HUB ---------------- */
 export function renderHub(app, host) {
@@ -85,17 +80,30 @@ export function renderChapter(app, host, params) {
     const accent = questAccent(ch, q.n, builtTotal);
     const def = questDef(q.id);
     const playable = q.built && !!def;
+    /* Sekwensiële slot (chapter 6 "Meetkunde Stellings" ALLEEN) — dieselfde
+       reël as die speel-skerm se navigasie-wag (chain.js), sodat 'n teël en
+       'n diep skakel altyd dieselfde ding sê. */
+    const chainLocked = playable && isChainLocked(app, ch, q.id);
     const prog = progressOf(app, q.id);
-    const card = el("div", "quest" + (playable ? "" : " locked"));
+    const card = el("div", "quest" + (playable && !chainLocked ? "" : " locked"));
     card.style.setProperty("--qc", accent);
-    const state = !playable ? "Binnekort" : prog.passed ? "Gemeester" : prog.attempts ? "Aan die gang" : "Oop";
+    const state = !playable ? "Binnekort" : chainLocked ? "Gesluit" : prog.passed ? "Gemeester" : prog.attempts ? "Aan die gang" : "Oop";
     card.innerHTML = `
       <div class="qn">${q.n}</div>
-      ${prog.passed ? '<div class="qcheck">✓</div>' : ""}
+      ${prog.passed ? '<div class="qcheck">✓</div>' : chainLocked ? '<div class="qcheck qlock">🔒</div>' : ""}
       <h3>${q.title}</h3>
-      <p>${q.blurb || ""}</p>
+      <p>${chainLocked ? "Voltooi eers die vorige rondte." : (q.blurb || "")}</p>
       <div class="qstate"><span class="led"></span>${state}</div>`;
-    if (playable) card.addEventListener("click", () => app.go("play", { chapter: ch, quest: q, def, accent }));
+    if (playable && !chainLocked) {
+      card.addEventListener("click", () => app.go("play", { chapter: ch, quest: q, def, accent }));
+    } else if (chainLocked) {
+      // sag "nee" — tik doen niks, net 'n klein wiggle, geen navigasie nie.
+      card.addEventListener("click", () => {
+        card.classList.remove("wiggle");
+        void card.offsetWidth; // herstart die animasie as dit al geloop het
+        card.classList.add("wiggle");
+      });
+    }
     grid.appendChild(card);
   });
   host.appendChild(grid);
