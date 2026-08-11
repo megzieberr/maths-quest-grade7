@@ -5,7 +5,12 @@ Live at **https://megzieberr.github.io/maths-quest-grade7/** (+ `/admin.html`), 
 `megzieberr/maths-quest-grade7` (PUBLIC, GitHub Pages). **Session 1 SHIPPED live
 2026-08-11** (her go): push verified serving (archived flags in live config.js, new admin
 css/js live), app boots clean against production, 0 console errors — sw auto-updates
-clients, no migration was needed.
+clients, no migration was needed. **Follow-up shipped same day (foreman review fix):** the
+admin page was capped at 840px, which squeezed the chip grid into 260px and pushed the
+action buttons into a sideways scroll. Now `max-width:min(1560px,94vw)`, action buttons
+stacked, chips column takes the leftover — measured at a 1512px window: chips 260→796px,
+learner row 421→271px tall, table 3423→2225px, sideways scroll gone. Phone layout
+unchanged (media query below 1000px).
 
 **2026-08-11 foreman day, paused after Session 1 of 4.** Session 1 BUILT + reviewed green
 (commit ff33a89): ch1+ch2 (Uitdrukkings/Vergelykings) archived — gone from the learner
@@ -45,7 +50,9 @@ decisions: see that date's entries below.)
   ids not 45; admin chip grid is per-chapter clusters with dates, never a flat 1–N strip;
   archived history shows as a dimmed Argief cluster only for learners who have data there;
   hiding the admin "Where the class is stuck" section CONFIRMED as her mid-build call
-  (stays hidden; `SHOW_STRUGGLES` flag in js/admin.js brings it back).
+  (stays hidden; `SHOW_STRUGGLES` flag in js/admin.js brings it back); **admin.html is a
+  LAPTOP tool — never re-cap it at 840px**; one chapter per chip line beats side-by-side
+  wrapping (she reads chapter by chapter).
 
 ## Pending on Megan
 - 💻 5 min [whenever, after limit reset]: dispatch Session 2 from RUN-PLAN-2026-08-11.md.
