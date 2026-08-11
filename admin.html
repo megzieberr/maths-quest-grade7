@@ -11,7 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <style>
-  .view.adm{max-width:840px}
+  /* the dashboard is a teacher tool read on a laptop, not a learner screen on a phone —
+     it may use the whole width. At 840px every chapter's chips stacked into a tall
+     column and the action buttons fell off the side. */
+  .view.adm{max-width:min(1560px,94vw)}
   .adm-head{margin:4px 2px 14px}
   .adm-section{margin-bottom:16px}
   .adm-section h2{font-size:19px;margin-bottom:2px}
@@ -24,7 +27,9 @@
   .adm-table th,.adm-table td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:middle}
   .adm-table th{color:var(--muted);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px}
   .adm-table .mono{font-family:var(--font-num);font-weight:700}
-  .adm-actions{display:flex;gap:6px;white-space:nowrap}
+  /* stacked, not in a row: three side-by-side buttons ate 318px of table width that
+     the round chips need, and rows are tall enough to hold them anyway */
+  .adm-actions{display:flex;flex-direction:column;gap:5px;white-space:nowrap;width:min-content}
   .adm-inactive{color:var(--warn);font-weight:700}
   .pwset{color:var(--muted);font-weight:700}
   .pwreset{color:var(--bad);font-weight:700}
@@ -53,8 +58,11 @@
   /* learner table: weekly/all-time numbers + round-status chips, grouped per chapter */
   .adm-lbtns{display:flex;gap:6px;margin-left:auto}
   .adm-table td.num{font-family:var(--font-num);font-weight:700;text-align:right;white-space:nowrap}
-  .adm-table td.chips{padding-top:8px;padding-bottom:8px;min-width:260px}
-  .rclusters{display:flex;flex-direction:column;gap:7px}
+  /* width:100% makes the chips column soak up whatever the other columns don't need */
+  .adm-table td.chips{padding-top:8px;padding-bottom:8px;width:100%;min-width:300px}
+  /* one chapter per line, colour bars stacked — now that the column is wide, each
+     chapter's chips fit on a single row instead of wrapping into a tall block */
+  .rclusters{display:flex;flex-direction:column;gap:8px}
   .rcluster{border-left:3px solid var(--cc,var(--line));padding-left:8px}
   .rcluster.archived{opacity:.62}
   .rch-head{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--cc,var(--muted));margin-bottom:3px;white-space:nowrap}
@@ -64,6 +72,8 @@
   .rchip.ok{background:#16a34a}
   .rchip.try{background:#f59e0b;color:#3a2a00}
   .rchip.none{background:#e7e8ef;color:#9aa3b2}
+  /* narrow screens (phone, split window): back to the old single-column stack */
+  @media (max-width:1000px){ .view.adm{max-width:840px} }
 </style>
 </head>
 <body>
