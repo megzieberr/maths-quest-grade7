@@ -41,12 +41,11 @@ decisions: see that date's entries below.)
   invisible to learners, folded in admin, data kept, one config flag (`archived: true`)
   to reverse; Sunday's Sessions 7–8 (u/v b-rounds) DROPPED, migration-deel2.sql seeds 30
   ids not 45; admin chip grid is per-chapter clusters with dates, never a flat 1–N strip;
-  archived history shows as a dimmed Argief cluster only for learners who have data there.
+  archived history shows as a dimmed Argief cluster only for learners who have data there;
+  hiding the admin "Where the class is stuck" section CONFIRMED as her mid-build call
+  (stays hidden; `SHOW_STRUGGLES` flag in js/admin.js brings it back).
 
 ## Pending on Megan
-- 💻 1 min [blocking Session 2 dispatch]: confirm — did you tell Session 1 mid-build to
-  hide the admin "Where the class is stuck" section? Yes = stays hidden; no = I flip
-  `SHOW_STRUGGLES` back on.
 - 💻 5 min [whenever, after limit reset]: dispatch Session 2 from RUN-PLAN-2026-08-11.md.
 
 ## Next up
