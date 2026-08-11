@@ -2,8 +2,10 @@
 
 ## Where we are
 Live at **https://megzieberr.github.io/maths-quest-grade7/** (+ `/admin.html`), repo
-`megzieberr/maths-quest-grade7` (PUBLIC, GitHub Pages). Live site still shows the
-pre-2026-08-11 state; today's work is committed locally, **NOT pushed**.
+`megzieberr/maths-quest-grade7` (PUBLIC, GitHub Pages). **Session 1 SHIPPED live
+2026-08-11** (her go): push verified serving (archived flags in live config.js, new admin
+css/js live), app boots clean against production, 0 console errors — sw auto-updates
+clients, no migration was needed.
 
 **2026-08-11 foreman day, paused after Session 1 of 4.** Session 1 BUILT + reviewed green
 (commit ff33a89): ch1+ch2 (Uitdrukkings/Vergelykings) archived — gone from the learner
