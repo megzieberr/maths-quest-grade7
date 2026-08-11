@@ -22,7 +22,7 @@ export function renderHub(app, host) {
   const cards = el("div", "chapter-cards");
   const dt = dailyTile(app);
   if (dt) cards.appendChild(dt);
-  CHAPTERS.forEach(ch => {
+  CHAPTERS.filter(ch => !ch.archived).forEach(ch => {
     const openQ = (ch.quests || []).filter(q => q.built && isOpen(openSet, q.id));
     const live = ch.open && openQ.length > 0;
     const card = el("div", "ch-card" + (live ? "" : " locked"));
@@ -59,7 +59,10 @@ export function renderHub(app, host) {
 /* ---------------- HOOFSTUK · quest-kaart ---------------- */
 export function renderChapter(app, host, params) {
   const ch = chapterById(params.chapterId);
-  if (!ch) return app.go("hub");
+  /* geargiveerde hoofstukke (bv. Uitdrukkings, Vergelykings) is glad nie meer
+     leerder-sigbaar nie — 'n verouderde teël of diep skakel stuur net terug hub toe,
+     dieselfde patroon as 'n onbekende chapterId. */
+  if (!ch || ch.archived) return app.go("hub");
 
   const head = el("div", "chap-head");
   head.style.setProperty("--accent", ch.signature);

@@ -18,6 +18,7 @@
 import { el } from "./ui.js";
 import { pick, shuffled } from "./quests/_shared.js";
 import { questDef } from "./quests/index.js";
+import { ARCHIVED_QUEST_IDS } from "./config.js";
 
 const ACCENT = "#f59e0b";              // amber — hoort by geen bestaande hoofstuk-kleur nie
 const FALLBACK_KEY = "g7.dailyDoneFallback";
@@ -34,7 +35,11 @@ export function dailyQuestId() { return `daily-${todayStr()}`; }
    agterkant die veld nog nie stuur nie — sien GRACEFUL hierbo). */
 export function revisionIds(app) {
   const r = app && app.state && app.state.revision;
-  return Array.isArray(r) ? r : [];
+  if (!Array.isArray(r)) return [];
+  /* 'n geargiveerde hoofstuk se rondte mag nooit in die Daaglikse Quest
+     opduik nie, al het die juffrou dit lank gelede as hersiening gemerk
+     (die "in_revision"-vlag is los van oop/toe EN nou ook los van argief). */
+  return r.filter(id => !ARCHIVED_QUEST_IDS.has(id));
 }
 
 /* bou 'n sintetiese quest-def: 10 vrae, EWEREDIG versprei oor die

@@ -41,13 +41,26 @@
   .adm-qrow.on{border-color:color-mix(in srgb,var(--good,#16a34a) 45%,white);background:color-mix(in srgb,var(--good,#16a34a) 8%,white)}
   .adm-qrow input{width:17px;height:17px;accent-color:var(--good,#16a34a);flex:none}
   .adm-qname{line-height:1.2}
-  /* learner table: weekly/all-time numbers + round-status chips */
+  /* archived chapters — collapsed "📦 Argief" block, checkboxes inside still work */
+  .adm-archive{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .adm-archive summary{cursor:pointer;font-family:var(--font-display);font-weight:600;font-size:16px;list-style:none}
+  .adm-archive summary::-webkit-details-marker{display:none}
+  .adm-archive summary::before{content:"▸ ";display:inline-block;transition:transform .12s}
+  .adm-archive[open] summary::before{transform:rotate(90deg)}
+  .adm-archive summary .muted{font-weight:600;font-size:12.5px}
+  .adm-archive-body{margin-top:4px}
+  .adm-archive-body .adm-qchap:first-of-type{border-top:1px solid var(--line)}
+  /* learner table: weekly/all-time numbers + round-status chips, grouped per chapter */
   .adm-lbtns{display:flex;gap:6px;margin-left:auto}
   .adm-table td.num{font-family:var(--font-num);font-weight:700;text-align:right;white-space:nowrap}
-  .adm-table td.chips{padding-top:8px;padding-bottom:8px}
-  .rgrid{display:grid;grid-template-columns:repeat(14,19px);gap:3px;width:max-content}
-  @media (max-width:760px){.rgrid{grid-template-columns:repeat(10,19px)}}
-  .rchip{display:grid;place-items:center;width:19px;height:19px;border-radius:6px;font-size:10px;font-weight:800;color:#fff;cursor:default}
+  .adm-table td.chips{padding-top:8px;padding-bottom:8px;min-width:260px}
+  .rclusters{display:flex;flex-direction:column;gap:7px}
+  .rcluster{border-left:3px solid var(--cc,var(--line));padding-left:8px}
+  .rcluster.archived{opacity:.62}
+  .rch-head{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--cc,var(--muted));margin-bottom:3px;white-space:nowrap}
+  .rch-ico{font-size:12px}
+  .rgrid{display:flex;flex-wrap:wrap;gap:3px;max-width:100%}
+  .rchip{display:inline-grid;place-items:center;min-width:24px;height:19px;padding:0 4px;border-radius:6px;font-size:9.5px;font-weight:800;color:#fff;cursor:default}
   .rchip.ok{background:#16a34a}
   .rchip.try{background:#f59e0b;color:#3a2a00}
   .rchip.none{background:#e7e8ef;color:#9aa3b2}

@@ -9,7 +9,7 @@
 export const CHAPTERS = [
   {
     id: "uitdrukkings", n: 1, name: "Algebraïese Uitdrukkings", icon: "🔠",
-    signature: "#7c3aed", open: true,
+    signature: "#7c3aed", open: true, archived: true,
     blurb: "Veranderlikes, koëffisiënte, terme en patrone.",
     quests: [
       { id: "u1", n: 1, title: "Veranderlike & koëffisiënt", blurb: "Wys die letter en die getal vóór dit.", built: true },
@@ -21,7 +21,7 @@ export const CHAPTERS = [
   },
   {
     id: "vergelykings", n: 2, name: "Algebraïese Vergelykings", icon: "⚖️",
-    signature: "#2563eb", open: true,
+    signature: "#2563eb", open: true, archived: true,
     blurb: "Los op vir x — hou die skaal in balans.",
     quests: [
       { id: "v1", n: 1, title: "Plus & minus (1)", blurb: "x + 7 = 21. Maak x alleen.", built: true },
@@ -131,6 +131,13 @@ export const CHAPTERS = [
 ];
 
 export function chapterById(id) { return CHAPTERS.find(c => c.id === id) || null; }
+
+/* rondte-id's wat in 'n GEARGIVEERDE hoofstuk woon (bv. Uitdrukkings, Vergelykings) —
+   herbruik deur screens.js (hub/diep-skakel-wag) en daily.js (Daaglikse Quest mag nie
+   uit 'n argief-hoofstuk trek nie, al is die rondte per ongeluk as "hersiening" gemerk). */
+export const ARCHIVED_QUEST_IDS = new Set(
+  CHAPTERS.filter(c => c.archived).flatMap(c => (c.quests || []).map(q => q.id))
+);
 
 /* a per-quest shade of the chapter colour: quest 1 = lightest, last = deepest.
    We return a CSS color-mix so each quest reads as a shade of the family. */

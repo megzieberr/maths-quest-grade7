@@ -47,6 +47,10 @@ function lessonCard(def) {
 
 export function renderPlay(app, host, params) {
   const { chapter, quest, def, accent } = params;
+  /* Navigasie-wag: 'n verouderde teël, browser-terug of diep skakel mag nooit
+     'n geargiveerde hoofstuk (bv. Uitdrukkings, Vergelykings) laat speel nie —
+     dieselfde "terug hub toe, geen crash nie"-reël as die hoofstuk-rooster. */
+  if (chapter && chapter.archived) { app.go("hub"); return; }
   /* Navigasie-wag: 'n verouderde teël of 'n diep skakel mag nie die
      sekwensiële slot (chapter 6 "Meetkunde Stellings" ALLEEN) omseil nie —
      dieselfde reël as die hoofstuk-rooster se teël-slot (chain.js). */

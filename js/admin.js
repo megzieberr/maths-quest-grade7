@@ -15,12 +15,20 @@ const root = () => document.getElementById("admin");
 let pw = null;
 
 const questCount = CHAPTERS.reduce((n, ch) => n + (ch.quests || []).filter(q => q.built).length, 0);
-/* flat, globally-numbered list of every built round, for the per-learner grid */
+const ACTIVE_CHAPTERS = CHAPTERS.filter(ch => !ch.archived);
+const ARCHIVED_CHAPTERS = CHAPTERS.filter(ch => ch.archived);
+/* every built round, grouped per hoofstuk (chapter) — the per-learner grid clusters
+   by this instead of one flat 1..79 numbering, and each entry carries what a chip
+   needs to render + its tooltip. */
 const ROUND_LIST = (() => {
-  let gi = 0, out = [];
-  CHAPTERS.forEach(ch => (ch.quests || []).filter(q => q.built).forEach(q => { out.push({ id: q.id, gi: ++gi, title: q.title, ch: ch.name }); }));
+  const out = [];
+  CHAPTERS.forEach(ch => (ch.quests || []).filter(q => q.built).forEach(q => {
+    out.push({ id: q.id, title: q.title, ch: ch.name, chId: ch.id, chIcon: ch.icon, chColor: ch.signature, archived: !!ch.archived });
+  }));
   return out;
 })();
+const ARCHIVED_IDS = new Set(ROUND_LIST.filter(rd => rd.archived).map(rd => rd.id));
+const SHOW_STRUGGLES = false;
 const conceptTitle = id => (CONCEPTS[id] && CONCEPTS[id].title) || id;
 const fmtDate = v => { if (!v) return "nooit"; const d = new Date(v); return isNaN(d) ? "—" : d.toLocaleDateString(); };
 const daysSince = v => { if (!v) return Infinity; const d = new Date(v); return isNaN(d) ? Infinity : (Date.now() - d.getTime()) / 864e5; };
@@ -56,7 +64,10 @@ async function dashboard() {
   if (!data || !data.ok) { status.textContent = "Kon nie die dashboard laai nie."; return; }
   status.remove();
   view.appendChild(questGateSection(data.quests));
-  view.appendChild(struggleSection(data.struggles || []));
+  // "Where the class is stuck" — hidden (her call, 2026-08-11): not in use right
+  // now and cluttering the page. Section stays fully built, just not mounted —
+  // flip SHOW_STRUGGLES back to true to bring it back.
+  if (SHOW_STRUGGLES) view.appendChild(struggleSection(data.struggles || []));
   view.appendChild(learnerSection(data.rows || [], data.inactiveDays || 7));
 }
 const reload = () => dashboard();
@@ -78,9 +89,9 @@ function questGateSection(quests) {
   const hasRevision = quests.some(q => Object.prototype.hasOwnProperty.call(q, "in_revision"));
   const revisionById = {}; quests.forEach(q => { revisionById[q.quest_id] = !!q.in_revision; });
 
-  CHAPTERS.forEach(ch => {
+  function buildChapterBlock(ch) {
     const built = (ch.quests || []).filter(q => q.built);
-    if (!built.length) return;
+    if (!built.length) return null;
     const block = el("div", "adm-qchap");
     const openCount = built.filter(q => openById[q.id]).length;
     const head = el("div", "adm-qchead",
@@ -114,8 +125,20 @@ function questGateSection(quests) {
       list.appendChild(row);
     });
     block.appendChild(list);
-    sec.appendChild(block);
-  });
+    return block;
+  }
+
+  ACTIVE_CHAPTERS.forEach(ch => { const block = buildChapterBlock(ch); if (block) sec.appendChild(block); });
+
+  const archivedBlocks = ARCHIVED_CHAPTERS.map(buildChapterBlock).filter(Boolean);
+  if (archivedBlocks.length) {
+    const details = el("details", "adm-archive");
+    details.innerHTML = `<summary>📦 Argief <span class="muted small">— nie meer sigbaar vir leerders nie, maar kan nog oop/toe gemaak word</span></summary>`;
+    const body = el("div", "adm-archive-body");
+    archivedBlocks.forEach(b => body.appendChild(b));
+    details.appendChild(body);
+    sec.appendChild(details);
+  }
   return sec;
 }
 
@@ -150,19 +173,40 @@ function learnerSection(rows, inactiveDays) {
   head.appendChild(btns);
   sec.appendChild(head);
 
-  sec.appendChild(el("p", "muted small", "Sorted by all-time XP. Rounds: green = mastered (80%+ first try) · orange = tried · grey = not started. Hover a chip for the round and best score. You never see passwords — reset a forgotten one (progress kept)."));
+  sec.appendChild(el("p", "muted small", "Sorted by all-time XP. Rounds are grouped by chapter — green = mastered (80%+ first try) · orange = tried · grey = not started. Hover a chip for the round, best score and when it was last played. You never see passwords — reset a forgotten one (progress kept)."));
 
   const table = el("table", "adm-table");
-  table.innerHTML = `<thead><tr><th>#</th><th>Name</th><th>Password</th><th>Weekly</th><th>All-time</th><th>Last active</th><th>Rounds (best %)</th><th></th></tr></thead>`;
+  table.innerHTML = `<thead><tr><th>#</th><th>Name</th><th>Password</th><th>Weekly</th><th>All-time</th><th>Last active</th><th>Rounds (by chapter)</th><th></th></tr></thead>`;
   const tb = el("tbody");
   rows.forEach((r, i) => {
     const inactive = r.lastActive && daysSince(r.lastActive) >= inactiveDays;
-    const chips = ROUND_LIST.map(rd => {
-      const p = (r.quests || {})[rd.id];
+    const learnerQuests = r.quests || {};
+    const chipFor = rd => {
+      const p = learnerQuests[rd.id];
       const best = p ? Math.round((p.best_score || 0) * 100) : 0;
       const cls = p && p.passed ? "ok" : (p && p.attempts ? "try" : "none");
-      return `<span class="rchip ${cls}" title="${rd.gi}. ${rd.ch} · ${rd.title} — ${p ? best + "%" : "nog nie begin"}">${rd.gi}</span>`;
-    }).join("");
+      const played = p && p.last_played_at ? fmtDate(p.last_played_at) : null;
+      const tip = p
+        ? `${rd.ch} · ${rd.title} — ${best}%${played ? ` — gespeel ${played}` : ""}`
+        : `${rd.ch} · ${rd.title} — nog nie begin`;
+      return `<span class="rchip ${cls}" title="${tip}">${rd.id}</span>`;
+    };
+    const clusterFor = ch => {
+      const round = ROUND_LIST.filter(rd => rd.chId === ch.id);
+      if (!round.length) return "";
+      return `<div class="rcluster" style="--cc:${ch.signature}">
+        <div class="rch-head"><span class="rch-ico">${ch.icon}</span><span class="rch-name">${ch.name}</span></div>
+        <div class="rgrid">${round.map(chipFor).join("")}</div>
+      </div>`;
+    };
+    const hasArchivedData = Object.keys(learnerQuests).some(id => ARCHIVED_IDS.has(id));
+    const clusters = ACTIVE_CHAPTERS.map(clusterFor).join("")
+      + (hasArchivedData
+        ? `<div class="rcluster archived" style="--cc:var(--muted)">
+            <div class="rch-head"><span class="rch-ico">📦</span><span class="rch-name">Argief</span></div>
+            <div class="rgrid">${ROUND_LIST.filter(rd => rd.archived).map(chipFor).join("")}</div>
+          </div>`
+        : "");
     const tr = el("tr");
     tr.innerHTML = `
       <td class="mono">${i + 1}</td>
@@ -171,7 +215,7 @@ function learnerSection(rows, inactiveDays) {
       <td class="num">${r.weeklyXp || 0}</td>
       <td class="num">${r.totalXp || 0}</td>
       <td class="${inactive ? "adm-inactive" : ""}">${fmtDate(r.lastActive)}${inactive ? " ⚠" : ""}</td>
-      <td class="chips"><div class="rgrid">${chips}</div></td>`;
+      <td class="chips"><div class="rclusters">${clusters}</div></td>`;
     const act = el("td", "adm-actions");
     const rpw = el("button", "btn ghost small", "Reset pw");
     rpw.addEventListener("click", async () => { if (!confirm(`Reset ${r.name}'s password? They'll set a new one next login (progress kept).`)) return; await api.adminResetPassword(pw, r.id); reload(); });
@@ -190,12 +234,14 @@ function learnerSection(rows, inactiveDays) {
 }
 
 function exportCsv(rows) {
-  const lines = [["Rank", "Name", "Username", "Password set", "Weekly XP", "All-time XP", "Last active", "Mastered", "Best per round"].join(",")];
+  const lines = [["Rank", "Name", "Username", "Password set", "Weekly XP", "All-time XP", "Last active", "Mastered", "Best per round", "Last played per round"].join(",")];
   rows.forEach((r, i) => {
-    const mastered = ROUND_LIST.filter(rd => (r.quests || {})[rd.id] && (r.quests || {})[rd.id].passed).length;
-    const best = ROUND_LIST.map(rd => { const p = (r.quests || {})[rd.id]; return `${rd.gi}:${p ? Math.round((p.best_score || 0) * 100) : 0}`; }).join(" ");
+    const q = r.quests || {};
+    const mastered = ROUND_LIST.filter(rd => q[rd.id] && q[rd.id].passed).length;
+    const best = ROUND_LIST.map(rd => { const p = q[rd.id]; return `${rd.id}:${p ? Math.round((p.best_score || 0) * 100) : 0}`; }).join(" ");
+    const played = ROUND_LIST.map(rd => { const p = q[rd.id]; return `${rd.id}:${p && p.last_played_at ? new Date(p.last_played_at).toISOString().slice(0, 10) : ""}`; }).join(" ");
     const cells = [i + 1, r.name, r.username, r.hasPassword ? "yes" : "no", r.weeklyXp || 0, r.totalXp || 0,
-      r.lastActive ? new Date(r.lastActive).toISOString() : "", `${mastered}/${questCount}`, best];
+      r.lastActive ? new Date(r.lastActive).toISOString() : "", `${mastered}/${questCount}`, best, played];
     lines.push(cells.map(c => `"${String(c).replace(/"/g, '""')}"`).join(","));
   });
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });
