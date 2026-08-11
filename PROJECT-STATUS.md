@@ -1,4 +1,4 @@
-# Project status — updated 2026-08-11 (foreman day PAUSED mid-queue, limit reset)
+# Project status — updated 2026-08-11 (foreman day paused mid-queue; Session 1 shipped live)
 
 ## Where we are
 Live at **https://megzieberr.github.io/maths-quest-grade7/** (+ `/admin.html`), repo
@@ -56,12 +56,28 @@ decisions: see that date's entries below.)
 
 ## Pending on Megan
 - 💻 5 min [whenever, after limit reset]: dispatch Session 2 from RUN-PLAN-2026-08-11.md.
+- Nothing blocking, nothing to run: no migration is outstanding, everything is pushed and
+  serving. She saw the widened dashboard on live and approved it ("looks great").
 
 ## Next up
 - Sessions 2–4 (Deel 2 ch3/ch4/ch5), one at a time with foreman review between, prompts
   ready in RUN-PLAN-2026-08-11.md. Session 4 also writes migration-deel2.sql (30 ids).
 - Then the ship step from this Fable session (run plan § "Ship plan"): migration → push →
-  live verify. Session 1's archive+dashboard work rides along with that ship, or can ship
-  alone earlier if she asks.
+  live verify.
+- **HER ASK 2026-08-11, queued after Deel 2: weekly winners, like Circle Quest's.**
+  Copy that pattern from `C:\Users\megzi\Desktop\Claude Code Projects\circle-geometry-game`:
+  `js/weekly.js` = two once-a-week popups (RALLY Fri–Sun "the board locks soon, here's where
+  you stand"; CROWN Mon–Tue "last week's results"), each gated to one show per learner per
+  week via localStorage. Server-authoritative: `cgg_weekly_results` (supabase/phase3.sql) for
+  learners, `cgg_admin_weekly_results` (phase8.sql) for the teacher dashboard. THREE awards to
+  THREE DIFFERENT learners so it doesn't always land on the same kid — Star of the Week (top
+  weekly XP) · Most Improved (biggest jump vs the week before, excludes the Star) · On Fire
+  (most daily challenges, excludes both).
+  Gr7 already has what it needs: append-only `xp_events` and the Daaglikse Quest
+  (`daily-YYYY-MM-DD`). Build as g7_-prefixed RPCs in a NEW migration file (never touch
+  schema.sql). ⚠️ ONE DESIGN CALL FOR HER BEFORE BUILDING: Gr7's weekly board runs off
+  `weekly_anchor` + her manual "↺ Reset weekly" button; Circle Quest computes from
+  `date_trunc('week')` (Monday). Those two disagree about when a week ends — pick one, or the
+  crown will name a different winner than the dashboard shows.
 - Still floated from Sunday (her call): extend traps into st28–st32; retro-fit "Tap"
   wording into old s7; trap-style questions in Deel 2 rounds where the pattern fits.
