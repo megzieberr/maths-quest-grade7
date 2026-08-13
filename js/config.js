@@ -90,6 +90,7 @@ export const CHAPTERS = [
       { id: "s10b", n: 20, title: "Nog kongruent of gelykvormig? — Deel 2", blurb: "Waar of onwaar — is die stelling reg?", built: true },
       { id: "s11", n: 21, title: "Teenoorstaande & aangrensende sye", blurb: "Watter sy is oorkant, watter een is langsaan?", built: true },
       { id: "s12", n: 22, title: "Wat beteken die simbole?", blurb: "Pyltjies, strepies en blokkies — lees die merke.", built: true },
+      { id: "s13", n: 23, title: "Eienskappe van vorms", blurb: "Jy kry die vorm — tap AL die eienskappe wat pas.", built: true },
     ],
   },
   {

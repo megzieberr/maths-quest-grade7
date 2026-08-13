@@ -3,7 +3,7 @@
    Driehoeke, vierhoeke, poligone, die sirkel (incl. 'n tik-rondte)
    en kongruent vs gelykvormig.
    ============================================================ */
-import { mc, tf, calc, tap, randInt, pick, shuffled, code } from "./_shared.js";
+import { mc, tf, calc, tap, multi, randInt, pick, shuffled, code } from "./_shared.js";
 import { triangleFigure, quadFigure, polygonFigure, circleFigure, circleTapFigure, congruentFigure, quadPropsFigure, QUAD_PROPS } from "../engine/diagrams.js";
 
 const ORANGE = "#ea580c";
@@ -427,6 +427,70 @@ const CONGRUENT_CLAIMS = [
   claimQ("Twee vorms wat kongruent is, is OOK altyd gelykvormig.", true),
 ];
 
+/* ============================================================
+   S13 — Eienskappe van vorms (NUUT, nie 'n Deel-2-hersiening nie)
+   ------------------------------------------------------------
+   Die vraag gee die vierhoek se NAAM ÉN 'n SKOON figuur (geen
+   merkies/pyltjies/blokkies nie — quadPropsFigure met decor:"none"
+   + tapSides/tapCorners af het toe al geen dekorasie of tik-areas
+   nie, sien engine/diagrams.js), en vra "kies AL die eienskappe".
+   'n Kind moet dus die eienskappe ONTHOU, nie van die prent aflees
+   nie — haar eksplisiete ontwerp-eis.
+
+   S_TRUTH is die BRON VAN WAARHEID: vir elke vierhoek-sleutel, vir
+   elke eienskap-id, true/false — of die sleutel WORD WEGGELAAT as
+   die eienskap wel WAAR is vir daardie vorm, maar nie een van sy
+   "kern"-eienskappe is nie (bv. 'n vierkant IS ook 'n reghoek/ruit/
+   parallelogram, dus "teenoorstaande sye ewe lank" ens. is tegnies
+   waar — dit verskyn NOOIT as 'n vals afleier nie, dit word bloot
+   heeltemal weggelaat uit die vierkant se lys). Elke vorm se "true"-
+   stel is haar bevestigde voorbeeld vir vierkant (4 korrek: al 4 sye
+   ewe lank · teenoorstaande sye parallel · al 4 hoeke 90° · hoeklyne
+   ewe lank) — sien tools/fuzz-s13.mjs vir die outomatiese nagaan
+   teen hierdie tabel. */
+const S_PROPS = [
+  { id: "allEq", label: "Al 4 sye is ewe lank" },
+  { id: "oppEq", label: "Teenoorstaande sye is ewe lank" },
+  { id: "adjEq", label: "Twee pare AANGRENSENDE sye is ewe lank" },
+  { id: "allDiff", label: "Al 4 sye is verskillende lengtes" },
+  { id: "oppPar", label: "Teenoorstaande sye is parallel" },
+  { id: "onePar", label: "Net EEN paar sye is parallel" },
+  { id: "noPar", label: "Geen paar sye is parallel nie" },
+  { id: "allRight", label: "Al 4 hoeke is 90°" },
+  { id: "twoRight", label: "Net twee van die hoeke is 90°" },
+  { id: "noRight", label: "Geen hoek is 90° nie" },
+  { id: "diagEq", label: "Die hoeklyne is ewe lank" },
+  { id: "diagPerp", label: "Die hoeklyne is loodreg (90° by mekaar)" },
+  { id: "onePairEq", label: "Net EEN paar sye is ewe lank" },
+];
+const S_TRUTH = {
+  vierkant: { allEq: true, allDiff: false, oppPar: true, onePar: false, noPar: false,
+    allRight: true, twoRight: false, noRight: false, diagEq: true, onePairEq: false },
+  reghoek: { allEq: false, oppEq: true, adjEq: false, allDiff: false, oppPar: true, onePar: false, noPar: false,
+    allRight: true, twoRight: false, noRight: false, diagEq: true, diagPerp: false, onePairEq: false },
+  ruit: { allEq: true, allDiff: false, oppPar: true, onePar: false, noPar: false,
+    allRight: false, twoRight: false, noRight: true, diagEq: false, diagPerp: true, onePairEq: false },
+  parallelogram: { allEq: false, oppEq: true, adjEq: false, allDiff: false, oppPar: true, onePar: false, noPar: false,
+    allRight: false, twoRight: false, noRight: true, diagEq: false, diagPerp: false, onePairEq: false },
+  trapesium: { allEq: false, oppEq: false, adjEq: false, allDiff: true, oppPar: false, onePar: true, noPar: false,
+    allRight: false, twoRight: false, noRight: true, diagEq: false, diagPerp: false, onePairEq: false },
+  vlieer: { allEq: false, oppEq: false, adjEq: true, allDiff: false, oppPar: false, onePar: false, noPar: true,
+    allRight: false, twoRight: false, noRight: true, diagEq: false, diagPerp: true, onePairEq: false },
+};
+function buildQuadPropOptions(key) {
+  const truth = S_TRUTH[key];
+  return S_PROPS.filter(p => truth[p.id] !== undefined).map(p => ({ label: p.label, correct: truth[p.id] }));
+}
+function genShapeProps(key) {
+  const q = QUADS.find(x => x.key === key);
+  const opts = buildQuadPropOptions(key);
+  return multi(`Watter eienskappe pas by hierdie <b>${q.name}</b>?`, opts, {
+    figure: quadPropsFigure(key, ORANGE, { decor: "none", tapSides: false, tapCorners: false }),
+    instruction: "Tap AL die eienskappe wat pas, dan Stuur.",
+    hint: "Dink aan die sye, dan die hoeke, dan die hoeklyne — tel hoeveel van elke soort gelyk is.",
+  });
+}
+
 export const CH4 = {
   s1: { skills: Array.from({ length: 5 }, () => ({ concept: "driehoeke", gen: genTriBySides })) },
   s1b: { skills: shuffled([true, true, false, false, true]).map(k => ({ concept: "driehoeke", gen: () => genTriBySidesTF(k) })) },
@@ -458,6 +522,13 @@ export const CH4 = {
     genTapParallel, genTapParallel, genTapEqual, genTapEqual,
     genSymbolTick, genSymbolRight,
   ]).map(gen => ({ concept: "vierhoeksimbole", gen })) },
+  /* 5 van die 6 vierhoeke, geen herhaling: shuffled(QUADS).slice(0,5) kies
+     5 UNIEKE vorms sodra hierdie module laai (dieselfde patroon as s9b se
+     CONGRUENT_CLAIMS en s11/s12 hierbo). Elke skill se gen() is 'n GESLOTE
+     funksie oor SY EIE vorm — 'n herprobeer ("Probeer 'n soortgelyke een")
+     wys dus weer DIESELFDE vorm se vraag (soos s9b se claimQ-patroon), nie
+     'n nuwe lukrake vorm wat die 5-uit-6-waarborg kon breek nie. */
+  s13: { skills: shuffled(QUADS).slice(0, 5).map(q => ({ concept: "vierhoeke", gen: () => genShapeProps(q.key) })) },
 };
 
 /* waar/onwaar-rondtes: die skill-inskrywing bepaal die ANTWOORD, so skommel
