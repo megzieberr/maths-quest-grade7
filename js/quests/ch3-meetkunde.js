@@ -364,3 +364,10 @@ export const CH3 = {
   ] },
   m10b: { skills: shuffled([true, false, true, false, true]).map(k => ({ concept: "reflekshoek", gen: () => genReflexTF(k) })) },
 };
+
+/* waar/onwaar-rondtes: die skill-inskrywing bepaal die ANTWOORD, so skommel
+   die volgorde elke speelslag — anders kan herspeel die W/O-patroon memoriseer
+   (selfde reël as hfst 6 se strik-rondtes, sien play.js). */
+for (const id of ["m2b", "m5b", "m6b", "m7b", "m8b", "m9b", "m10b"]) {
+  CH3[id].shuffleSkills = true;
+}
