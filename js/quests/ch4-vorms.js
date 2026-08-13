@@ -292,7 +292,10 @@ function wrongBy(trueVal, deltas = [-20, -15, -10, 10, 15, 20]) {
 function genTriBySidesTF(claimTrue) {
   const kinds = ["gelyksydig", "gelykbenig", "ongelyksydig"];
   const kind = pick(kinds);
-  const claimed = claimTrue ? kind : pick(kinds.filter(k => k !== kind));
+  // 'n gelyksydige driehoek IS streng gesproke ook gelykbenig (2 sye is mos gelyk) —
+  // daardie bewering mag nooit as ONWAAR gemerk word nie, so laat dit heeltemal uit.
+  const falsePool = kinds.filter(k => k !== kind && !(kind === "gelyksydig" && k === "gelykbenig"));
+  const claimed = claimTrue ? kind : pick(falsePool);
   return tf(`Iemand sê: "Dit is 'n <b>${claimed}</b> driehoek (volgens sye)." Is hulle reg?`, claimTrue, {
     figure: triangleFigure(kind, ORANGE),
     hint: "Die merkies wys gelyke sye: 3 gelyk = gelyksydig · 2 gelyk = gelykbenig · geen gelyk = ongelyksydig.",
@@ -316,9 +319,11 @@ function genAngleSumTF(claimTrue) {
   const trueBase = (180 - top) / 2;
   const claimed = claimTrue ? trueBase : wrongBy(trueBase, [-10, -8, -5, 5, 8, 10]);
   return tf(`'n Gelykbenige driehoek het 'n tophoek van ${code(top + "°")}. Iemand sê elke basishoek is ${code(claimed + "°")}. Is hulle reg?`, claimTrue, {
-    figure: triangleFigure("gelykbenig", ORANGE, { apex: top }),
+    // hide:"base" — die basishoeke wys as "?" sodat die figuur nie die
+    // antwoord op die bewering weggee (of dit weerspreek) nie.
+    figure: triangleFigure("gelykbenig", ORANGE, { apex: top, hide: "base" }),
     hint: "Die drie hoeke van 'n driehoek tel altyd saam op tot 180°. (180 − tophoek) ÷ 2 = elke basishoek.",
-    _chk: { figKind: "gelykbenig", values: [top, trueBase, trueBase], hideIndex: null, allShown: true, apex: top },
+    _chk: { figKind: "gelykbenig", values: [top, trueBase, trueBase], apex: top, hideIndex: 1, allShown: false },
   });
 }
 
@@ -327,7 +332,7 @@ const QUAD_DESC = {
   vierkant: "4 gelyke sye ÉN 4 regte hoeke.",
   reghoek: "2 pare gelyke sye ÉN 4 regte hoeke, maar nie al 4 sye ewe lank nie.",
   ruit: "4 gelyke sye, maar GEEN regte hoeke nie.",
-  parallelogram: "2 pare ewewydige sye en 2 pare gelyke sye, maar geen regte hoeke nie.",
+  parallelogram: "2 pare ewewydige sye en 2 pare gelyke sye, maar nie al 4 sye ewe lank nie en geen regte hoeke nie.",
   trapesium: "net EEN paar ewewydige sye.",
   vlieer: "2 pare langsaan-liggende gelyke sye, en geen paar sye is ewewydig nie.",
 };
@@ -408,8 +413,9 @@ function genDiameterTF(claimTrue) {
    Elke bewering se waarheid is VAS (nie 'n coin-flip binne een gen nie) — daarom EEN
    funksie per bewering, dan die lys self geskommel gebou (soos CH3 se m2b-patroon). */
 function claimQ(text, isTrue) {
+  // GEEN figuur nie: die bewerings is algemene stellings, en 'n lukraak gekose
+  // kongruent/gelykvormig-prentjie kan die teks visueel weerspreek en mislei.
   return () => tf(text, isTrue, {
-    figure: congruentFigure(pick([true, false]), ORANGE),
     hint: "Kongruent = presies dieselfde vorm ÉN dieselfde grootte. Gelykvormig = dieselfde vorm, maar 'n ander grootte.",
   });
 }
