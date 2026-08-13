@@ -3,7 +3,7 @@
    Driehoeke, vierhoeke, poligone, die sirkel (incl. 'n tik-rondte)
    en kongruent vs gelykvormig.
    ============================================================ */
-import { mc, calc, tap, randInt, pick, shuffled, code } from "./_shared.js";
+import { mc, tf, calc, tap, randInt, pick, shuffled, code } from "./_shared.js";
 import { triangleFigure, quadFigure, polygonFigure, circleFigure, circleTapFigure, congruentFigure, quadPropsFigure, QUAD_PROPS } from "../engine/diagrams.js";
 
 const ORANGE = "#ea580c";
@@ -265,17 +265,183 @@ function genTapEqual() {
   });
 }
 
+/* ============================================================
+   DEEL 2 — hersiening-rondtes (s1b–s10b)
+   ------------------------------------------------------------
+   Nooit 'n Deel-1-sjabloon met vars getalle nie — elke rondte kry
+   'n EGTE nuwe vraagstyl: die rigting omgekeer, 'n nuwe konteks, of
+   'n waar/onwaar-nagaan-meganika i.p.v. Deel 1 se identifiseer-
+   meganika (sien ch3-meetkunde.js se Deel 2 vir dieselfde patroon).
+   s3b is die enigste rondte met 'n EGTE geTEKENDE hoekfiguur (die
+   gelykbenige driehoek se apex+basishoeke), so dis die enigste een
+   met _chk — sien tools/verify-stellings-core.mjs. Die ander s-b-
+   rondtes se figure (driehoek-soort, sirkeldele, kongruent) teken
+   nooit 'n meetbare booghoek nie, dus geen _chk nodig nie.
+   Waar/onwaar is 'n antwoord-bepalende keuse, so elke sulke rondte
+   se skills-lys word EENMAAL geskommel gebou (die st20/st24-patroon
+   — 'n gedwonge mengsel, nooit 'n coin-flip BINNE een gen nie). */
+
+/* kies 'n "amper reg" vals getal — altyd positief, nooit gelyk aan trueVal nie */
+function wrongBy(trueVal, deltas = [-20, -15, -10, 10, 15, 20]) {
+  const pool = shuffled(deltas);
+  for (const d of pool) { const v = trueVal + d; if (v > 0 && v !== trueVal) return v; }
+  return trueVal + 5;   // noodval, behoort nooit bereik te word nie
+}
+
+/* ---------- s1b · Driehoeke volgens sye — Deel 2 (waar of onwaar 'n bewering) ---------- */
+function genTriBySidesTF(claimTrue) {
+  const kinds = ["gelyksydig", "gelykbenig", "ongelyksydig"];
+  const kind = pick(kinds);
+  const claimed = claimTrue ? kind : pick(kinds.filter(k => k !== kind));
+  return tf(`Iemand sê: "Dit is 'n <b>${claimed}</b> driehoek (volgens sye)." Is hulle reg?`, claimTrue, {
+    figure: triangleFigure(kind, ORANGE),
+    hint: "Die merkies wys gelyke sye: 3 gelyk = gelyksydig · 2 gelyk = gelykbenig · geen gelyk = ongelyksydig.",
+  });
+}
+
+/* ---------- s2b · Driehoeke volgens hoeke — Deel 2 (waar of onwaar 'n bewering) ---------- */
+function genTriByAnglesTF(claimTrue) {
+  const kinds = ["skerphoekig", "reghoekig", "stomphoekig"];
+  const kind = pick(kinds);
+  const claimed = claimTrue ? kind : pick(kinds.filter(k => k !== kind));
+  return tf(`Iemand sê: "Dit is 'n <b>${claimed}</b> driehoek (volgens hoeke)." Is hulle reg?`, claimTrue, {
+    figure: triangleFigure(kind, ORANGE),
+    hint: "Regtehoek-blokkie (90°) → reghoekig · een hoek groter as 90° → stomphoekig · al die hoeke skerp → skerphoekig.",
+  });
+}
+
+/* ---------- s3b · Binnehoeke van 'n driehoek — Deel 2 (gaan 'n bewering na, met egte hoeke) ---------- */
+function genAngleSumTF(claimTrue) {
+  const top = randInt(15, 60) * 2;              // 30…120 — die apex-reël
+  const trueBase = (180 - top) / 2;
+  const claimed = claimTrue ? trueBase : wrongBy(trueBase, [-10, -8, -5, 5, 8, 10]);
+  return tf(`'n Gelykbenige driehoek het 'n tophoek van ${code(top + "°")}. Iemand sê elke basishoek is ${code(claimed + "°")}. Is hulle reg?`, claimTrue, {
+    figure: triangleFigure("gelykbenig", ORANGE, { apex: top }),
+    hint: "Die drie hoeke van 'n driehoek tel altyd saam op tot 180°. (180 − tophoek) ÷ 2 = elke basishoek.",
+    _chk: { figKind: "gelykbenig", values: [top, trueBase, trueBase], hideIndex: null, allShown: true, apex: top },
+  });
+}
+
+/* ---------- s4b · Vierhoeke — Deel 2 (beskrywing → naam) ---------- */
+const QUAD_DESC = {
+  vierkant: "4 gelyke sye ÉN 4 regte hoeke.",
+  reghoek: "2 pare gelyke sye ÉN 4 regte hoeke, maar nie al 4 sye ewe lank nie.",
+  ruit: "4 gelyke sye, maar GEEN regte hoeke nie.",
+  parallelogram: "2 pare ewewydige sye en 2 pare gelyke sye, maar geen regte hoeke nie.",
+  trapesium: "net EEN paar ewewydige sye.",
+  vlieer: "2 pare langsaan-liggende gelyke sye, en geen paar sye is ewewydig nie.",
+};
+function genQuadReverse() {
+  const q = pick(QUADS);
+  const distract = shuffled(QUADS.filter(x => x.key !== q.key)).slice(0, 3);
+  return mc(`Watter vierhoek het ${QUAD_DESC[q.key]}`,
+    shuffled([{ label: q.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
+    hint: "Tel gelyke sye, regte hoeke en ewewydige sye — elke vierhoek se eie kombinasie is uniek.",
+    answerLabel: q.name,
+  });
+}
+
+/* ---------- s5b · Poligone — Deel 2 (regte-lewe voorbeeld → naam) ---------- */
+const POLY_CONTEXT = [
+  { sides: 3, name: "driehoek", ex: "'n Waarskuwingsteken langs die pad (▲)" },
+  { sides: 4, name: "vierhoek", ex: "'n Los A4-vel papier" },
+  { sides: 5, name: "pentagoon", ex: "Elke swart lappie op 'n sokkerbal" },
+  { sides: 6, name: "heksagoon", ex: "'n Sel in 'n heuningkoek" },
+  { sides: 8, name: "oktagoon", ex: "'n STOP-verkeersteken" },
+];
+function genPolyContext() {
+  const it = pick(POLY_CONTEXT);
+  const distract = shuffled(POLY.filter(p => p.sides !== it.sides)).slice(0, 3);
+  return mc(`${it.ex} het die vorm van watter poligoon?`,
+    shuffled([{ label: it.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
+    hint: "Tel hoeveel sye die voorbeeld het, en pas dit by die poligoon se naam.",
+    answerLabel: it.name,
+  });
+}
+
+/* ---------- s6b · Dele van 'n sirkel — Deel 2 (beskrywing → naam) ---------- */
+const CIRCLE_DESC = {
+  radius: "'n Reguit lyn van die middelpunt na die rand.",
+  middellyn: "'n Reguit lyn wat DEUR die middelpunt gaan, van rand tot rand.",
+  koord: "'n Reguit lyn tussen twee randpunte wat NIE deur die middelpunt gaan nie.",
+  sektor: "'n “Pizza-snytjie”-vorm tussen twee radiusse en 'n boog.",
+  omtrek: "Die afstand heeltemal rondom die sirkel.",
+  boog: "'n Stukkie van die sirkel se rand.",
+};
+function genCirclePartReverse() {
+  const it = pick(CIRCLE_PARTS);
+  const distract = shuffled(CIRCLE_PARTS.filter(p => p.key !== it.key)).slice(0, 3);
+  return mc(CIRCLE_DESC[it.key],
+    shuffled([{ label: it.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
+    hint: "Radius: middel→rand. Middellyn: oor die sirkel deur die middel. Koord: twee randpunte (nie deur die middel). Sektor: 'n “pizza-snytjie”. Boog: 'n stuk van die rand.",
+    answerLabel: it.name,
+  });
+}
+
+/* ---------- s7b · Tik die sirkeldeel — Deel 2 (beskrywing i.p.v. naam) ---------- */
+const TAP_PARTS_DESC = [
+  { key: "koord", q: "Tik die lyn wat twee randpunte verbind, maar NIE deur die middelpunt gaan nie." },
+  { key: "middelpunt", q: "Tik die punt heel binne-in die sirkel, in die middel." },
+  { key: "radius", q: "Tik die lyn wat van die middelpunt af reguit na die rand toe loop." },
+  { key: "boog", q: "Tik 'n stukkie van die sirkel se buitenste rand self." },
+];
+function genCircleTapReverse() {
+  const t = pick(TAP_PARTS_DESC);
+  return tap(t.q, t.key, circleTapFigure(t.key, ORANGE), {
+    hint: "Middelpunt = die kol in die middel · radius = lyn van die middel na die rand · koord = lyn tussen twee randpunte · boog = 'n stuk van die rand self.",
+    answerLabel: { koord: "die koord", middelpunt: "die middelpunt", radius: "die radius", boog: "die boog" }[t.key],
+  });
+}
+
+/* ---------- s8b · Radius & middellyn — Deel 2 (waar of onwaar 'n bewering) ---------- */
+function genDiameterTF(claimTrue) {
+  const r = randInt(2, 15);
+  const trueD = 2 * r;
+  const claimed = claimTrue ? trueD : wrongBy(trueD, [-6, -4, -2, 2, 4, 6]);
+  return tf(`'n Sirkel het 'n radius van ${code(r + " cm")}. Iemand sê die middellyn is ${code(claimed + " cm")}. Is hulle reg?`, claimTrue, {
+    figure: circleFigure("radius", ORANGE),
+    hint: "Middellyn = 2 × radius. Vermenigvuldig die radius met 2 en vergelyk met die bewering.",
+  });
+}
+
+/* ---------- s9b/s10b · Kongruent of gelykvormig — Deel 2 (waar of onwaar 'n stelling) ----------
+   Elke bewering se waarheid is VAS (nie 'n coin-flip binne een gen nie) — daarom EEN
+   funksie per bewering, dan die lys self geskommel gebou (soos CH3 se m2b-patroon). */
+function claimQ(text, isTrue) {
+  return () => tf(text, isTrue, {
+    figure: congruentFigure(pick([true, false]), ORANGE),
+    hint: "Kongruent = presies dieselfde vorm ÉN dieselfde grootte. Gelykvormig = dieselfde vorm, maar 'n ander grootte.",
+  });
+}
+const CONGRUENT_CLAIMS = [
+  claimQ("Kongruente vorms het presies dieselfde vorm ÉN dieselfde grootte.", true),
+  claimQ("Gelykvormige vorms het dieselfde vorm, maar kan 'n ANDER grootte hê.", true),
+  claimQ("Kongruente vorms kan verskillende groottes hê, solank hulle dieselfde vorm het.", false),
+  claimQ("Gelykvormige vorms moet altyd presies dieselfde grootte wees.", false),
+  claimQ("Twee vorms wat kongruent is, is OOK altyd gelykvormig.", true),
+];
+
 export const CH4 = {
   s1: { skills: Array.from({ length: 5 }, () => ({ concept: "driehoeke", gen: genTriBySides })) },
+  s1b: { skills: shuffled([true, true, false, false, true]).map(k => ({ concept: "driehoeke", gen: () => genTriBySidesTF(k) })) },
   s2: { skills: Array.from({ length: 5 }, () => ({ concept: "driehoeke", gen: genTriByAngles })) },
+  s2b: { skills: shuffled([true, false, true, false, true]).map(k => ({ concept: "driehoeke", gen: () => genTriByAnglesTF(k) })) },
   s3: { skills: Array.from({ length: 5 }, () => ({ concept: "hoeksom", gen: genAngleSum })) },
+  s3b: { skills: shuffled([true, true, false, false, true]).map(k => ({ concept: "hoeksom", gen: () => genAngleSumTF(k) })) },
   s4: { skills: Array.from({ length: 5 }, () => ({ concept: "vierhoeke", gen: genQuad })) },
+  s4b: { skills: Array.from({ length: 5 }, () => ({ concept: "vierhoeke", gen: genQuadReverse })) },
   s5: { skills: Array.from({ length: 5 }, () => ({ concept: "poligone", gen: genPoly })) },
+  s5b: { skills: Array.from({ length: 5 }, () => ({ concept: "poligone", gen: genPolyContext })) },
   s6: { skills: Array.from({ length: 5 }, () => ({ concept: "sirkeldele", gen: genCirclePart })) },
+  s6b: { skills: Array.from({ length: 5 }, () => ({ concept: "sirkeldele", gen: genCirclePartReverse })) },
   s7: { skills: Array.from({ length: 5 }, () => ({ concept: "sirkeldele", gen: genCircleTap })) },
+  s7b: { skills: Array.from({ length: 5 }, () => ({ concept: "sirkeldele", gen: genCircleTapReverse })) },
   s8: { skills: Array.from({ length: 5 }, () => ({ concept: "sirkeldele", gen: genDiameter })) },
+  s8b: { skills: shuffled([true, true, false, false, true]).map(k => ({ concept: "sirkeldele", gen: () => genDiameterTF(k) })) },
   s9: { skills: Array.from({ length: 5 }, () => ({ concept: "kongruent", gen: genCongruent })) },
+  s9b: { skills: shuffled(CONGRUENT_CLAIMS).map(gen => ({ concept: "kongruent", gen })) },
   s10: { skills: Array.from({ length: 5 }, () => ({ concept: "kongruent", gen: genCongruent })) },
+  s10b: { skills: shuffled(CONGRUENT_CLAIMS).map(gen => ({ concept: "kongruent", gen })) },
   s11: { skills: shuffled([
     genOppositeSide, genOppositeSide, genOppositeSide, genOppositeSide,
     genAdjacentSide, genAdjacentSide, genAdjacentSide,
@@ -287,3 +453,10 @@ export const CH4 = {
     genSymbolTick, genSymbolRight,
   ]).map(gen => ({ concept: "vierhoeksimbole", gen })) },
 };
+
+/* waar/onwaar-rondtes: die skill-inskrywing bepaal die ANTWOORD, so skommel
+   die volgorde elke speelslag — anders kan herspeel die W/O-patroon memoriseer
+   (selfde reël as hfst 3 se Deel-2-rondtes, sien play.js). */
+for (const id of ["s1b", "s2b", "s3b", "s8b", "s9b", "s10b"]) {
+  CH4[id].shuffleSkills = true;
+}
