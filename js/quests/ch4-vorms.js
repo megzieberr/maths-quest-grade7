@@ -481,11 +481,21 @@ function buildQuadPropOptions(key) {
   const truth = S_TRUTH[key];
   return S_PROPS.filter(p => truth[p.id] !== undefined).map(p => ({ label: p.label, correct: truth[p.id] }));
 }
+/* Die GEDEELDE QUADS-koordinate is ontwerp om saam met merkies gelees te word:
+   sonder versiering lyk daardie trapesium se bene gelyk (108 vs 111 px) en die
+   vlieër soos 'n ruit met vier 90°-hoeke (85,8°–92,6°). Vir s13 se skoon figure
+   kry dié twee vorms dus OORDREWE koordinate — bene 20%+ verskillend, hoeke
+   ≥10° weg van 90° — sodat wat die kind SIEN nooit die waarheidstabel weerspreek
+   nie. s4/s11/s12 se gedeelde punte bly onaangeraak (opt.pts is opt-in). */
+const S13_CLEAN_PTS = {
+  trapesium: [[105, 42], [175, 42], [215, 138], [25, 138]],   // sye 70/104/190/125 · hoeke 130/113/67/50
+  vlieer: [[120, 22], [175, 66], [120, 168], [65, 66]],       // sye 70,4/115,9 pare · hoeke 103/100/57/100
+};
 function genShapeProps(key) {
   const q = QUADS.find(x => x.key === key);
   const opts = buildQuadPropOptions(key);
   return multi(`Watter eienskappe pas by hierdie <b>${q.name}</b>?`, opts, {
-    figure: quadPropsFigure(key, ORANGE, { decor: "none", tapSides: false, tapCorners: false }),
+    figure: quadPropsFigure(key, ORANGE, { decor: "none", tapSides: false, tapCorners: false, pts: S13_CLEAN_PTS[key] }),
     instruction: "Tap AL die eienskappe wat pas, dan Stuur.",
     hint: "Dink aan die sye, dan die hoeke, dan die hoeklyne — tel hoeveel van elke soort gelyk is.",
   });

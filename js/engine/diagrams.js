@@ -736,7 +736,7 @@ const QP_CORNER_IDX = { A: 0, B: 1, C: 2, D: 3 };
    "wat beteken dit?"-vrae, sodat die vraag ondubbelsinnig is). */
 export function quadPropsFigure(kind, accent = "#ea580c", opt = {}) {
   const d = QUADS[kind] || QUADS.vierkant;
-  const p = d.pts;
+  const p = opt.pts || d.pts;   // opt.pts: eie koordinate (s13 se skoon figure) — verstek onveranderd
   const props = QUAD_PROPS[kind] || QUAD_PROPS.vierkant;
   const cx = (p[0][0] + p[1][0] + p[2][0] + p[3][0]) / 4, cy = (p[0][1] + p[1][1] + p[2][1] + p[3][1]) / 4;
   const poly = `<polygon points="${p.map(q => q.join(",")).join(" ")}" fill="${accent}" fill-opacity="0.13" stroke="${INK}" stroke-width="2.8" stroke-linejoin="round"/>`;
