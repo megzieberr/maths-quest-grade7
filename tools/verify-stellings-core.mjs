@@ -25,6 +25,7 @@ export const CENTERS = {
   triAngles: [110, 95],
   gelykbenig: [110, 90],
   buitehoek: [110, 90],
+  angle: [48, 142],   // ch3-meetkunde.js se angleFigure (m2b/m5b/m6b Deel 2) — hoekpunt is OX,OY daar
 };
 
 function parsePolylines(svg) {
