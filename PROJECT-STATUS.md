@@ -1,4 +1,4 @@
-# Project status — updated 2026-08-14 (evening: correction day round 2 SHIPPED — her live-playtest catches; migration-nuwe-rondtes.sql still gated on her preview play)
+# Project status — updated 2026-08-14 (evening: correction day round 2 SHIPPED — her live-playtest catches; migration-nuwe-rondtes.sql RAN — m1c + m11 live, see Pending on Megan)
 
 > **2026-08-14 evening (her playtest catches, pushed on her "push"):** five wording fixes
 > (aangrensende; rand→omtrek everywhere; radius sonder "(straal)" — straal is dié app se
