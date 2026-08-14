@@ -1,23 +1,27 @@
-# Project status — updated 2026-08-14 (Deel 2 built + CODE shipped live behind teacher preview; migration NOT run — her phone playtest gates it)
+# Project status — updated 2026-08-14 (evening: Deel 2 LIVE for the kids; m1c + m11 built & foreman-reviewed, local only — her check gates the push)
 
-> **2026-08-14 morning:** teacher preview mode (?preview=1, Circle Quest pattern) built
-> (Session 5, commit f5ec08a) and the WHOLE branch pushed to Pages on her go. Live-verified:
-> plain URL still boots to Teken in (kids' view unchanged — the 31 new rounds are in NO
-> quests row, `select count(*)` = 0, so learner maps filter them out entirely); ?preview=1
-> boots past auth with the "👁️ Juffrou-voorskou" banner, shows 20/23/20/32 rounds, plays
-> Deel 2 rounds, writes zero g7.* keys; admin has the "👁️ Voorskou as leerder" button.
-> Console clean. ONLY the migration still stands between the kids and the new rounds.
+> **2026-08-14 midday (foreman day, Fable ran the agents on her /go):** she played the
+> Deel 2 preview and said "run the migration" → migration-deel2.sql RAN on Homework Hub
+> (verified: 31/31 rows, all open) — **the class has Deel 2 now** (code was already live).
+> Then her two queued rounds were built by two Sonnet sessions, each foreman-reviewed
+> (diff read + DOM-played at 375px with own eyes): commits 9b336e1, 19d9031 (review fix),
+> bacab5c. NOTHING pushed — her check gates the deploy.
 
 ## Where we are
-Live site unchanged tonight. Locally, the whole Deel 2 build is DONE and foreman-reviewed:
-**31 new rounds** — m1b–m10b (ch3), s1b–s10b (ch4), t1b–t10b (ch5), plus her chat-requested
-**s13 "Eienskappe van vorms"** (shape name + CLEAN figure → tap the matching properties from
-a 10–13 list, truth-matrix driven). `supabase/migration-deel2.sql` is WRITTEN (31 ids, all
-seeded OPEN, idempotent) but **NOT RUN**. Repo is 8 commits ahead of origin (Session 1's
-archive/dashboard work + tonight): 1b3d0c1, 3a874a9, 77c86b6, cc6a28f, 34e7598, af9ba68,
-3cfa64e + status. Verify state at wrap: verify-stellings 19,860 diagrams 0 mismatches;
-fuzz-s13 and fuzz-ch5b (new harnesses) both green; every new mechanic DOM-played at phone
-width, 0 console errors.
+Live site: Deel 2 fully open to learners since midday (migration ran; sw auto-updates).
+Locally, TWO new rounds are done and reviewed, sitting 4 commits ahead of origin:
+- **m1c "Lees die gradeboog — ander kant"** (ch3, after m1b) — protractor engine got an
+  opt-in `baseSide:"left"` (default output byte-identical, proven by capture + the new
+  `tools/verify-gradeboog-c.mjs`, 32 angles 0 failures). Arm A left → correct reading is
+  the OUTER row; classic inner-row mistake rejected (DOM-verified).
+- **m11 "Refleks-hoeke met die sakrekenaar"** (ch3, after m10b) — new `calcdo` question
+  type: real reflex figure (`reflexFigure` in diagrams.js, "?" stays orange) + Blipwork's
+  Casio ported COMP-only (`js/calculator.js`, new `eq` event). Auto-passes when "="
+  shows 360 − klein; "Gaan my antwoord na ✓" commits a wrong display into the normal
+  wrong flow; Syntax ERROR/incomplete "=" never counts as an attempt.
+  `tools/fuzz-m11.mjs`: 500 questions + real key-press pipeline, 0 failures.
+`supabase/migration-nuwe-rondtes.sql` seeds BOTH rounds **CLOSED** — written, **NOT run**.
+All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
 
 ## Decisions
 (2026-07-22 install, 2026-08-10 day+night, 2026-08-11: see git history of this file / below.)
@@ -37,31 +41,32 @@ width, 0 console errors.
 - **2026-08-13** — migration-deel2.sql seeds **31** ids (30 b-rounds + s13), all is_open
   TRUE (her 2026-08-10 "Deel 2 seeds OPEN" ruling), sort band 300+.
 - **2026-08-13** — spelling for learner-facing property text: "Teenoorstaande", "parallel".
+- **2026-08-14** — migration-deel2.sql RAN on Homework Hub (31/31 verified) on her
+  explicit go after her phone playtest. Deel 2 is live content now.
+- **2026-08-14** — NEW-content rounds seed **CLOSED** in migration-nuwe-rondtes.sql (the
+  Deel 2 open-seeding ruling was specific to revision rounds of already-taught material).
+- **2026-08-14** — m1c's in-play prompt is deliberately identical to m1's: noticing which
+  side arm A is on IS the skill. The "ander kant" cue lives only in the round
+  title/blurb, the hint, and the figure itself.
+- **2026-08-14** — m11 pass semantics: auto-pass the moment "=" shows the right value; a
+  wrong "=" never auto-fails (only the "Gaan my antwoord na ✓" button commits it); Syntax
+  ERROR/incomplete never counts as an attempt; a bare typed answer is accepted (the
+  display is the check — no method policing).
 
 ## Pending on Megan
-- 📱 15 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/admin.html → tap
-  "👁️ Voorskou as leerder" → play the Deel 2 rounds + "Eienskappe van vorms" (round 23 in
-  2D Vorms). Happy? Say "run the migration" and the kids get them.
+- 💬 1 min **[blocking]**: happy for the two new rounds to go up hidden? Say **"push it
+  behind the preview"** — they're seeded closed + unseeded on live, so kids see nothing,
+  and then: 📱 5 min: open ?preview=1 on your phone → play m1c (rondte 3) + m11
+  (rondte 22) → happy? say "run the new migration + open them" (or keep them closed).
 - 💬 1 min **[whenever]**: t6b (dubbele 180°-rotasie) is correct but all 5 questions share
   the one "you land back where you started" trick — say if you want more variety mixed in.
 
 ## Next up
-- Her review of the 31 rounds → then the ship step in a Fable session (run plan § "Ship
-  plan"): run migration-deel2.sql on Homework Hub (ref wjkhedepwnwrqcpxmkds) → git push
-  (Pages; sw auto-updates) → live verify (play one b-round + s13 as test learner, b-rounds
-  show OPEN). Session 1's archive/dashboard work rides along in the same push.
-- Then her queued ask: **weekly winners** (Circle Quest pattern — see 2026-08-11 entry
-  below/git history: three awards to three different learners, g7_ RPCs in a NEW migration;
-  ⚠️ the weekly_anchor vs date_trunc('week') design call is HERS before building).
-- **Her round ideas 2026-08-14 (for the next build session):**
-  1. Protractor round reading from the OTHER side — 0° on the LEFT, so the correct reading
-     comes off the other row than usual (extend js/engine/protractor.js carefully; the
-     dual-scale drawing itself is sacred, this is an orientation/arm variant).
-  2. Reflex-angle CALCULATOR round (her upgrade 2026-08-14): show a REFLEX angle figure,
-     give the smaller angle (e.g. 50°) — the learner gets the Blipwork in-app Casio
-     (port js/calculator.js from maths-homework-quest, COMP arithmetic only, strip the
-     stats mode) and literally types 360 − 50 = ; the round watches the display via the
-     calculator's onEvent hook and passes when the right answer shows. Copy the calc CSS
-     too. (Reconcile with m10's existing genReflexFromInner; check what m10 draws first.)
+- Ship step for m1c + m11 after her check (Fable session): git push (Pages, sw
+  auto-updates) → run migration-nuwe-rondtes.sql on Homework Hub (wjkhedepwnwrqcpxmkds) —
+  decide open-or-closed at that moment → live verify as test learner/preview.
+- Then her queued ask: **weekly winners** (Circle Quest pattern — three awards to three
+  different learners, g7_ RPCs in a NEW migration; ⚠️ the weekly_anchor vs
+  date_trunc('week') design call is HERS before building).
 - Still floated from Sunday: traps in st28–st32; "Tap" retro-fit in old s7; trap-style
   questions in Deel 2 rounds where the pattern fits.
