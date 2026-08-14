@@ -537,7 +537,7 @@ export function buitehoekFigure(angA, angB, accent = "#16a34a", opt = {}) {
   const dot = p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="${INK}"/>`;
 
   const base = line(pA, pB) + line(pB, pC) + line(pA, pC) + line(pC, pD)
-    + arrowHead(pD[0], pD[1], angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK)
+    + arrowHead(pD[0], pD[1], -angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK) /* −1×: angleOfVec is y-op, arrowHead se hoek is y-af */
     + dot(pA) + dot(pB) + dot(pC);
 
   let marks, labels;
@@ -617,7 +617,7 @@ export function buitehoekBentFigure(angA, angB, accent = "#16a34a", opt = {}) {
   const dot = p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="${INK}"/>`;
 
   const base = line(pA, pB) + line(pB, pC) + line(pA, pC) + line(pC, pD)
-    + arrowHead(pD[0], pD[1], angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK)
+    + arrowHead(pD[0], pD[1], -angleOfVec([pD[0] - pC[0], pD[1] - pC[1]]), INK) /* −1×: angleOfVec is y-op, arrowHead se hoek is y-af */
     + dot(pA) + dot(pB) + dot(pC);
 
   const ask = !!opt.ask;
