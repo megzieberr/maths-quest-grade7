@@ -2,7 +2,7 @@
    HOOFSTUK 5 — TRANSFORMASIES  (met diagramme, soos Circle Quest)
    ============================================================ */
 import { mc, tf, calc, coord, randInt, pick, shuffled, code } from "./_shared.js";
-import { transformFigure, pointFigure, reflectFigure, rotateFigure, shapeFigure, enlargeFigure } from "../engine/diagrams.js";
+import { transformFigure, pointFigure, twoPointFigure, reflectFigure, rotateFigure, shapeFigure, enlargeFigure } from "../engine/diagrams.js";
 
 const ACC = "#db2777";
 
@@ -217,15 +217,19 @@ function genContextName() {
   });
 }
 
-/* ---------- t2b · Translasie & koördinate — Deel 2 (gee A en A′, kry die translasie) ---------- */
+/* ---------- t2b · Translasie & koördinate — Deel 2 (gee A en A′, kry die translasie) ----------
+   Haar 2026-08-14 versoek: albei punte word GEPLOT (twoPointFigure) sodat die
+   leerder die spronge kan tel — dus word dx/dy so gekies dat A′ ook op die
+   assestelsel pas (|x+dx| ≤ 6 en |y+dy| ≤ 6, die rooster se RANGE). */
 function genTranslateReverse() {
   const x = randInt(-5, 5), y = randInt(-5, 5);
-  const dx = randInt(1, 6) * pick([1, -1]), dy = randInt(1, 6) * pick([1, -1]);
+  const fits = c => [1, 2, 3, 4, 5, 6].flatMap(m => [m, -m]).filter(d => Math.abs(c + d) <= 6);
+  const dx = pick(fits(x)), dy = pick(fits(y));
   const x2 = x + dx, y2 = y + dy;
   return coord(`Punt A is by ${code(`(${x} ; ${y})`)} en ná 'n translasie is dit by A′ ${code(`(${x2} ; ${y2})`)}. Wat was die translasie? Tik dit as ${code("dx ; dy")}.`,
     { x: dx, y: dy }, {
-    figure: pointFigure(x, y, ACC),
-    hint: "Trek die ORIGINELE koördinate van die NUWE koördinate af: dx = x₂ − x₁, dy = y₂ − y₁.",
+    figure: twoPointFigure(x, y, x2, y2, ACC),
+    hint: "Tel die blokkies op die vlak van A na A′ (regs/op is +, links/af is −), of trek af: dx = x₂ − x₁, dy = y₂ − y₁.",
     answerLabel: `(${dx} ; ${dy})`,
     solution: [{ s: `dx: ${x2} − ${x} = ${dx}`, r: "" }, { s: `dy: ${y2} − ${y} = ${dy}`, r: "" }],
   });
@@ -351,7 +355,18 @@ export const CH5 = {
   t1: { skills: Array.from({ length: 5 }, () => ({ concept: "transformasie", gen: genName })) },
   t1b: { skills: Array.from({ length: 5 }, () => ({ concept: "transformasie", gen: genContextName })) },
   t2: { skills: Array.from({ length: 5 }, () => ({ concept: "translasie", gen: genTranslate })) },
-  t2b: { skills: Array.from({ length: 5 }, () => ({ concept: "translasie", gen: genTranslateReverse })) },
+  t2b: {
+    /* haar 2026-08-14 versoek: één uitgewerkte voorbeeld HEEL EERSTE
+       (dieselfde vasgespelde 📖 Leer-kaart as ch6 se intro-rondtes). */
+    lesson: {
+      title: "Voorbeeld: kry die translasie",
+      figure: twoPointFigure(2, 1, 5, -1, ACC),
+      body: `<p>Punt A is by <code>(2 ; 1)</code> en ná 'n translasie is dit by A′ <code>(5 ; -1)</code>. Wat was die translasie?</p>
+        <p><b>Tel die spronge van A na A′:</b> <b>3 blokkies regs</b> (x: <code>5 − 2 = 3</code>) en <b>2 blokkies af</b> (y: <code>-1 − 1 = -2</code>).</p>
+        <p>Die translasie is <code>(3 ; -2)</code> — jy tik dit in as <code>3 ; -2</code>. Regs en op is +, links en af is −.</p>`,
+    },
+    skills: Array.from({ length: 5 }, () => ({ concept: "translasie", gen: genTranslateReverse })),
+  },
   t3: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genReflectAxis })) },
   t3b: { skills: shuffled([true, true, false, false, true]).map(k => ({ concept: "refleksie", gen: () => genReflectVerify(k) })) },
   t4: { skills: Array.from({ length: 5 }, () => ({ concept: "rotasie", gen: genReflectPoint })) },

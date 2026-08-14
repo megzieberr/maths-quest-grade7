@@ -123,6 +123,27 @@ export function pointFigure(x, y, accent = "#db2777") {
   return svgGrid(gridBg() + dot + lbl);
 }
 
+/* t2b — translasie: wys A ÉN A′ met 'n stippelpyl tussenin, sodat die
+   leerder die spronge op die vlak kan TEL. Etikette anker weg van die
+   naaste rand van die assestelsel sodat lang koördinate nie afsny nie. */
+export function twoPointFigure(x1, y1, x2, y2, accent = "#db2777") {
+  const A2 = "#7c3aed", ARR = "#94a3b8";
+  const [p1x, p1y] = gpx(x1, y1), [p2x, p2y] = gpx(x2, y2);
+  const dxs = p2x - p1x, dys = p2y - p1y, len = Math.hypot(dxs, dys);
+  const t = Math.max(0, (len - 10) / len);
+  const ex = p1x + dxs * t, ey = p1y + dys * t;
+  const ang = Math.atan2(dys, dxs) * 180 / Math.PI;   /* skerm-hoek (y-af) — presies arrowHead se konvensie */
+  const arrow = `<line x1="${f(p1x)}" y1="${f(p1y)}" x2="${f(ex)}" y2="${f(ey)}" stroke="${ARR}" stroke-width="2.4" stroke-dasharray="5 4"/>` + arrowHead(ex, ey, ang, ARR, 7);
+  const lbl = (px, py, txt, col) => {
+    const anchor = px > OX + 30 ? "end" : "start";
+    const tx = anchor === "end" ? px - 9 : px + 9;
+    const ty = py < OY - RANGE * S + 20 ? py + 20 : py - 9;
+    return `<text x="${f(tx)}" y="${f(ty)}" text-anchor="${anchor}" font-family="Fredoka, sans-serif" font-size="14" font-weight="600" fill="${col}">${txt}</text>`;
+  };
+  const dots = `<circle cx="${p1x}" cy="${p1y}" r="5.5" fill="${accent}"/>` + `<circle cx="${p2x}" cy="${p2y}" r="5.5" fill="${A2}"/>`;
+  return svgGrid(gridBg() + arrow + dots + lbl(p1x, p1y, `A (${x1} ; ${y1})`, accent) + lbl(p2x, p2y, `A′ (${x2} ; ${y2})`, A2));
+}
+
 /* t4 — simmetrie: wys die vorm (sonder die lyne) */
 const SHCX = 135, SHCY = 105, SHR = 70;
 function regPoly(n, startDeg) {
