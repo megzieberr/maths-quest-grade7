@@ -45,5 +45,15 @@ width, 0 console errors.
 - Then her queued ask: **weekly winners** (Circle Quest pattern — see 2026-08-11 entry
   below/git history: three awards to three different learners, g7_ RPCs in a NEW migration;
   ⚠️ the weekly_anchor vs date_trunc('week') design call is HERS before building).
+- **Her round ideas 2026-08-14 (for the next build session):**
+  1. Protractor round reading from the OTHER side — 0° on the LEFT, so the correct reading
+     comes off the other row than usual (extend js/engine/protractor.js carefully; the
+     dual-scale drawing itself is sacred, this is an orientation/arm variant).
+  2. Reflex-angle CALCULATOR round (her upgrade 2026-08-14): show a REFLEX angle figure,
+     give the smaller angle (e.g. 50°) — the learner gets the Blipwork in-app Casio
+     (port js/calculator.js from maths-homework-quest, COMP arithmetic only, strip the
+     stats mode) and literally types 360 − 50 = ; the round watches the display via the
+     calculator's onEvent hook and passes when the right answer shows. Copy the calc CSS
+     too. (Reconcile with m10's existing genReflexFromInner; check what m10 draws first.)
 - Still floated from Sunday: traps in st28–st32; "Tap" retro-fit in old s7; trap-style
   questions in Deel 2 rounds where the pattern fits.
