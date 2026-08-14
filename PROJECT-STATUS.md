@@ -1,4 +1,14 @@
-# Project status — updated 2026-08-14 (evening: Deel 2 LIVE; m1c + m11 PUSHED behind the teacher preview — her preview play gates the migration)
+# Project status — updated 2026-08-14 (late afternoon: correction day SHIPPED — arrows fixed, m10 got the Casio; migration-nuwe-rondtes.sql still gated on her preview play)
+
+> **2026-08-14 correction day (her /go + "fix the bent arrow and then you can ship"):**
+> four commits built, foreman-reviewed and PUSHED LIVE: (1) parallel marks are now real
+> chevrons drawn ON the line (parMark in diagrams.js) instead of the floating "›" glyph
+> she screenshotted — incl. rotated marks on slanted quad sides; (2) m10's three
+> calculation questions converted to calcdo — the kids type 360−104= on the in-app Casio
+> (genReflexIdentify stays mc; new tools/fuzz-m10.mjs, 0 failures); (3) the bent-ray
+> buitehoek arrowhead was y-mirrored (~46° off) — angleOfVec is y-up, arrowHead is
+> y-down; fixed by negating at both call sites (verify-stellings: 19,860 diagrams,
+> 0 mismatches). m3 + m10 are open rounds, so these went live to the class on push.
 
 > **2026-08-14 late:** on her go, the 4 local commits were pushed to Pages and
 > live-verified: plain URL boots to Teken in (kids see nothing new — m1c/m11 have no
@@ -15,8 +25,10 @@
 > bacab5c. NOTHING pushed — her check gates the deploy.
 
 ## Where we are
-Live site: Deel 2 fully open to learners since midday (migration ran; sw auto-updates).
-Locally, TWO new rounds are done and reviewed, sitting 4 commits ahead of origin:
+Live site: Deel 2 fully open to learners since midday yesterday (migration ran; sw
+auto-updates), PLUS today's correction-day fixes (chevron parallel marks, m10 Casio,
+bent-ray arrowhead). The two NEW rounds are pushed but only visible in ?preview=1
+until migration-nuwe-rondtes.sql runs:
 - **m1c "Lees die gradeboog — ander kant"** (ch3, after m1b) — protractor engine got an
   opt-in `baseSide:"left"` (default output byte-identical, proven by capture + the new
   `tools/verify-gradeboog-c.mjs`, 32 angles 0 failures). Arm A left → correct reading is
@@ -59,19 +71,26 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   wrong "=" never auto-fails (only the "Gaan my antwoord na ✓" button commits it); Syntax
   ERROR/incomplete never counts as an attempt; a bare typed answer is accepted (the
   display is the check — no method policing).
+- **2026-08-14 (correction day)** — her call: old m10's calculation questions ALSO use the
+  Casio (calcdo), not just m11 — kids should literally type 360−104=. m11's remaining
+  distinctive is its reflex FIGURE. genReflexIdentify stays mc (recognition, no sum).
+- **2026-08-14 (correction day)** — parallel-mark notation is DRAWN chevrons on the line
+  (parMark, y-up angleOfVec convention), never text glyphs. Convention rule for
+  diagrams.js: angleOfVec/arcPoly are y-UP, arrowHead's ang is y-DOWN — negate when
+  feeding one to the other (the bent-ray arrowhead bug was exactly this).
 
 ## Pending on Megan
-- 📱 5 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/?preview=1 →
-  Reguitlyn Meetkunde → play m1c (rondte 3, "ander kant") + m11 (rondte 22, sakrekenaar)
-  → happy? say "run the new migration" (they seed CLOSED; add "and open them" if you
-  want them live to the kids straight away).
+- 📱 7 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/?preview=1 →
+  Meetkunde → play m1c (rondte 3, "ander kant") + m11 (rondte 22, sakrekenaar), and
+  eyeball today's fixes on the live rounds (m3 arrows, m10 Casio) → happy? say "run the
+  new migration" (m1c+m11 seed CLOSED; add "and open them" to put them straight on the
+  kids' maps).
 - 💬 1 min **[whenever]**: t6b (dubbele 180°-rotasie) is correct but all 5 questions share
   the one "you land back where you started" trick — say if you want more variety mixed in.
 
 ## Next up
-- Ship step for m1c + m11 after her check (Fable session): git push (Pages, sw
-  auto-updates) → run migration-nuwe-rondtes.sql on Homework Hub (wjkhedepwnwrqcpxmkds) —
-  decide open-or-closed at that moment → live verify as test learner/preview.
+- On her "run the migration": run migration-nuwe-rondtes.sql on Homework Hub
+  (wjkhedepwnwrqcpxmkds) — open-or-closed decided at that moment → live verify.
 - Then her queued ask: **weekly winners** (Circle Quest pattern — three awards to three
   different learners, g7_ RPCs in a NEW migration; ⚠️ the weekly_anchor vs
   date_trunc('week') design call is HERS before building).
