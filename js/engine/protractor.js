@@ -40,8 +40,8 @@ export function renderProtractor(theta, opts = {}) {
   }
 
   // basis-arm A se posisie: regs (0°, standaard) of links (180°, ander kant).
-  // die bewegende arm B lê altyd `theta` grade van arm A af, gemeet die REGTE kant toe
-  // sodat die hoek AÔB steeds `theta` is, om die aardse eise.
+  // die bewegende arm B lê altyd `theta` grade van arm A af, sodat die hoek
+  // AÔB steeds `theta` is — net die leesrigting (binneste/buitenste ry) verskil.
   const armA = baseSide === "left" ? 180 : 0;
   const armB = baseSide === "left" ? 180 - theta : theta;
 
