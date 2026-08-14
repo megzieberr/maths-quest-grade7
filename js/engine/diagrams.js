@@ -882,5 +882,5 @@ export function circleTapFigure(target, accent = "#0d9488") {
   const tapBoog = hit("boog", arcPoly(cx, cy, r, 118, 167, "transparent", 22) + boog);
   // teken volgorde: areas onder, sigbare bo reeds ingesluit
   return svgWrap(base + tapKoord + tapRad + tapBoog + tapMid,
-    "0 0 270 220", 260, "Sirkel — tik die regte deel") ;
+    "0 0 270 220", 260, "Sirkel — klik op die regte deel") ;
 }

@@ -99,7 +99,7 @@ function genPoly() {
 
 /* ============ s6 · Dele van 'n sirkel (benoem) ============ */
 const CIRCLE_PARTS = [
-  { key: "radius", name: "radius (straal)" }, { key: "middellyn", name: "middellyn (deursnee)" },
+  { key: "radius", name: "radius" }, { key: "middellyn", name: "middellyn (deursnee)" },
   { key: "koord", name: "koord" }, { key: "sektor", name: "sektor" },
   { key: "omtrek", name: "omtrek" }, { key: "boog", name: "boog" },
 ];
@@ -109,22 +109,22 @@ function genCirclePart() {
   return mc("Wat noem ons die <b>gemerkte</b> deel van die sirkel?",
     shuffled([{ label: it.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
     figure: circleFigure(it.key, ORANGE),
-    hint: "Radius: middel→rand. Middellyn: oor die sirkel deur die middel. Koord: twee randpunte (nie deur die middel). Sektor: 'n “pizza-snytjie”. Boog: 'n stuk van die rand.",
+    hint: "Radius: middel→omtrek. Middellyn: oor die sirkel deur die middel. Koord: twee punte op die omtrek (nie deur die middel). Sektor: 'n “pizza-snytjie”. Boog: 'n stuk van die omtrek.",
     answerLabel: it.name,
   });
 }
 
-/* ============ s7 · Tik die sirkeldeel ============ */
+/* ============ s7 · Klik op die sirkeldeel ============ */
 const TAP_PARTS = [
-  { key: "koord", q: "Tik die <b>koord</b> op die sirkel." },
-  { key: "middelpunt", q: "Tik die <b>middelpunt</b> van die sirkel." },
-  { key: "radius", q: "Tik die <b>radius</b> van die sirkel." },
-  { key: "boog", q: "Tik die <b>boog</b> op die sirkel." },
+  { key: "koord", q: "Klik op die <b>koord</b> op die sirkel." },
+  { key: "middelpunt", q: "Klik op die <b>middelpunt</b> van die sirkel." },
+  { key: "radius", q: "Klik op die <b>radius</b> van die sirkel." },
+  { key: "boog", q: "Klik op die <b>boog</b> op die sirkel." },
 ];
 function genCircleTap() {
   const t = pick(TAP_PARTS);
   return tap(t.q, t.key, circleTapFigure(t.key, ORANGE), {
-    hint: "Middelpunt = die kol in die middel · radius = lyn van die middel na die rand · koord = lyn tussen twee randpunte · boog = 'n stuk van die rand self.",
+    hint: "Middelpunt = die kol in die middel · radius = lyn van die middel na die omtrek · koord = lyn tussen twee punte op die omtrek · boog = 'n stuk van die omtrek self.",
     answerLabel: { koord: "die koord", middelpunt: "die middelpunt", radius: "die radius", boog: "die boog" }[t.key],
   });
 }
@@ -334,7 +334,7 @@ const QUAD_DESC = {
   ruit: "4 gelyke sye, maar GEEN regte hoeke nie.",
   parallelogram: "2 pare ewewydige sye en 2 pare gelyke sye, maar nie al 4 sye ewe lank nie en geen regte hoeke nie.",
   trapesium: "net EEN paar ewewydige sye.",
-  vlieer: "2 pare langsaan-liggende gelyke sye, en geen paar sye is ewewydig nie.",
+  vlieer: "2 pare aangrensende gelyke sye, en geen paar sye is ewewydig nie.",
 };
 function genQuadReverse() {
   const q = pick(QUADS);
@@ -357,43 +357,44 @@ const POLY_CONTEXT = [
 function genPolyContext() {
   const it = pick(POLY_CONTEXT);
   const distract = shuffled(POLY.filter(p => p.sides !== it.sides)).slice(0, 3);
-  return mc(`${it.ex} het die vorm van watter poligoon?`,
+  return mc(`${it.ex} het hierdie vorm. Watter poligoon is dit?`,
     shuffled([{ label: it.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
-    hint: "Tel hoeveel sye die voorbeeld het, en pas dit by die poligoon se naam.",
+    figure: polygonFigure(it.sides, ORANGE),
+    hint: "Tel die sye op die figuur, en pas dit by die poligoon se naam.",
     answerLabel: it.name,
   });
 }
 
 /* ---------- s6b · Dele van 'n sirkel — Deel 2 (beskrywing → naam) ---------- */
 const CIRCLE_DESC = {
-  radius: "'n Reguit lyn van die middelpunt na die rand.",
-  middellyn: "'n Reguit lyn wat DEUR die middelpunt gaan, van rand tot rand.",
-  koord: "'n Reguit lyn tussen twee randpunte wat NIE deur die middelpunt gaan nie.",
+  radius: "'n Reguit lyn van die middelpunt na die omtrek.",
+  middellyn: "'n Reguit lyn wat DEUR die middelpunt gaan, van een kant van die omtrek na die ander.",
+  koord: "'n Reguit lyn tussen twee punte op die omtrek wat NIE deur die middelpunt gaan nie.",
   sektor: "'n “Pizza-snytjie”-vorm tussen twee radiusse en 'n boog.",
   omtrek: "Die afstand heeltemal rondom die sirkel.",
-  boog: "'n Stukkie van die sirkel se rand.",
+  boog: "'n Stukkie van die sirkel se omtrek.",
 };
 function genCirclePartReverse() {
   const it = pick(CIRCLE_PARTS);
   const distract = shuffled(CIRCLE_PARTS.filter(p => p.key !== it.key)).slice(0, 3);
   return mc(CIRCLE_DESC[it.key],
     shuffled([{ label: it.name, correct: true }, ...distract.map(d => ({ label: d.name, correct: false }))]), {
-    hint: "Radius: middel→rand. Middellyn: oor die sirkel deur die middel. Koord: twee randpunte (nie deur die middel). Sektor: 'n “pizza-snytjie”. Boog: 'n stuk van die rand.",
+    hint: "Radius: middel→omtrek. Middellyn: oor die sirkel deur die middel. Koord: twee punte op die omtrek (nie deur die middel). Sektor: 'n “pizza-snytjie”. Boog: 'n stuk van die omtrek.",
     answerLabel: it.name,
   });
 }
 
-/* ---------- s7b · Tik die sirkeldeel — Deel 2 (beskrywing i.p.v. naam) ---------- */
+/* ---------- s7b · Klik op die sirkeldeel — Deel 2 (beskrywing i.p.v. naam) ---------- */
 const TAP_PARTS_DESC = [
-  { key: "koord", q: "Tik die lyn wat twee randpunte verbind, maar NIE deur die middelpunt gaan nie." },
-  { key: "middelpunt", q: "Tik die punt heel binne-in die sirkel, in die middel." },
-  { key: "radius", q: "Tik die lyn wat van die middelpunt af reguit na die rand toe loop." },
-  { key: "boog", q: "Tik 'n stukkie van die sirkel se buitenste rand self." },
+  { key: "koord", q: "Klik op die lyn wat twee punte op die omtrek verbind, maar NIE deur die middelpunt gaan nie." },
+  { key: "middelpunt", q: "Klik op die punt heel binne-in die sirkel, in die middel." },
+  { key: "radius", q: "Klik op die lyn wat van die middelpunt af reguit na die omtrek toe loop." },
+  { key: "boog", q: "Klik op 'n stukkie van die sirkel se omtrek self." },
 ];
 function genCircleTapReverse() {
   const t = pick(TAP_PARTS_DESC);
   return tap(t.q, t.key, circleTapFigure(t.key, ORANGE), {
-    hint: "Middelpunt = die kol in die middel · radius = lyn van die middel na die rand · koord = lyn tussen twee randpunte · boog = 'n stuk van die rand self.",
+    hint: "Middelpunt = die kol in die middel · radius = lyn van die middel na die omtrek · koord = lyn tussen twee punte op die omtrek · boog = 'n stuk van die omtrek self.",
     answerLabel: { koord: "die koord", middelpunt: "die middelpunt", radius: "die radius", boog: "die boog" }[t.key],
   });
 }

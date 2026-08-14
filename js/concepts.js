@@ -104,7 +104,7 @@ const C = {
     <p>So: <b>refleks-hoek = 360° − die kleiner hoek</b>. Bv. kleiner hoek 110° → refleks = <code>360 − 110 = 250°</code>.</p>` },
   sirkeldele: { title: "Dele van 'n sirkel", body: `
     <ul>
-      <li><b>Radius (straal):</b> van die middelpunt na die omtrek.</li>
+      <li><b>Radius:</b> van die middelpunt na die omtrek.</li>
       <li><b>Middellyn (deursnee):</b> oor die sirkel deur die middel. <code>Middellyn = 2 × radius</code>.</li>
       <li><b>Koord:</b> verbind twee punte op die omtrek, nie deur die middel nie.</li>
       <li><b>Sektor:</b> 'n stuk tussen twee radiusse.</li>
