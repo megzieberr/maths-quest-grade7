@@ -1,4 +1,11 @@
-# Project status — updated 2026-08-14 (evening: Deel 2 LIVE for the kids; m1c + m11 built & foreman-reviewed, local only — her check gates the push)
+# Project status — updated 2026-08-14 (evening: Deel 2 LIVE; m1c + m11 PUSHED behind the teacher preview — her preview play gates the migration)
+
+> **2026-08-14 late:** on her go, the 4 local commits were pushed to Pages and
+> live-verified: plain URL boots to Teken in (kids see nothing new — m1c/m11 have no
+> quests rows, SQL-confirmed empty); ?preview=1 shows "Juffrou-voorskou", meetkunde
+> = 22 rounds with both new ones on the map; js/calculator.js serves live with the eq
+> hook; 0 console errors. migration-nuwe-rondtes.sql still NOT run — that's the switch
+> that puts the rounds on learner maps (seeds them CLOSED even then).
 
 > **2026-08-14 midday (foreman day, Fable ran the agents on her /go):** she played the
 > Deel 2 preview and said "run the migration" → migration-deel2.sql RAN on Homework Hub
@@ -54,10 +61,10 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   display is the check — no method policing).
 
 ## Pending on Megan
-- 💬 1 min **[blocking]**: happy for the two new rounds to go up hidden? Say **"push it
-  behind the preview"** — they're seeded closed + unseeded on live, so kids see nothing,
-  and then: 📱 5 min: open ?preview=1 on your phone → play m1c (rondte 3) + m11
-  (rondte 22) → happy? say "run the new migration + open them" (or keep them closed).
+- 📱 5 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/?preview=1 →
+  Reguitlyn Meetkunde → play m1c (rondte 3, "ander kant") + m11 (rondte 22, sakrekenaar)
+  → happy? say "run the new migration" (they seed CLOSED; add "and open them" if you
+  want them live to the kids straight away).
 - 💬 1 min **[whenever]**: t6b (dubbele 180°-rotasie) is correct but all 5 questions share
   the one "you land back where you started" trick — say if you want more variety mixed in.
 
