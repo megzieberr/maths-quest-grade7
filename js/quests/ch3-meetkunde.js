@@ -149,29 +149,36 @@ function genVerticalQ() {
   });
 }
 
-/* ============ m10 · Inspringende (refleks) hoeke (360 − kleiner) ============ */
+/* ============ m10 · Inspringende (refleks) hoeke (360 − kleiner) ============
+   Rekenvrae hier is "calcdo" — die leerder tik die berekening letterlik op
+   die ingeboude Casio (sien js/calculator.js + genReflexCalc in m11 vir
+   dieselfde bouer/meganika). genReflexIdentify (mc) is 'n herkenningsvraag
+   sonder berekening, so dié bly "mc". */
 function genReflexFromInner() {
   const inner = randInt(20, 175);
-  return calc(`Die kleiner hoek is ${code(inner + "°")}. Wat is die inspringende (refleks) hoek?`, 360 - inner, {
-    unit: "°",
-    hint: "Die kleiner hoek en die refleks-hoek maak saam 'n volle draai (360°). Trek dus die kleiner hoek van 360° af.",
-    solution: [{ s: `360 − ${inner} = ${360 - inner}`, r: "volle draai = 360°" }],
+  const expected = 360 - inner;
+  return calcdo(`Die kleiner hoek is ${code(inner + "°")}. Wat is die inspringende (refleks) hoek?`, expected, {
+    hint: "Die kleiner hoek en die refleks-hoek maak saam 'n volle draai (360°). Tik 360 − die kleiner hoek op die sakrekenaar, dan =.",
+    solution: [{ s: `360 − ${inner} = ${expected}`, r: "volle draai = 360°" }],
+    answerLabel: `${expected}°`,
   });
 }
 function genReflexAroundPoint() {
   const a = randInt(30, 170);
-  return calc(`Hoeke rondom 'n punt maak saam ${code("360°")}. Een hoek is ${code(a + "°")}. Wat is die ander (refleks) hoek rondom die punt?`, 360 - a, {
-    unit: "°",
-    hint: "Al die hoeke rondom 'n punt tel saam tot 360°. Trek die gegewe hoek van 360° af.",
-    solution: [{ s: `360 − ${a} = ${360 - a}`, r: "" }],
+  const expected = 360 - a;
+  return calcdo(`Hoeke rondom 'n punt maak saam ${code("360°")}. Een hoek is ${code(a + "°")}. Wat is die ander (refleks) hoek rondom die punt?`, expected, {
+    hint: "Al die hoeke rondom 'n punt tel saam tot 360°. Tik 360 − die gegewe hoek op die sakrekenaar, dan =.",
+    solution: [{ s: `360 − ${a} = ${expected}`, r: "" }],
+    answerLabel: `${expected}°`,
   });
 }
 function genReflexReverse() {
   const reflex = randInt(185, 340);
-  return calc(`'n Refleks-hoek is ${code(reflex + "°")}. Wat is die kleiner hoek?`, 360 - reflex, {
-    unit: "°",
-    hint: "Die refleks-hoek en die kleiner hoek maak saam 360°. Trek die refleks-hoek van 360° af.",
-    solution: [{ s: `360 − ${reflex} = ${360 - reflex}`, r: "" }],
+  const expected = 360 - reflex;
+  return calcdo(`'n Refleks-hoek is ${code(reflex + "°")}. Wat is die kleiner hoek?`, expected, {
+    hint: "Die refleks-hoek en die kleiner hoek maak saam 360°. Tik 360 − die refleks-hoek op die sakrekenaar, dan =.",
+    solution: [{ s: `360 − ${reflex} = ${expected}`, r: "" }],
+    answerLabel: `${expected}°`,
   });
 }
 function genReflexIdentify() {
@@ -352,10 +359,10 @@ function genReflexTF(claimTrue) {
 }
 
 /* ============ m11 · Refleks-hoeke met die sakrekenaar (hands-on Casio) ============
-   Reguit gesuster van m10 (wat NET tik-die-getal is, geen figuur nie) —
-   m11 wys 'n EGTE refleks-figuur ÉN laat die leerder letterlik
-   360 − klein op die ingeboude Casio tik. Sien js/calculator.js +
-   questions.js se "calcdo"-tipe vir die meganika. */
+   Soos m10 se rekenvrae (calcdo, dieselfde bouer) — die verskil is dat m11
+   ELKE vraag 'n EGTE refleks-figuur wys (m10 se calcdo-vrae het nog geen
+   figuur nie). Sien js/calculator.js + questions.js se "calcdo"-tipe vir
+   die meganika. */
 function genReflexCalc() {
   const small = randInt(5, 30) * 5;            // 25…150
   const expected = 360 - small;
