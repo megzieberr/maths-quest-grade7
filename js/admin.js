@@ -165,11 +165,14 @@ function learnerSection(rows, inactiveDays) {
   const sec = el("div", "card adm-section");
   const head = el("div", "adm-lhead", `<h2>Learners (${rows.length})</h2>`);
   const btns = el("div", "adm-lbtns");
+  const preview = el("button", "btn ghost small", "👁️ Voorskou as leerder");
+  preview.title = "Open the game as a learner would see it, with every built round unlocked — nothing is saved";
+  preview.addEventListener("click", () => window.open("index.html?preview=1", "_blank", "noopener"));
   const wk = el("button", "btn ghost small", "↺ Reset weekly");
   wk.addEventListener("click", async () => { if (!confirm("Reset the weekly board to zero for everyone? (All-time XP is kept.)")) return; wk.disabled = true; await api.adminResetWeekly(pw); reload(); });
   const csv = el("button", "btn ghost small", "Export CSV");
   csv.addEventListener("click", () => exportCsv(rows));
-  btns.appendChild(wk); btns.appendChild(csv);
+  btns.appendChild(preview); btns.appendChild(wk); btns.appendChild(csv);
   head.appendChild(btns);
   sec.appendChild(head);
 

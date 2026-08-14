@@ -389,3 +389,17 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 
 /* ---------- HUB · daily-quest tile ---------- */
 .daily-card{cursor:pointer}
+
+/* ---------- onderwyser "voorskou as leerder"-strook ----------
+   Blywend sigbaar bo-op alles terwyl ?preview=1 loop (app.js se
+   previewBanner). Fixed onderaan, soos Circle Quest se weergawe —
+   .view het reeds 110px onderste-opvulling vir ander vaste elemente,
+   so ons gee hom nog bietjie meer sodat die strook nooit inhoud
+   oordek nie. */
+.preview-banner{position:fixed;left:0;right:0;bottom:0;z-index:240;display:flex;align-items:center;
+  justify-content:center;gap:14px;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#fff;
+  font-weight:700;font-size:.86rem;box-shadow:0 -3px 0 rgba(44,33,80,.18)}
+.preview-banner .pv-close{cursor:pointer;font-family:var(--font-display);font-weight:700;font-size:.8rem;color:var(--ink);
+  background:#fff;border:2px solid #fff;border-radius:999px;padding:3px 12px}
+.preview-banner .pv-close:hover{background:#ffe3ef;border-color:#ffe3ef}
+body.has-preview-banner .view{padding-bottom:170px}

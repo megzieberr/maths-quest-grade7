@@ -1,6 +1,6 @@
 /* App-beheerder: dop, roetering, sessie-boot, agterkant-agnosties. */
-import { api } from "./api.js";
-import { getSession, isLoggedIn, clearSession } from "./session.js";
+import { api, PREVIEW } from "./api.js";
+import { getSession, isLoggedIn, clearSession, setPreviewSession } from "./session.js";
 import { el, clear } from "./ui.js";
 import { renderLogin } from "./auth.js";
 import { renderHub, renderChapter, renderResults } from "./screens.js";
@@ -12,8 +12,35 @@ const app = {
 
   async boot() {
     this.root = document.getElementById("app");
+
+    // Onderwyser "voorskou as leerder" (oopgemaak vanaf die admin-dashboard,
+    // ?preview=1): 'n in-geheue-alleen sessie, elke gebou rondte ontsluit,
+    // die inteken-skerm heeltemal oorgeslaan. Niks word gestoor nie — sien
+    // PreviewBackend in api.js.
+    if (PREVIEW) {
+      setPreviewSession("juffrou-voorskou", "voorskou");
+      this.previewBanner();
+      const ok = await this.refresh();
+      this.go(ok ? "hub" : "login");
+      return;
+    }
+
     if (isLoggedIn()) { const ok = await this.refresh(); if (!ok) clearSession(); }
     this.go(isLoggedIn() ? "hub" : "login");
+  },
+
+  // 'n blywende strook wat onmiskenbaar maak dit is die onderwyser-voorskou
+  // en dat niks hier gestoor word nie. "Sluit" maak net die voorskou-oortjie toe.
+  previewBanner() {
+    if (document.getElementById("preview-banner")) return;
+    const bar = el("div", "preview-banner");
+    bar.id = "preview-banner";
+    bar.innerHTML = `<span>👁️ Juffrou-voorskou — alles oop, niks word gestoor nie</span>`;
+    const close = el("button", "pv-close", "✕ Sluit");
+    close.addEventListener("click", () => window.close());
+    bar.appendChild(close);
+    document.body.appendChild(bar);
+    document.body.classList.add("has-preview-banner");
   },
 
   // trek die leerder se toestand (vordering, XP) van die agterkant af
@@ -34,7 +61,10 @@ const app = {
     this.root.appendChild(view);
     switch (this.screen) {
       case "login": renderLogin(this, view); break;
-      case "hub": renderHub(this, view); maybeShowInstallPopup(this); break;
+      // die "sit dit op jou foon"-nudge skryf 'n g7.installSeen.* localStorage-
+      // sleutel by die eerste hub-besoek — nooit in voorskou nie (PREVIEW mag
+      // glad niks skryf nie, sien die boot-kommentaar hierbo).
+      case "hub": renderHub(this, view); if (!PREVIEW) maybeShowInstallPopup(this); break;
       case "chapter": renderChapter(this, view, this.params); break;
       case "play": renderPlay(this, view, this.params); break;
       case "results": renderResults(this, view, this.params); break;
