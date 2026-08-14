@@ -184,10 +184,13 @@ function arrowHead(x, y, ang, col, size = 8) {
 }
 /* parallel-merk (die ›/›› notasie) — `count` oop V-tjies (chevrons), ELK
    se punt OP die lyn self, gesentreer om (x,y) en geroteer sodat hulle in
-   rigting `ang` grade wys (dieselfde skermkoördinaat-konvensie as
-   arrowHead hierbo). Vervang die ou swewende "›"-TEKSGLief wat nie op
-   die lyn gelê het nie, en nie geroteer het met skuins sye nie (m3/m4 se
-   ewewydig-figuur, en die vierhoek-dekorasies verderaan). */
+   rigting `ang` grade wys. LET WEL: parMark gebruik die y-OP konvensie
+   (dieselfde een as angleOfVec/arcPoly — punt(d,len) = middel + len·(cos d,
+   −sin d)), NIE arrowHead se rou "y − sin"-patroon nie, want die roepers
+   (quadFigure/quadPropsFigure) stuur hulle hoeke via angleOfVec. Vervang
+   die ou swewende "›"-TEKSGLief wat nie op die lyn gelê het nie, en nie
+   geroteer het met skuins sye nie (m3/m4 se ewewydig-figuur, en die
+   vierhoek-dekorasies verderaan). */
 function parMark(x, y, ang, count, col) {
   const a = rd(ang);
   const spacing = 9.5, armLen = 7.5, spread = 0.5;
@@ -197,8 +200,8 @@ function parMark(x, y, ang, count, col) {
   for (let i = 0; i < count; i++) {
     const off = start + i * spacing;
     const cx = x + off * stepX, cy = y + off * stepY;
-    const b1 = [f(cx - armLen * Math.cos(a - spread)), f(cy - armLen * Math.sin(a - spread))];
-    const b2 = [f(cx - armLen * Math.cos(a + spread)), f(cy - armLen * Math.sin(a + spread))];
+    const b1 = [f(cx - armLen * Math.cos(a - spread)), f(cy + armLen * Math.sin(a - spread))];
+    const b2 = [f(cx - armLen * Math.cos(a + spread)), f(cy + armLen * Math.sin(a + spread))];
     out += `<polyline points="${b1.join(",")} ${f(cx)},${f(cy)} ${b2.join(",")}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`;
   }
   return out;
