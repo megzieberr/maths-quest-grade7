@@ -100,18 +100,14 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   leerder kan TEL; genereer-waardes word so begrens dat alles op die figuur pas.
 
 ## Pending on Megan
-- 📱 7 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/?preview=1 →
-  Meetkunde → play m1c (rondte 3, "ander kant") + m11 (rondte 22, sakrekenaar), and
-  eyeball today's fixes on the live rounds (m3 arrows, m10 Casio) → happy? say "run the
-  new migration" (m1c+m11 seed CLOSED; add "and open them" to put them straight on the
-  kids' maps).
+- 🌐 1 min **[whenever]**: m1c + m11 are on the learner map as "Binnekort" (migration ran
+  2026-08-14, seeded CLOSED per the new-content rule) — open them in admin.html when
+  you're ready to teach them.
 - 💬 1 min **[whenever]**: t6b (dubbele 180°-rotasie) is correct but all 5 questions share
   the one "you land back where you started" trick — say if you want more variety mixed in.
 
 ## Next up
-- On her "run the migration": run migration-nuwe-rondtes.sql on Homework Hub
-  (wjkhedepwnwrqcpxmkds) — open-or-closed decided at that moment → live verify.
-- Then her queued ask: **weekly winners** (Circle Quest pattern — three awards to three
+- Her queued ask: **weekly winners** (Circle Quest pattern — three awards to three
   different learners, g7_ RPCs in a NEW migration; ⚠️ the weekly_anchor vs
   date_trunc('week') design call is HERS before building).
 - Still floated from Sunday: traps in st28–st32; "Tap" retro-fit in old s7; trap-style
