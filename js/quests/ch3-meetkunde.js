@@ -20,6 +20,19 @@ function genRead() {
   });
 }
 
+/* ============ m1c · Lees die gradeboog — ander kant (arm A LINKS) ============ */
+function genReadOtherSide() {
+  let ang = randInt(3, 33) * 5;            // 15 … 165
+  if (Math.random() < 0.12) ang = 90;
+  const type = ang < 90 ? "skerphoek" : ang === 90 ? "regtehoek" : "stomphoek";
+  return protractor(`Hoe groot is hoek <b>AÔB</b>? Lees dit van die gradeboog af.`, ang, {
+    baseSide: "left",
+    tol: 2,
+    answerLabel: `${ang}° (${type})`,
+    hint: "Arm A lê nou op die 0-lyn aan die LINKERKANT. Begin by 0 langs arm A en tel op — dit is nou die BUITENSTE ry getalle. Tussen twee getalle? Elke klein merkie is 1°.",
+  });
+}
+
 /* ============ m2 · Soorte hoeke (klassifiseer uit 'n diagram) ============ */
 const HOEK_TIPES = [
   { name: "skerphoek", lo: 4, hi: 16 },     // ×5 → 20…80
@@ -341,6 +354,7 @@ function genReflexTF(claimTrue) {
 export const CH3 = {
   m1: { skills: Array.from({ length: 5 }, () => ({ concept: "gradeboog", gen: genRead })) },
   m1b: { skills: Array.from({ length: 5 }, () => ({ concept: "gradeboog", gen: genReadReverse })) },
+  m1c: { skills: Array.from({ length: 5 }, () => ({ concept: "gradeboog", gen: genReadOtherSide })) },
   m2: { skills: Array.from({ length: 5 }, () => ({ concept: "hoektipes", gen: genSoortHoek })) },
   m2b: { skills: shuffled([true, true, false, false, true]).map(k => ({ concept: "hoektipes", gen: () => genSoortHoekTF(k) })) },
   m3: { skills: Array.from({ length: 5 }, () => ({ concept: "lyne", gen: genLineNotasie })) },

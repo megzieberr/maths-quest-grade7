@@ -29,7 +29,7 @@ export function mountQuestion(host, q, handlers = {}) {
   // optional figure (protractor / shape) drawn above the input
   if (q.type === "protractor") {
     const fig = el("div", "q-figure");
-    fig.innerHTML = renderProtractor(q.angle, { accent: handlers.accent });
+    fig.innerHTML = renderProtractor(q.angle, { accent: handlers.accent, baseSide: q.baseSide });
     root.appendChild(fig);
   } else if (q.figure) {
     const fig = el("div", "q-figure");
