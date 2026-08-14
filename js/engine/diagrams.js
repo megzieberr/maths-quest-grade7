@@ -344,6 +344,22 @@ export function verticalFigure(known, accent = "#0d9488", opt = {}) {
     "0 0 260 190", 250, adjacent ? "Hoeke langsaan mekaar op 'n reguitlyn" : "Regoorstaande hoeke");
 }
 
+/* ---------- m11: refleks-hoek met sakrekenaar (twee arms, klein hoek + refleks-boog) ----------
+   small = die gegewe (kleiner) hoek tussen die twee arms — geteken met sy
+   eie boog en waarde in `accent`. Die REFLEKS-boog swaai die lang pad om
+   die punt (van `small` tot 360°) en word ALTYD "?" gemerk, in die
+   gelaaide oranje "?"-konvensie (sien Feature 4 hierbo — nooit verander). */
+export function reflexFigure(small, accent = "#0d9488") {
+  const OX = 130, OY = 120, L = 100;
+  const arm = (d, len) => [f(OX + len * Math.cos(rd(d))), f(OY - len * Math.sin(rd(d)))];
+  const a0 = arm(0, L), a1 = arm(small, L);
+  const armLine = p => `<line x1="${OX}" y1="${OY}" x2="${p[0]}" y2="${p[1]}" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>`;
+  const smallArc = arcPoly(OX, OY, 30, 0, small, accent) + txt(arm(small / 2, 46), `${small}°`, accent, 13);
+  const reflexArc = arcPoly(OX, OY, 42, small, 360, ASK_COL) + txt(arm((small + 360) / 2, 60), "?", ASK_TXT, 16);
+  return svgWrap(`${armLine(a0)}${armLine(a1)}${reflexArc}${smallArc}<circle cx="${OX}" cy="${OY}" r="4.5" fill="${INK}"/>`,
+    "0 0 260 210", 250, "Refleks-hoek");
+}
+
 /* ---------- m3/m4: lyne & notasie ---------- */
 export function lineFigure(kind, accent = "#0d9488") {
   const tick = (x, y, ang) => { const a = rd(ang + 90); const dx = 6 * Math.cos(a), dy = 6 * Math.sin(a); return `<line x1="${f(x - dx)}" y1="${f(y - dy)}" x2="${f(x + dx)}" y2="${f(y + dy)}" stroke="${accent}" stroke-width="2.4"/>`; };

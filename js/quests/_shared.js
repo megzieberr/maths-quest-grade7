@@ -44,6 +44,13 @@ export function protractor(prompt, angle, extra = {}) {
   return { type: "protractor", prompt, angle, unit: "°",
     answerLabel: extra.answerLabel ?? `${angle}°`, ...extra };
 }
+/* sakrekenaar-vraag: (opsionele) figuur + 'n werklike Casio; die vraag
+   slaag sodra "=" die REGTE waarde wys (of via die "Gaan my antwoord
+   na ✓"-knoppie, wat die laaste "="-resultaat teen expected toets). */
+export function calcdo(prompt, expected, extra = {}) {
+  return { type: "calcdo", prompt, expected,
+    answerLabel: extra.answerLabel ?? fmt(expected, extra.dp), ...extra };
+}
 
 /* ---------- Hoofstuk 6: Meetkunde Stellings — rede-vrae ---------- */
 /* hulp: sorg dat die korrekte kode in die aangebode lys is, geskommel */

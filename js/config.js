@@ -62,6 +62,7 @@ export const CHAPTERS = [
       { id: "m9b", n: 19, title: "Regoorstaande hoeke — Deel 2", blurb: "Gaan iemand anders se antwoord na.", built: true },
       { id: "m10", n: 20, title: "Inspringende (refleks) hoeke", blurb: "Trek die kleiner hoek van 360° af.", built: true },
       { id: "m10b", n: 21, title: "Inspringende (refleks) hoeke — Deel 2", blurb: "Gaan iemand anders se antwoord na.", built: true },
+      { id: "m11", n: 22, title: "Refleks-hoeke met die sakrekenaar", blurb: "Tik 360 − die kleiner hoek op die Casio.", built: true },
     ],
   },
   {

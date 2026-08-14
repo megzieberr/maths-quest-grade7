@@ -16,8 +16,14 @@
 --
 --  • m1c  (Hoofstuk 3 Reguitlyn Meetkunde — "Lees die gradeboog
 --          — ander kant": arm A on the left, reads the outer row)
+--  • m11  (Hoofstuk 3 Reguitlyn Meetkunde — "Refleks-hoeke met die
+--          sakrekenaar": reflex figure + in-app Casio calcdo round)
 -- ============================================================
 
 insert into public.quests (quest_id, chapter, is_open, sort) values
   ('m1c','meetkunde',false,351)
+on conflict (quest_id) do nothing;
+
+insert into public.quests (quest_id, chapter, is_open, sort) values
+  ('m11','meetkunde',false,352)
 on conflict (quest_id) do nothing;

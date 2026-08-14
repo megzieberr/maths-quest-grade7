@@ -2,8 +2,8 @@
    HOOFSTUK 3 — REGUITLYN MEETKUNDE  (met diagramme)
    Sterkpunt: m1 "Lees die gradeboog" (akkurate protractor).
    ============================================================ */
-import { mc, tf, multi, calc, protractor, randInt, pick, shuffled, code, nearDistractors } from "./_shared.js";
-import { angleFigure, lineFigure, straightLineFigure, aroundPointFigure, verticalFigure } from "../engine/diagrams.js";
+import { mc, tf, multi, calc, calcdo, protractor, randInt, pick, shuffled, code, nearDistractors } from "./_shared.js";
+import { angleFigure, lineFigure, straightLineFigure, aroundPointFigure, verticalFigure, reflexFigure } from "../engine/diagrams.js";
 import { renderProtractor } from "../engine/protractor.js";
 
 const TEAL = "#0d9488";
@@ -351,6 +351,22 @@ function genReflexTF(claimTrue) {
   });
 }
 
+/* ============ m11 · Refleks-hoeke met die sakrekenaar (hands-on Casio) ============
+   Reguit gesuster van m10 (wat NET tik-die-getal is, geen figuur nie) —
+   m11 wys 'n EGTE refleks-figuur ÉN laat die leerder letterlik
+   360 − klein op die ingeboude Casio tik. Sien js/calculator.js +
+   questions.js se "calcdo"-tipe vir die meganika. */
+function genReflexCalc() {
+  const small = randInt(5, 30) * 5;            // 25…150
+  const expected = 360 - small;
+  return calcdo(`Die kleiner hoek is ${code(small + "°")}. Gebruik die sakrekenaar en werk die inspringende (refleks) hoek uit.`, expected, {
+    figure: reflexFigure(small, TEAL),
+    hint: "Die kleiner hoek en die refleks-hoek maak saam 'n volle draai (360°). Tik 360 − die kleiner hoek op die sakrekenaar, dan =.",
+    solution: [{ s: `360 − ${small} = ${expected}`, r: "volle draai = 360°" }],
+    answerLabel: `${expected}°`,
+  });
+}
+
 export const CH3 = {
   m1: { skills: Array.from({ length: 5 }, () => ({ concept: "gradeboog", gen: genRead })) },
   m1b: { skills: Array.from({ length: 5 }, () => ({ concept: "gradeboog", gen: genReadReverse })) },
@@ -377,6 +393,7 @@ export const CH3 = {
     { concept: "reflekshoek", gen: genReflexFromInner },
   ] },
   m10b: { skills: shuffled([true, false, true, false, true]).map(k => ({ concept: "reflekshoek", gen: () => genReflexTF(k) })) },
+  m11: { skills: Array.from({ length: 5 }, () => ({ concept: "reflekshoek", gen: genReflexCalc })) },
 };
 
 /* waar/onwaar-rondtes: die skill-inskrywing bepaal die ANTWOORD, so skommel

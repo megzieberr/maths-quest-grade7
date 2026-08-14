@@ -17,6 +17,7 @@ import { el, clear } from "./ui.js";
 import { mountKeypad } from "./keypad.js";
 import { answerCorrect, fmtComma, parseNum } from "./check.js";
 import { renderProtractor } from "./engine/protractor.js";
+import { mountCalculator } from "./calculator.js";
 import { TOL } from "./config.js";
 import { REDES } from "./redes.js";
 
@@ -166,6 +167,39 @@ export function mountQuestion(host, q, handlers = {}) {
         commit(ok, q.escape.label, null, ok ? undefined : { solution: q.escape.wrongTapSolution });
       });
     }
+  }
+
+  // sakrekenaar-vraag: 'n regte Casio (COMP-only) gemonteer inline. Slaag
+  // OUTOMATIES sodra 'n "=" die regte waarde toon (geen ekstra tik nodig
+  // nie) — of via "Gaan my antwoord na ✓" wat die laaste "="-resultaat
+  // teen q.expected toets. 'n "=" wat Syntax ERROR gee (of 'n onvolledige
+  // som) vuur geen "eq"-gebeurtenis nie, so dit tel nooit as 'n poging nie.
+  else if (q.type === "calcdo") {
+    const calcBox = el("div", "q-calc");
+    inputHost.appendChild(calcBox);
+    const checkRow = el("div", "q-check");
+    const checkBtn = el("button", "btn primary big", "Gaan my antwoord na ✓");
+    checkRow.appendChild(checkBtn);
+    inputHost.appendChild(checkRow);
+
+    let lastEq = null;   // { expr, value } van die laaste geslaagde "="
+    const lockCalc = () => { calcBox.classList.add("locked"); checkBtn.disabled = true; checkRow.remove(); };
+
+    mountCalculator(calcBox, {
+      onEvent(type, p) {
+        if (answered || type !== "eq") return;
+        lastEq = p;
+        if (p.value === q.expected) { lockCalc(); commit(true, `${p.expr} = ${fmtComma(p.value)}`); }
+      },
+    });
+
+    checkBtn.addEventListener("click", () => {
+      if (answered) return;
+      const chosen = lastEq ? `${lastEq.expr} = ${fmtComma(lastEq.value)}` : "geen berekening getik nie";
+      const ok = !!(lastEq && lastEq.value === q.expected);
+      lockCalc();
+      commit(ok, chosen);
+    });
   }
 
   else if (q.type === "multi") {
