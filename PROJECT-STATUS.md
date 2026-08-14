@@ -1,4 +1,13 @@
-# Project status — updated 2026-08-14 (late afternoon: correction day SHIPPED — arrows fixed, m10 got the Casio; migration-nuwe-rondtes.sql still gated on her preview play)
+# Project status — updated 2026-08-14 (evening: correction day round 2 SHIPPED — her live-playtest catches; migration-nuwe-rondtes.sql still gated on her preview play)
+
+> **2026-08-14 evening (her playtest catches, pushed on her "push"):** five wording fixes
+> (aangrensende; rand→omtrek everywhere; radius sonder "(straal)" — straal is dié app se
+> woord vir 'n RAY; Tik→"Klik op" in klik-rondtes, app-wyd insluitend die ou "Tap"-rondtes
+> s11/s12/s13 op haar ruling; Poligone s5b wys nou die poligoon-figuur by elke vraag),
+> plus: waarde-chips (koördinate) breek nooit meer oor 'n reël nie (white-space:nowrap),
+> en t2b het nou 'n vasgespelde 📖 Leer-voorbeeldkaart (def.lesson, soos ch6) én
+> twoPointFigure — A én A′ geplot met 'n stippelpyl, dx/dy so gekies dat A′ op die rooster
+> pas. Alles DOM-geverifieer (rondte as leerder gespeel, "✓ Reg!").
 
 > **2026-08-14 correction day (her /go + "fix the bent arrow and then you can ship"):**
 > four commits built, foreman-reviewed and PUSHED LIVE: (1) parallel marks are now real
@@ -78,6 +87,17 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   (parMark, y-up angleOfVec convention), never text glyphs. Convention rule for
   diagrams.js: angleOfVec/arcPoly are y-UP, arrowHead's ang is y-DOWN — negate when
   feeding one to the other (the bent-ray arrowhead bug was exactly this).
+- **2026-08-14 (evening, her rulings from the live playtest)** — circle wording: the
+  sirkel se buiterand heet die OMTREK, nooit "rand"/"randpunte" nie; "radius" staan
+  alleen (geen "(straal)" nie — straal beteken 'n ray in hierdie app se ch3). Vlieer:
+  "aangrensende" (nie "langsaan-liggende" nie). Klik-instruksies sê "Klik op" — die ou
+  "Tap"-ruling is HIERMEE VERVANG, app-wyd; "Tik" bly net waar dit TIK/tipe beteken
+  (sakrekenaar, keypads, aanteken-velde). Waarde-chips mag nooit oor 'n reël breek nie.
+  Rondtes met kaal regte-lewe verwysings (heuningkoek) kry 'n figuur by elke vraag.
+- **2026-08-14 (evening)** — t2b patroon vir "moeilike eerste kennismaking": een
+  uitgewerkte voorbeeld in 'n vasgespelde 📖 Leer-kaart BO die vrae (def.lesson werk in
+  enige hoofstuk, nie net ch6 nie) + albei punte geplot (twoPointFigure) sodat die
+  leerder kan TEL; genereer-waardes word so begrens dat alles op die figuur pas.
 
 ## Pending on Megan
 - 📱 7 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/?preview=1 →
