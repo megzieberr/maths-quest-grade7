@@ -182,6 +182,27 @@ function arrowHead(x, y, ang, col, size = 8) {
   const b2 = [f(x - size * Math.cos(a + 0.45)), f(y - size * Math.sin(a + 0.45))];
   return `<polygon points="${f(x)},${f(y)} ${b1.join(",")} ${b2.join(",")}" fill="${col}"/>`;
 }
+/* parallel-merk (die ›/›› notasie) — `count` oop V-tjies (chevrons), ELK
+   se punt OP die lyn self, gesentreer om (x,y) en geroteer sodat hulle in
+   rigting `ang` grade wys (dieselfde skermkoördinaat-konvensie as
+   arrowHead hierbo). Vervang die ou swewende "›"-TEKSGLief wat nie op
+   die lyn gelê het nie, en nie geroteer het met skuins sye nie (m3/m4 se
+   ewewydig-figuur, en die vierhoek-dekorasies verderaan). */
+function parMark(x, y, ang, count, col) {
+  const a = rd(ang);
+  const spacing = 9.5, armLen = 7.5, spread = 0.5;
+  const stepX = Math.cos(a), stepY = -Math.sin(a);
+  const start = -((count - 1) * spacing) / 2;
+  let out = "";
+  for (let i = 0; i < count; i++) {
+    const off = start + i * spacing;
+    const cx = x + off * stepX, cy = y + off * stepY;
+    const b1 = [f(cx - armLen * Math.cos(a - spread)), f(cy - armLen * Math.sin(a - spread))];
+    const b2 = [f(cx - armLen * Math.cos(a + spread)), f(cy - armLen * Math.sin(a + spread))];
+    out += `<polyline points="${b1.join(",")} ${f(cx)},${f(cy)} ${b2.join(",")}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`;
+  }
+  return out;
+}
 /* boog (as polilyn) van d0 tot d1 grade, radius r, om (cx,cy) — y-af stelsel */
 function arcPoly(cx, cy, r, d0, d1, col, w = 2.6) {
   const steps = Math.max(6, Math.round(Math.abs(d1 - d0) / 5));
@@ -368,7 +389,7 @@ export function lineFigure(kind, accent = "#0d9488") {
     inner = `<circle cx="120" cy="92" r="7.5" fill="${accent}"/>`
       + `<text x="136" y="85" font-family="Fredoka, sans-serif" font-size="19" font-weight="700" fill="${INK}">A</text>`;
   } else if (kind === "ewewydig") {
-    inner = [60, 110].map(y => `<line x1="24" y1="${y}" x2="236" y2="${y}" stroke="${INK}" stroke-width="3"/>` + arrowHead(24, y, 180, INK) + arrowHead(236, y, 0, INK) + `<text x="150" y="${y - 8}" text-anchor="middle" fill="${accent}" font-size="15" font-weight="700">›</text>`).join("");
+    inner = [60, 110].map(y => `<line x1="24" y1="${y}" x2="236" y2="${y}" stroke="${INK}" stroke-width="3"/>` + arrowHead(24, y, 180, INK) + arrowHead(236, y, 0, INK) + parMark(130, y, 0, 1, accent)).join("");
   } else if (kind === "loodreg") {
     inner = `<line x1="40" y1="90" x2="220" y2="90" stroke="${INK}" stroke-width="3"/>` + arrowHead(40, 90, 180, INK) + arrowHead(220, 90, 0, INK)
       + `<line x1="130" y1="20" x2="130" y2="160" stroke="${INK}" stroke-width="3"/>` + arrowHead(130, 20, 270, INK) + arrowHead(130, 160, 90, INK)
@@ -717,7 +738,11 @@ export function quadFigure(kind, accent = "#ea580c") {
   let marks = "";
   (d.ticks || []).forEach(([i, j, n]) => marks += sideTick(p[i], p[j], n, accent));
   (d.right || []).forEach(i => marks += rightAngle(p[i], p[(i + 1) % 4], p[(i + 3) % 4], accent, 13));
-  (d.par || []).forEach(([i, j], k) => { const c = "›".repeat(k + 1); const mx = (p[i][0] + p[j][0]) / 2, my = (p[i][1] + p[j][1]) / 2; marks += txt([mx, my], c, accent, 14); });
+  (d.par || []).forEach(([i, j], k) => {
+    const mx = (p[i][0] + p[j][0]) / 2, my = (p[i][1] + p[j][1]) / 2;
+    const sideAng = angleOfVec([p[j][0] - p[i][0], p[j][1] - p[i][1]]);
+    marks += parMark(mx, my, sideAng, k + 1, accent);
+  });
   return svgWrap(poly + marks, "0 0 240 185", 230, "Vierhoek");
 }
 
@@ -772,7 +797,8 @@ export function quadPropsFigure(kind, accent = "#ea580c", opt = {}) {
     pair.forEach(side => {
       const [i, j] = QP_SIDE_IDX[side];
       const mx = (p[i][0] + p[j][0]) / 2, my = (p[i][1] + p[j][1]) / 2;
-      marks += txt([mx, my], "›".repeat(pi + 1), accent, 14);
+      const sideAng = angleOfVec([p[j][0] - p[i][0], p[j][1] - p[i][1]]);
+      marks += parMark(mx, my, sideAng, pi + 1, accent);
     });
   });
   props.rightCorners.forEach(c => {
