@@ -171,7 +171,7 @@ const OPP_CORNER = { A: "C", B: "D", C: "A", D: "B" };
 
 function genOppositeSide() {
   const q = pick(QUADS), side = pick(SIDE_KEYS), target = OPP_SIDE[side];
-  return tap(`Die BLOU sy is <b>${side}</b>. Tap die sy <b>TEENOORSTAANDE</b> ${side}.`, target,
+  return tap(`Die BLOU sy is <b>${side}</b>. Klik op die sy <b>TEENOORSTAANDE</b> ${side}.`, target,
     quadPropsFigure(q.key, ORANGE, { highlightSide: side, decor: "none" }), {
     tip: "Teenoorstaande = oorkant, raak nie.",
     hint: `${side} en ${target} lê oorkant mekaar in die vierhoek — hulle raak mekaar nêrens.`,
@@ -180,7 +180,7 @@ function genOppositeSide() {
 }
 function genAdjacentSide() {
   const q = pick(QUADS), side = pick(SIDE_KEYS), targets = ADJ_SIDES[side];
-  return tap(`Die BLOU sy is <b>${side}</b>. Tap 'n sy wat <b>AANGRENSEND</b> aan ${side} is.`, targets,
+  return tap(`Die BLOU sy is <b>${side}</b>. Klik op 'n sy wat <b>AANGRENSEND</b> aan ${side} is.`, targets,
     quadPropsFigure(q.key, ORANGE, { highlightSide: side, decor: "none" }), {
     tip: "Aangrensend = langsaan, deel 'n hoekpunt.",
     hint: `${targets.join(" en ")} deel elk 'n hoekpunt met ${side} — albei tel.`,
@@ -189,7 +189,7 @@ function genAdjacentSide() {
 }
 function genOppositeCorner() {
   const q = pick(QUADS), corner = pick(CORNER_KEYS), target = OPP_CORNER[corner];
-  return tap(`Die BLOU hoek is <b>${corner}</b>. Tap die hoek <b>TEENOORSTAANDE</b> hoek ${corner}.`, target,
+  return tap(`Die BLOU hoek is <b>${corner}</b>. Klik op die hoek <b>TEENOORSTAANDE</b> hoek ${corner}.`, target,
     quadPropsFigure(q.key, ORANGE, { highlightCorner: corner, decor: "none" }), {
     tip: "Teenoorstaande = oorkant, raak nie.",
     hint: `${corner} en ${target} is die twee hoekpunte heel anderkant mekaar.`,
@@ -246,7 +246,7 @@ function genTapParallel() {
   const q = pick(PARALLEL_KINDS);
   const pair = pick(QUAD_PROPS[q.key].parallelPairs);
   const green = pick(pair), target = pair.find(s => s !== green);
-  return tap(`Die GROEN sy is <b>${green}</b>. Tap 'n sy wat <b>parallel</b> aan die groen sy is.`, target,
+  return tap(`Die GROEN sy is <b>${green}</b>. Klik op 'n sy wat <b>parallel</b> aan die groen sy is.`, target,
     quadPropsFigure(q.key, ORANGE, { highlightSide: green, highlightColor: "#16a34a", decor: "none" }), {
     tip: "Parallel = loop langs mekaar, sny nooit.",
     hint: `${target} is die enigste ander sy wat nooit ${green} sal raak nie — parallel.`,
@@ -257,7 +257,7 @@ function genTapEqual() {
   const q = pick(EQUAL_KINDS);
   const group = pick(QUAD_PROPS[q.key].equalGroups);
   const green = pick(group), targets = group.filter(s => s !== green);
-  return tap(`Die GROEN sy is <b>${green}</b>. Tap 'n sy wat <b>ewe lank</b> is as die groen sy.`, targets,
+  return tap(`Die GROEN sy is <b>${green}</b>. Klik op 'n sy wat <b>ewe lank</b> is as die groen sy.`, targets,
     quadPropsFigure(q.key, ORANGE, { highlightSide: green, highlightColor: "#16a34a", decor: "none" }), {
     tip: "Ewe lank = presies dieselfde lengte.",
     hint: `${targets.join(" en ")} is ewe lank as ${green}.`,
@@ -497,7 +497,7 @@ function genShapeProps(key) {
   const opts = buildQuadPropOptions(key);
   return multi(`Watter eienskappe pas by hierdie <b>${q.name}</b>?`, opts, {
     figure: quadPropsFigure(key, ORANGE, { decor: "none", tapSides: false, tapCorners: false, pts: S13_CLEAN_PTS[key] }),
-    instruction: "Tap AL die eienskappe wat pas, dan Stuur.",
+    instruction: "Klik op AL die eienskappe wat pas, dan Stuur.",
     hint: "Dink aan die sye, dan die hoeke, dan die hoeklyne — tel hoeveel van elke soort gelyk is.",
   });
 }

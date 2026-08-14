@@ -158,6 +158,8 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 .q-prompt{font-family:var(--font-display);font-weight:500;font-size:19px;line-height:1.35;margin-bottom:14px;color:var(--ink)}
 .q-prompt code,.codeblk{font-family:var(--font-num);font-weight:700;background:color-mix(in srgb,var(--accent) 9%,#f4f1ff);
   color:var(--accent);padding:1px 7px;border-radius:8px}
+/* waarde-blokkies (koördinate, grade) mag nooit oor 'n reël breek nie */
+.q-prompt code,.codeblk,.tip-box code,.fb-answer code,.sol code,.concept code{white-space:nowrap}
 .q-figure{display:flex;justify-content:center;margin:4px 0 16px}
 .q-task{font-size:14px;color:var(--muted);margin:-4px 0 12px;font-weight:700}
 .q-input{margin-top:4px}
