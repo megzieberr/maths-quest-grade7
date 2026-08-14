@@ -1,4 +1,12 @@
-# Project status — updated 2026-08-13 (Deel 2 night build DONE, awaiting her review — NOTHING shipped)
+# Project status — updated 2026-08-14 (Deel 2 built + CODE shipped live behind teacher preview; migration NOT run — her phone playtest gates it)
+
+> **2026-08-14 morning:** teacher preview mode (?preview=1, Circle Quest pattern) built
+> (Session 5, commit f5ec08a) and the WHOLE branch pushed to Pages on her go. Live-verified:
+> plain URL still boots to Teken in (kids' view unchanged — the 31 new rounds are in NO
+> quests row, `select count(*)` = 0, so learner maps filter them out entirely); ?preview=1
+> boots past auth with the "👁️ Juffrou-voorskou" banner, shows 20/23/20/32 rounds, plays
+> Deel 2 rounds, writes zero g7.* keys; admin has the "👁️ Voorskou as leerder" button.
+> Console clean. ONLY the migration still stands between the kids and the new rounds.
 
 ## Where we are
 Live site unchanged tonight. Locally, the whole Deel 2 build is DONE and foreman-reviewed:
@@ -31,9 +39,9 @@ width, 0 console errors.
 - **2026-08-13** — spelling for learner-facing property text: "Teenoorstaande", "parallel".
 
 ## Pending on Megan
-- 💻 15 min **[blocking]**: play the new rounds before they reach the kids — say "start the
-  preview" in a session, then open http://localhost:5192/?local=1 → Meetkunde/2D Vorms/
-  Transformasies, elke "— Deel 2" rondte + "Eienskappe van vorms" (round 23 in 2D Vorms).
+- 📱 15 min **[blocking]**: open megzieberr.github.io/maths-quest-grade7/admin.html → tap
+  "👁️ Voorskou as leerder" → play the Deel 2 rounds + "Eienskappe van vorms" (round 23 in
+  2D Vorms). Happy? Say "run the migration" and the kids get them.
 - 💬 1 min **[whenever]**: t6b (dubbele 180°-rotasie) is correct but all 5 questions share
   the one "you land back where you started" trick — say if you want more variety mixed in.
 
