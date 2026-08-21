@@ -1,4 +1,29 @@
-# Project status — updated 2026-08-14 (evening: correction day round 2 SHIPPED — her live-playtest catches; migration-nuwe-rondtes.sql RAN — m1c + m11 live, see Pending on Megan)
+# Project status — updated 2026-08-21 (🎲 Dice Quest SHIPPED LIVE on her go — migration-dice.sql RAN first, then push; live-verified end to end)
+
+> **2026-08-21 (ship, on her "You can ship it"):** migration RAN via MCP (g7_submit_dice
+> verified on live: SECURITY DEFINER, search_path pinned, anon+authenticated execute,
+> fake-creds → clean auth error, 0 dice rows at ship), THEN pushed (7db2f03..cad2df0).
+> Live-verified: dice.js + screens.js serving with the review fixes, Dice Quest card
+> renders on the live Meetkunde page in ?preview=1, 0 console errors. sw auto-updates —
+> no cache bump needed.
+
+> **2026-08-21 (Dice Quest day — her /go: Sonnet built, Fable foreman-reviewed):** every
+> chapter page (ch3–ch6) gets a 🎲 **"Dice Quest"** card (her wording; chapter page, NOT
+> the hub) dealing 10 fresh questions evenly across that chapter's teacher-open rounds
+> via the Daaglikse Quest mechanic, now factored into shared js/deal.js. ch6 deals ONLY
+> the gemeng rounds st28–32 (a single-theorem round's hint names its theorem = leak in a
+> mixed deal); its card appears once the learner's chain unlocks st28. **XP pays EVERY
+> play** (her ruling): new g7_submit_dice RPC in supabase/migration-dice.sql —
+> server-computed 10 XP per first-try-correct, cap 100/play; `passed` stays false
+> forever so dice-* ids never enter the chip grid or CSV. **Migration NOT run** — until
+> it runs, dice is fully playable and XP simply doesn't bank (graceful). Foreman catches,
+> fixed in cad2df0: (1) the results screen now shows the XP that actually BANKS (was the
+> client streak number) with dice-specific copy — no kenteken-talk; (2) the double-submit
+> hole closed (finish() re-entry guard + the "Gaan voort" button disables) — latent
+> app-wide, but only g7_submit_dice (no was_passed gate) could PAY TWICE on a double-tap.
+> Verified: fuzz-dice.mjs green twice (300 deals/chapter), full DOM plays at 375px (dice
+> ×2 incl. deliberate double-clicks on every continue → exactly ONE xp_event; m1 normal
+> round renders byte-identically, badge pop and all), 0 console errors.
 
 > **2026-08-14 evening (her playtest catches, pushed on her "push"):** five wording fixes
 > (aangrensende; rand→omtrek everywhere; radius sonder "(straal)" — straal is dié app se
@@ -34,6 +59,8 @@
 > bacab5c. NOTHING pushed — her check gates the deploy.
 
 ## Where we are
+🎲 Dice Quest is LIVE (2026-08-21 blocks above) — card on every chapter page, XP pays
+every play through g7_submit_dice (migration ran before the push, so no unpaid window).
 Live site: Deel 2 fully open to learners since midday yesterday (migration ran; sw
 auto-updates), PLUS today's correction-day fixes (chevron parallel marks, m10 Casio,
 bent-ray arrowhead). The two NEW rounds are pushed but only visible in ?preview=1
@@ -99,7 +126,23 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   enige hoofstuk, nie net ch6 nie) + albei punte geplot (twoPointFigure) sodat die
   leerder kan TEL; genereer-waardes word so begrens dat alles op die figuur pas.
 
+- **2026-08-21 (Dice Quest day)** — her rulings: name is exactly **"Dice Quest"** (🎲);
+  the card lives INSIDE each chapter's page, not the hub; XP pays EVERY play like
+  Blipwork's dice. Design: pool = that chapter's teacher-open rounds only; ch6 pool =
+  gemeng (st28–32) only, card gated on the chain reaching st28; deal mechanic shared
+  with the Daaglikse Quest (js/deal.js); dice progress rows keep passed=false forever
+  (no kenteken → no chip-grid/CSV leak); the XP amount is SERVER-computed
+  (10 × first-try-correct, cap 100), never client-named — dice is infinitely
+  repeatable, a client-named amount would be farmable.
+- **2026-08-21 (foreman)** — results screens must show the XP that actually BANKS;
+  double-submit law now enforced at finish() + the continue button (the hole was latent
+  app-wide; only the gate-less dice RPC could pay twice).
+
 ## Pending on Megan
+- 📱 3 min **[whenever]**: open the app on your phone, close-and-reopen twice (service
+  worker double-load), then play one 🎲 Dice Quest round for real — and veto any of my
+  Afrikaans (card blurb, "Elke gooi verdien XP" lines, "Gooi weer" button) if it reads
+  wrong.
 - 🌐 1 min **[whenever]**: m1c + m11 are on the learner map as "Binnekort" (migration ran
   2026-08-14, seeded CLOSED per the new-content rule) — open them in admin.html when
   you're ready to teach them.
