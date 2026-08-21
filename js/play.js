@@ -137,7 +137,14 @@ export function renderPlay(app, host, params) {
     });
   }
 
+  /* dubbel-stuur-wet: finish() mag NOOIT twee keer indien nie. Vir gewone
+     rondtes vang die bediener se was_passed-hek 'n tweede stuur (0 XP), maar
+     g7_submit_dice het DOELBEWUS geen so 'n hek nie (Dice Quest betaal elke
+     speel) — 'n dubbel-tik op die laaste "Gaan voort →" sou dubbel betaal. */
+  let finishing = false;
   async function finish() {
+    if (finishing) return;
+    finishing = true;
     bar.querySelector("i").style.width = "100%";
     const score = st.total ? st.firstTry / st.total : 0;
     let res = { badgeEarned: false, alreadyPassed: false };
@@ -155,7 +162,8 @@ export function renderPlay(app, host, params) {
     } catch { /* vanlyn — wys steeds plaaslike uitslag */ }
     await app.refresh();
     app.go("results", { chapter, quest, def, accent, score, xp: st.xp, firstTry: st.firstTry, total: st.total,
-      badgeEarned: !!(res && res.badgeEarned), alreadyPassed: !!(res && res.alreadyPassed) });
+      badgeEarned: !!(res && res.badgeEarned), alreadyPassed: !!(res && res.alreadyPassed),
+      xpAwarded: res && typeof res.xpAwarded === "number" ? res.xpAwarded : undefined });
   }
 
   showSkill();

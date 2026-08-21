@@ -120,10 +120,16 @@ export function renderChapter(app, host, params) {
 
 /* ---------------- UITSLAE ---------------- */
 export function renderResults(app, host, params) {
-  const { chapter, quest, def, accent, score, xp, firstTry, total, badgeEarned, alreadyPassed } = params;
+  const { chapter, quest, def, accent, score, xp, firstTry, total, badgeEarned, alreadyPassed, xpAwarded } = params;
   const pct = Math.round(score * 100);
   const passed = score >= PASS;
   if (passed && String(quest.id).startsWith("daily-")) markDailyDone();
+  /* 🎲 Dice Quest wys die BEDIENER se uitbetaling — die getal op die skerm
+     moet die getal wees wat werklik by die leerder se ★ bygetel word, nie die
+     kliënt se strook-XP nie. Val terug op presies die RPC se formule (10 per
+     eerste-keer-reg) solank die agterkant (nog) nie geantwoord het nie. */
+  const isDice = String(quest.id).startsWith("dice-");
+  const shownXp = isDice ? (typeof xpAwarded === "number" ? xpAwarded : firstTry * 10) : xp;
 
   const screen = el("div", "results");
   setAccent(screen, accent);
@@ -132,8 +138,10 @@ export function renderResults(app, host, params) {
     <div class="result-emoji">${passed ? "🎉" : "💪"}</div>
     <h1>Quest klaar!</h1>
     <div class="big-score">${pct}%</div>
-    <p class="muted">${firstTry} / ${total} reg met die eerste probeerslag · <span class="num">★ +${xp} XP</span></p>
-    <div class="result-msg ${passed ? "good" : "warn"}">${passed ? "Geslaag — kenteken verdien!" : "Amper! Kry 80% eerste-keer reg vir die kenteken."}</div>
+    <p class="muted">${firstTry} / ${total} reg met die eerste probeerslag · <span class="num">★ +${shownXp} XP</span></p>
+    <div class="result-msg ${passed ? "good" : "warn"}">${isDice
+      ? (passed ? "Geslaag! Elke gooi verdien XP." : "Amper! Gooi weer — elke gooi verdien XP.")
+      : (passed ? "Geslaag — kenteken verdien!" : "Amper! Kry 80% eerste-keer reg vir die kenteken.")}</div>
     ${badgeEarned ? `<div class="badge-pop"><span class="bi">${chapter.icon}</span>${quest.title} gemeester</div>` : ""}
     ${alreadyPassed ? `<div class="result-msg warn">Oefenrondte — reeds gemeester, dus geen nuwe XP nie.</div>` : ""}
     <div class="result-actions"></div>`;
@@ -147,7 +155,6 @@ export function renderResults(app, host, params) {
      "juffrou-oop + geketting"-reël wat die hoofstuk-rooster gebruik,
      sodat hierdie knoppie nooit 'n geslote of gesluite rondte oopmaak). */
   const isDaily = chapter.id === "daily" || String(quest.id).startsWith("daily-");
-  const isDice = String(quest.id).startsWith("dice-");
   const next = passed && !isDaily && !isDice ? nextPlayableQuest(app, chapter, quest.id) : null;
   if (isDice) {
     // 🎲 Gooi weer — 'n HEELTEMAL vars gooi (nuwe deel, nuwe getalle), nie

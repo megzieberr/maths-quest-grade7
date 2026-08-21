@@ -55,7 +55,7 @@ const PreviewBackend = {
   // elke skryf is 'n no-op wat sukses rapporteer — die speletjie voel normaal,
   // maar niks raak Supabase of localStorage se leerder-sleutels nie.
   async submitQuest() { return { ok: true, passed: true, badgeEarned: false, xpAwarded: 0, alreadyPassed: true }; },
-  async submitDice() { return { ok: true, xpAwarded: 0 }; },
+  async submitDice() { return { ok: true }; },  // geen xpAwarded nie → uitslae-skerm wys die formule-bedrag
   async logStruggle() { return { ok: true }; },
 };
 

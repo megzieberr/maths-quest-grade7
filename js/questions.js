@@ -86,7 +86,7 @@ export function mountQuestion(host, q, handlers = {}) {
     feedback.innerHTML = html;
     const foot = el("div", "fb-foot");
     const next = el("button", "btn primary", isCorrect ? "Gaan voort →" : "Probeer 'n soortgelyke een →");
-    next.addEventListener("click", () => (isCorrect ? handlers.onContinue : handlers.onSibling)());
+    next.addEventListener("click", () => { next.disabled = true; (isCorrect ? handlers.onContinue : handlers.onSibling)(); });
     foot.appendChild(next);
     feedback.appendChild(foot);
     next.focus();
