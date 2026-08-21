@@ -88,6 +88,29 @@ export const LocalBackend = {
     if (award > 0) { const ev = read(LS.xpevents, {}); (ev[s.id] || (ev[s.id] = [])).push({ ts: Date.now(), xp: award }); write(LS.xpevents, ev); }
     return { ok: true, passed, badgeEarned: passed && !wasPassed, xpAwarded: award, alreadyPassed: wasPassed };
   },
+  /* 🎲 Dice Quest — APARTE pad van submitQuest: betaal ELKE speel, nie net
+     eerste-keer-slaag nie (haar ruling). Die XP-bedrag word HIER bereken
+     (10 per korrekte item, tot 10 items) — nooit deur die kliënt genoem
+     nie, anders sou onbeperkte herspeel onbeperkte XP kon "aanvra". Skryf
+     in dieselfde progress-tabel onder 'n "dice-<pool>"-id sodat dit
+     natuurlik saamtel in totalXp/weeklyXp — maar "passed" bly ALTYD false
+     (geen kenteken vir Dice Quest nie), so hierdie id lek nooit in die
+     admin-rooster in nie (dié bou net oor die bekende ROUND_LIST). */
+  async submitDice(username, password, pool, { score, correct }) {
+    const s = verify(username, password);
+    if (!s) return { ok: false, error: "auth" };
+    const qid = `dice-${pool}`;
+    const all = read(LS.progress, {});
+    const p = all[s.id] || {};
+    const prev = p[qid] || { best_score: 0, attempts: 0, total_xp: 0, passed: false };
+    const correctClamped = Math.max(0, Math.min(Math.round(correct) || 0, 10));
+    const award = correctClamped * 10;
+    p[qid] = { best_score: Math.max(prev.best_score, score || 0), attempts: prev.attempts + 1,
+      total_xp: prev.total_xp + award, passed: false, last_played_at: Date.now() };
+    all[s.id] = p; write(LS.progress, all); touch(s.id);
+    if (award > 0) { const ev = read(LS.xpevents, {}); (ev[s.id] || (ev[s.id] = [])).push({ ts: Date.now(), xp: award }); write(LS.xpevents, ev); }
+    return { ok: true, xpAwarded: award };
+  },
   async logStruggle(username, password, concept) {
     const s = verify(username, password);
     if (!s) return { ok: false, error: "auth" };

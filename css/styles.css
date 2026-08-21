@@ -392,6 +392,9 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 /* ---------- HUB · daily-quest tile ---------- */
 .daily-card{cursor:pointer}
 
+/* ---------- CHAPTER · dice-quest tile (bo-aan die rondte-rooster) ---------- */
+.dice-card{cursor:pointer;margin-bottom:16px}
+
 /* ---------- onderwyser "voorskou as leerder"-strook ----------
    Blywend sigbaar bo-op alles terwyl ?preview=1 loop (app.js se
    previewBanner). Fixed onderaan, soos Circle Quest se weergawe —

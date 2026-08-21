@@ -30,6 +30,13 @@ export const SupabaseBackend = {
   async submitQuest(username, password, quest, { score, xp, total, correct }) {
     return rpc("g7_submit_quest", { p_username: username, p_password: password, p_quest: quest, p_score: score, p_xp: xp, p_total: total, p_correct: correct });
   },
+  // 🎲 Dice Quest — nuwe RPC (supabase/migration-dice.sql, nog nie op live
+  // gedraai nie). GRACEFUL: totdat dit loop, gooi rpc() 'n fout wat play.js
+  // se finish() stilweg vang (presies dieselfde patroon as elders) — die
+  // Dice Quest bly speelbaar, XP betaal net eers sodra sy die migrasie loop.
+  async submitDice(username, password, pool, { score, total, correct }) {
+    return rpc("g7_submit_dice", { p_username: username, p_password: password, p_pool: pool, p_score: score, p_total: total, p_correct: correct });
+  },
   async logStruggle(username, password, concept) { return rpc("g7_log_struggle", { p_username: username, p_password: password, p_concept: concept }); },
 
   // ---- admin ----

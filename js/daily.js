@@ -16,13 +16,12 @@
    verskyn eenvoudig nie — geen fout, geen "Binnekort" niks nie.
    ============================================================ */
 import { el } from "./ui.js";
-import { pick, shuffled } from "./quests/_shared.js";
 import { questDef } from "./quests/index.js";
 import { ARCHIVED_QUEST_IDS } from "./config.js";
+import { dealMixed } from "./deal.js";
 
 const ACCENT = "#f59e0b";              // amber — hoort by geen bestaande hoofstuk-kleur nie
 const FALLBACK_KEY = "g7.dailyDoneFallback";
-const TOTAL_QUESTIONS = 10;
 
 const pad2 = n => String(n).padStart(2, "0");
 export function todayStr() {
@@ -43,14 +42,11 @@ export function revisionIds(app) {
 }
 
 /* bou 'n sintetiese quest-def: 10 vrae, EWEREDIG versprei oor die
-   gemerkte rondtes se eie vaardigheid-lyste (skills). 'n rondte met
-   geen speelbare (built) def of leë skills word oorgeslaan. */
+   gemerkte rondtes se eie vaardigheid-lyste (skills). Die "deel"-kern
+   self woon nou in deal.js (dealMixed) — gedeel met die Dice Quest
+   (dice.js), sodat hierdie meganika net EEN keer geskryf is. */
 export function buildDailyDef(ids) {
-  const defs = ids.map(id => questDef(id)).filter(d => d && Array.isArray(d.skills) && d.skills.length);
-  if (!defs.length) return null;
-  const n = defs.length, picked = [];
-  for (let i = 0; i < TOTAL_QUESTIONS; i++) picked.push(pick(defs[i % n].skills));
-  return { skills: shuffled(picked) };
+  return dealMixed(ids.map(id => questDef(id)));
 }
 
 /* "Klaar vir vandag!" — eers uit app.state.progress (die regte bron),

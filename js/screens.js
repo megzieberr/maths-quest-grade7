@@ -5,6 +5,7 @@ import { questDef } from "./quests/index.js";
 import { el } from "./ui.js";
 import { installEntryButton } from "./install.js";
 import { dailyTile, markDailyDone } from "./daily.js";
+import { diceTile, buildDiceDef } from "./dice.js";
 import { openSetOf, isOpen, progressOf, isChainLocked, nextPlayableQuest } from "./chain.js";
 
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
@@ -70,6 +71,11 @@ export function renderChapter(app, host, params) {
     <button class="link-btn back" aria-label="Terug">←</button>`;
   head.querySelector(".back").addEventListener("click", () => app.go("hub"));
   host.appendChild(head);
+
+  // 🎲 Dice Quest — bo-aan hierdie hoofstuk se rondte-rooster (dice.js);
+  // gee eenvoudig geen kaart terug (self-omit) as die poel leeg is.
+  const dt = diceTile(app, ch);
+  if (dt) host.appendChild(dt);
 
   const openSet = openSetOf(app);
   const builtTotal = (ch.quests || []).filter(q => q.built).length;
@@ -141,8 +147,24 @@ export function renderResults(app, host, params) {
      "juffrou-oop + geketting"-reël wat die hoofstuk-rooster gebruik,
      sodat hierdie knoppie nooit 'n geslote of gesluite rondte oopmaak). */
   const isDaily = chapter.id === "daily" || String(quest.id).startsWith("daily-");
-  const next = passed && !isDaily ? nextPlayableQuest(app, chapter, quest.id) : null;
-  if (passed && next) {
+  const isDice = String(quest.id).startsWith("dice-");
+  const next = passed && !isDaily && !isDice ? nextPlayableQuest(app, chapter, quest.id) : null;
+  if (isDice) {
+    // 🎲 Gooi weer — 'n HEELTEMAL vars gooi (nuwe deel, nuwe getalle), nie
+    // net 'n herspeel van dieselfde 10 vaardighede nie. dice.js se
+    // sintetiese "hoofstuk" dra steeds die REGTE hoofstuk-id, so ons kan
+    // die poel herbou; het dit intussen leeg geword (juffrou het toegemaak,
+    // of — hoofstuk 6 — die ketting is nie meer oop nie), val ons sag terug
+    // hoofstuk toe — nooit 'n fout nie (dieselfde GRACEFUL-patroon as orals).
+    const rethrow = () => {
+      const realChapter = chapterById(chapter.id);
+      const freshDef = realChapter && buildDiceDef(app, realChapter);
+      if (!freshDef) { app.go("chapter", { chapterId: chapter.id }); return; }
+      app.go("play", { chapter, quest, def: freshDef, accent });
+    };
+    mk("🎲 Gooi weer", true, rethrow);
+    mk("Terug na quests", false, toChapter);
+  } else if (passed && next) {
     const builtTotal = (chapter.quests || []).filter(q => q.built).length;
     const nextAccent = questAccent(chapter, next.n, builtTotal);
     const goNext = () => app.go("play", { chapter, quest: next, def: questDef(next.id), accent: nextAccent });

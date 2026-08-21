@@ -10,6 +10,7 @@ import { openConcept } from "./modal.js";
 import { el, clear, mount, shuffled } from "./ui.js";
 import { REDES } from "./redes.js";
 import { isChainLocked } from "./chain.js";
+import { poolFromDiceId } from "./dice.js";
 
 /* collapsible "Watter rede? 🧭" gids — 'n rondte kies in via def.guide = [kodes].
    Lys elke rede se kort + vol bewoording; toe by verstek, oop met 'n tik. */
@@ -140,8 +141,18 @@ export function renderPlay(app, host, params) {
     bar.querySelector("i").style.width = "100%";
     const score = st.total ? st.firstTry / st.total : 0;
     let res = { badgeEarned: false, alreadyPassed: false };
-    try { res = await api.submitQuest(sess.username, sess.password, quest.id, { score, xp: st.xp, total: st.total, correct: st.firstTry }); }
-    catch { /* vanlyn — wys steeds plaaslike uitslag */ }
+    // Dice Quest ("dice-m"/"dice-s"/"dice-t"/"dice-st") gaan deur 'n APARTE
+    // RPC-pad: betaal ELKE speel (nie net eerste-keer-slaag soos g7_submit_quest
+    // nie), en die bedrag word BEDIEN-SIEKANT bereken, nie deur die kliënt
+    // genoem nie — anders sou onbeperkte herspeel onbeperkte XP kon "aanvra"
+    // (sien supabase/migration-dice.sql). Alles anders (rondtes + Daaglikse
+    // Quest) bly presies soos dit was.
+    const dicePool = poolFromDiceId(quest.id);
+    try {
+      res = dicePool
+        ? await api.submitDice(sess.username, sess.password, dicePool, { score, total: st.total, correct: st.firstTry })
+        : await api.submitQuest(sess.username, sess.password, quest.id, { score, xp: st.xp, total: st.total, correct: st.firstTry });
+    } catch { /* vanlyn — wys steeds plaaslike uitslag */ }
     await app.refresh();
     app.go("results", { chapter, quest, def, accent, score, xp: st.xp, firstTry: st.firstTry, total: st.total,
       badgeEarned: !!(res && res.badgeEarned), alreadyPassed: !!(res && res.alreadyPassed) });
