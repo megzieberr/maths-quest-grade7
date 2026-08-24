@@ -5,6 +5,7 @@ import { el, clear } from "./ui.js";
 import { renderLogin } from "./auth.js";
 import { renderHub, renderChapter, renderResults } from "./screens.js";
 import { renderPlay } from "./play.js";
+import { renderLeaderboard } from "./leaderboard.js";
 import { maybeShowInstallPopup } from "./install.js";
 
 const app = {
@@ -47,8 +48,19 @@ const app = {
   async refresh() {
     const s = getSession();
     if (!s) return false;
-    try { const r = await api.getState(s.username, s.password); if (!r || !r.ok) return false; this.state = r; return true; }
-    catch { return false; }
+    try {
+      const r = await api.getState(s.username, s.password);
+      if (!r || !r.ok) return false;
+      this.state = r;
+      // verryk met die weeklikse bord vir die rally-opspring (weekly.js) —
+      // beste-poging, blokkeer nooit die hub as die ranglys-RPC nog nie
+      // bestaan nie (voor migration-weekly.sql loop, sien PLAN-weekly-winners.md).
+      try {
+        const lb = await api.leaderboard(s.username, s.password);
+        if (lb && lb.ok) { this.state.weekly = lb.weekly || []; this.state.myWeekly = lb.myWeekly || null; }
+      } catch { /* die rally verskyn eenvoudig nie */ }
+      return true;
+    } catch { return false; }
   },
 
   go(screen, params) { this.screen = screen; this.params = params || {}; window.scrollTo(0, 0); this.render(); },
@@ -68,6 +80,7 @@ const app = {
       case "chapter": renderChapter(this, view, this.params); break;
       case "play": renderPlay(this, view, this.params); break;
       case "results": renderResults(this, view, this.params); break;
+      case "leaderboard": renderLeaderboard(this, view); break;
       default: renderHub(this, view);
     }
   },

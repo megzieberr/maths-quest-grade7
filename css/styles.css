@@ -395,6 +395,72 @@ h1{font-size:30px} h2{font-size:22px} h3{font-size:18px}
 /* ---------- CHAPTER · dice-quest tile (bo-aan die rondte-rooster) ---------- */
 .dice-card{cursor:pointer;margin-bottom:16px}
 
+/* ---------- HUB · leaderboard tile ---------- */
+.lb-card{cursor:pointer}
+
+/* ---------- LEADERBOARD screen ---------- */
+.leaderboard{padding-top:4px}
+.lb-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.lb-head h1{font-size:26px;display:flex;align-items:center;gap:8px}
+.lb-tabs{display:flex;gap:8px;margin-bottom:16px}
+.lb-tabs .tab{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--muted);
+  background:#fff;border:2px solid var(--line);border-radius:999px;padding:9px 18px;cursor:pointer;
+  box-shadow:var(--shadow-sm);transition:transform .12s,color .12s,border-color .12s}
+.lb-tabs .tab:hover{transform:translateY(-2px)}
+.lb-tabs .tab.active{color:#fff;border-color:transparent;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--star) 85%,#fff),var(--star))}
+.lb-list{display:flex;flex-direction:column;gap:9px}
+.lb-row{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:12px;
+  background:var(--card);border-radius:var(--r-md);padding:12px 15px;box-shadow:var(--shadow-sm);
+  border:2px solid transparent}
+.lb-row.me{border-color:var(--star);background:color-mix(in srgb,var(--star) 9%,#fff)}
+.lb-rank{font-family:var(--font-num);font-weight:700;font-size:18px;text-align:center;color:var(--muted)}
+.lb-name{font-family:var(--font-display);font-weight:600;font-size:15.5px;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-xp{font-family:var(--font-num);font-weight:700;font-size:15px;color:var(--star);white-space:nowrap}
+.lb-sep{text-align:center;color:var(--faint);letter-spacing:.4em;font-weight:700;padding:2px 0}
+.tag-you{font-family:var(--font-display);font-weight:600;font-size:10.5px;letter-spacing:.3px;
+  color:#fff;background:var(--star);padding:2px 8px;border-radius:999px;vertical-align:middle}
+
+/* ---------- WEEKLY HYPE — rally / crown popups (js/weekly.js) ----------
+   Transition-based (not @keyframes) because the JS toggles a .show class
+   both ways: it fades/slides in on open AND out on close before removing
+   the node, unlike the one-shot .modal-scrim/.modal fade+slideup above. */
+.wk-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  padding:16px;background:rgba(44,33,80,.5);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s}
+.wk-overlay.show{opacity:1}
+.wk-modal{position:relative;width:100%;max-width:420px;text-align:center;
+  border-radius:var(--r-xl);box-shadow:0 20px 60px -14px rgba(44,33,80,.45);padding:26px 22px 22px;
+  transform:translateY(18px);opacity:.5;transition:transform .22s,opacity .22s}
+.wk-overlay.show .wk-modal{transform:none;opacity:1}
+.wk-close{position:absolute;top:12px;right:12px;background:#fff;border:none;color:var(--muted);
+  font-size:15px;line-height:1;cursor:pointer;width:32px;height:32px;border-radius:50%;
+  box-shadow:var(--shadow-sm);display:grid;place-items:center}
+.wk-close:hover{color:var(--ink)}
+.wk-emoji{font-size:44px;line-height:1;margin-bottom:2px}
+.wk-modal h1{font-size:23px;margin:4px 0 12px}
+.wk-winners{display:flex;flex-direction:column;gap:9px;margin:4px 0 14px}
+.wk-award{display:flex;align-items:center;gap:11px;text-align:left;border-radius:16px;
+  padding:11px 13px;background:var(--card-2);border:2px solid var(--line)}
+.wk-winners .wk-award:first-child{background:linear-gradient(180deg,#fff7dc,#fff);
+  border-color:color-mix(in srgb,var(--star) 55%,transparent)}
+.wk-award.you{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+.wk-aw-icon{font-size:24px;line-height:1}
+.wk-aw-body{display:flex;flex-direction:column;flex:1;min-width:0}
+.wk-aw-label{font-family:var(--font-display);font-weight:600;font-size:10.5px;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--muted)}
+.wk-aw-name{font-family:var(--font-display);font-weight:600;font-size:15.5px;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis}
+.wk-aw-xp{font-family:var(--font-num);font-weight:700;font-size:14.5px;color:var(--accent);white-space:nowrap}
+.wk-personal{font-family:var(--font-display);font-weight:600;font-size:15.5px;color:var(--ink);
+  background:var(--card-2);border-radius:var(--r-md);padding:12px 14px;margin-bottom:6px}
+.wk-rally .wk-personal{background:#fff7e6}
+.wk-sub{margin-bottom:2px}
+.wk-actions{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.wk-seeboard{background:none;border:none;color:var(--muted);font-weight:700;font-size:14px;
+  cursor:pointer;padding:6px;text-decoration:underline;margin:2px auto 0}
+.wk-seeboard:hover{color:var(--accent)}
+
 /* ---------- onderwyser "voorskou as leerder"-strook ----------
    Blywend sigbaar bo-op alles terwyl ?preview=1 loop (app.js se
    previewBanner). Fixed onderaan, soos Circle Quest se weergawe —

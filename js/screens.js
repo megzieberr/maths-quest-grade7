@@ -7,6 +7,7 @@ import { installEntryButton } from "./install.js";
 import { dailyTile, markDailyDone } from "./daily.js";
 import { diceTile, buildDiceDef } from "./dice.js";
 import { openSetOf, isOpen, progressOf, isChainLocked, nextPlayableQuest } from "./chain.js";
+import { maybeShowWeekly } from "./weekly.js";
 
 function setAccent(host, accent) { if (accent) host.style.setProperty("--accent", accent); }
 
@@ -23,6 +24,7 @@ export function renderHub(app, host) {
   const cards = el("div", "chapter-cards");
   const dt = dailyTile(app);
   if (dt) cards.appendChild(dt);
+  cards.appendChild(leaderboardTile(app));
   CHAPTERS.filter(ch => !ch.archived).forEach(ch => {
     const openQ = (ch.quests || []).filter(q => q.built && isOpen(openSet, q.id));
     const live = ch.open && openQ.length > 0;
@@ -55,6 +57,27 @@ export function renderHub(app, host) {
     row.appendChild(install);
     host.appendChild(row);
   }
+
+  // Star of the Week / rally popups — Fri–Sun rally, Mon–Tue crown, or
+  // forced via ?wk=rally|crown. No-ops off-day, already-seen, or empty
+  // board (incl. before migration-weekly.sql has run). Never let a popup
+  // glitch blank the hub.
+  try { maybeShowWeekly(app); } catch { /* non-critical */ }
+}
+
+/* 🏆 Leaderboard hub tile — a permanent entry point (unlike the Daaglikse
+   Quest tile, this never self-omits: the board's own empty state lives
+   inside the screen, not here). */
+const LB_ACCENT = "#f5b50a";   // var(--star) gold, distinct from every chapter colour
+function leaderboardTile(app) {
+  const card = el("div", "ch-card lb-card");
+  card.style.setProperty("--accent", LB_ACCENT);
+  card.innerHTML = `
+    <div class="ico">🏆</div>
+    <h2>Leaderboard</h2>
+    <div class="sub">Sien wie hierdie week vooruit is.</div>`;
+  card.addEventListener("click", () => app.go("leaderboard"));
+  return card;
 }
 
 /* ---------------- HOOFSTUK · quest-kaart ---------------- */
