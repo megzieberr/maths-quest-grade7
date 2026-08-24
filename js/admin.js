@@ -10,6 +10,7 @@ import { api } from "./api.js";
 import { CHAPTERS } from "./config.js";
 import { CONCEPTS } from "./concepts.js";
 import { el, clear } from "./ui.js";
+import { showCrownPreview, showRallyPreview } from "./weekly.js";
 
 const root = () => document.getElementById("admin");
 let pw = null;
@@ -63,11 +64,18 @@ async function dashboard() {
   try { data = await api.adminData(pw); } catch { status.textContent = "Kan nie laai nie. Kontroleer jou verbinding."; return; }
   if (!data || !data.ok) { status.textContent = "Kon nie die dashboard laai nie."; return; }
   status.remove();
+  // Weekly winners (Session 3, PLAN-weekly-winners.md) — best-effort: on live,
+  // this RPC throws until migration-weekly.sql runs. Caught quietly, no console
+  // error; the panel just shows its "nog nie beskikbaar nie" state.
+  let wk = { ok: false };
+  try { wk = api.adminWeeklyResults ? await api.adminWeeklyResults(pw) : { ok: false }; }
+  catch { wk = { ok: false }; }
   view.appendChild(questGateSection(data.quests));
   // "Where the class is stuck" — hidden (her call, 2026-08-11): not in use right
   // now and cluttering the page. Section stays fully built, just not mounted —
   // flip SHOW_STRUGGLES back to true to bring it back.
   if (SHOW_STRUGGLES) view.appendChild(struggleSection(data.struggles || []));
+  view.appendChild(weeklyWinnersSection(wk, data.rows || []));
   view.appendChild(learnerSection(data.rows || [], data.inactiveDays || 7));
 }
 const reload = () => dashboard();
@@ -139,6 +147,72 @@ function questGateSection(quests) {
     details.appendChild(body);
     sec.appendChild(details);
   }
+  return sec;
+}
+
+/* ---------- 🌟 Weekly winners (last week's crown results + a live rally podium) ---------- */
+/* Current-week board from adminData rows (weeklyXp already reflects the same
+   greatest(date_trunc('week', now()), weekly_anchor) window the learner
+   leaderboard uses) — SQL RANK() semantics: ties share a rank, the next
+   rank skips (mirrors local-backend.js's rankBy). */
+function buildCurrentWeekBoard(rows) {
+  const sorted = (rows || []).filter(r => (r.weeklyXp || 0) > 0).sort((a, b) => b.weeklyXp - a.weeklyXp);
+  const board = [];
+  let rank = 0, prevXp = null, seen = 0;
+  sorted.forEach(r => {
+    seen++;
+    if (prevXp === null || r.weeklyXp !== prevXp) { rank = seen; prevXp = r.weeklyXp; }
+    board.push({ name: r.name, xp: r.weeklyXp, rank });
+  });
+  return board;
+}
+
+function weeklyWinnersSection(wk, rows) {
+  const sec = el("div", "card adm-section adm-wk");
+  sec.appendChild(el("h2", "", "🌟 Weekly winners"));
+
+  if (!wk || !wk.ok) {
+    sec.appendChild(el("p", "muted small", "Weeklikse wenners is nog nie beskikbaar nie."));
+    return sec;
+  }
+  if (!wk.board || !wk.board.length) {
+    sec.appendChild(el("p", "muted small", "Niemand het verlede week gespeel nie."));
+    return sec;
+  }
+
+  sec.appendChild(el("p", "muted small", "Verlede week se uitslae — presies soos die Maandag-kroon vir leerders."));
+
+  const chips = el("div", "adm-wk-chips");
+  const addChip = (icon, label, name, value) => chips.appendChild(el("div", "adm-wk-chip", `
+    <span class="adm-wk-icon">${icon}</span>
+    <span class="adm-wk-body"><span class="adm-wk-label">${label}</span><span class="adm-wk-name">${name}</span></span>
+    <span class="adm-wk-val">${value}</span>`));
+  if (wk.star) addChip("🌟", "Ster van die Week", wk.star.name, `★ ${wk.star.xp}`);
+  if (wk.mostImproved) addChip("📈", "Grootste Sprong", wk.mostImproved.name, `+${wk.mostImproved.delta} XP`);
+  if (wk.onFire) addChip("🔥", "Aan die Brand", wk.onFire.name, `${wk.onFire.days} ${wk.onFire.days === 1 ? "dag" : "dae"}`);
+  if (Array.isArray(wk.perfectWeek) && wk.perfectWeek.length) addChip("🎯", "Perfekte Week", wk.perfectWeek.join(", "), "7/7");
+  sec.appendChild(chips);
+
+  const medals = ["🥇", "🥈", "🥉"];
+  const board = el("div", "adm-wk-board");
+  wk.board.slice(0, 3).forEach((r, i) => board.appendChild(el("div", "adm-wk-brow",
+    `<span class="adm-wk-medal">${medals[i] || "•"}</span><b>${r.name}</b><span class="adm-wk-bxp">${r.xp} XP</span>`)));
+  sec.appendChild(board);
+
+  const btns = el("div", "adm-lbtns");
+  const crownBtn = el("button", "btn ghost small", "Voorskou: kroon");
+  crownBtn.title = "Open the exact learner crown popup with these real results — screenshot it for the class WhatsApp group";
+  crownBtn.addEventListener("click", () => showCrownPreview(wk));
+  const rallyBtn = el("button", "btn ghost small", "Voorskou: rally");
+  rallyBtn.title = "Open the exact learner rally popup with THIS week's live standings";
+  rallyBtn.addEventListener("click", () => {
+    const live = buildCurrentWeekBoard(rows);
+    if (!live.length) { alert("Niemand het hierdie week nog gespeel nie — die rally-bord is nog leeg."); return; }
+    showRallyPreview(live);
+  });
+  btns.appendChild(crownBtn); btns.appendChild(rallyBtn);
+  sec.appendChild(btns);
+
   return sec;
 }
 

@@ -72,6 +72,18 @@
   .rchip.ok{background:#16a34a}
   .rchip.try{background:#f59e0b;color:#3a2a00}
   .rchip.none{background:#e7e8ef;color:#9aa3b2}
+  /* 🌟 weekly winners panel — last week's crown results + teacher preview buttons */
+  .adm-wk-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:10px 0}
+  .adm-wk-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1.5px solid var(--line);border-radius:12px;background:#fbfaff}
+  .adm-wk-icon{font-size:20px;line-height:1}
+  .adm-wk-body{display:flex;flex-direction:column;flex:1;min-width:0}
+  .adm-wk-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .adm-wk-name{font-family:var(--font-display);font-weight:600;font-size:14.5px;color:var(--ink);overflow-wrap:anywhere}
+  .adm-wk-val{font-family:var(--font-num);font-weight:700;font-size:13.5px;color:var(--accent);white-space:nowrap}
+  .adm-wk-board{display:flex;flex-direction:column;gap:3px;margin:2px 0 12px}
+  .adm-wk-brow{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 2px}
+  .adm-wk-medal{font-size:16px}
+  .adm-wk-bxp{margin-left:auto;font-family:var(--font-num);font-weight:700;color:var(--muted)}
   /* narrow screens (phone, split window): back to the old single-column stack */
   @media (max-width:1000px){ .view.adm{max-width:840px} }
 </style>
