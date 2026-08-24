@@ -1,4 +1,24 @@
-# Project status — updated 2026-08-21 (🎲 Dice Quest SHIPPED LIVE on her go — migration-dice.sql RAN first, then push; live-verified end to end)
+# Project status — updated 2026-08-24 (🏆 Weekly winners BUILT, foreman-reviewed, NOT shipped — migration-weekly.sql NOT run, nothing pushed; her ship-yes gates it)
+
+> **2026-08-24 (Weekly winners foreman day — her "run the plan", Fable dispatched 3
+> Sonnet sessions, reviewed each with own eyes):** the Circle Quest leaderboard +
+> weekly-winners pattern, ported per `PLAN-weekly-winners.md`. Commits dea183d (SQL
+> + local mirror) → d8fb152 (learner UI) → 1dd2e8f (admin panel) → 20eeb93 (foreman
+> review fix). LOCAL ONLY — `supabase/migration-weekly.sql` is written but NOT run;
+> nothing pushed. Until the migration runs, the live UI is graceful: the Leaderboard
+> screen shows a friendly empty state and no popups fire (RPC throw is caught).
+> What's in: 🏆 "Leaderboard" hub tile → screen with "Hierdie week"/"Altyd" tabs
+> (top 10 + own row below "···"); Fri–Sun rally popup with the chase line; Mon–Tue
+> crown popup with her award names (🌟 Ster van die Week · 📈 Grootste Sprong ·
+> 🔥 Aan die Brand · 🎯 Perfekte Week 7/7 — three DIFFERENT winners by design);
+> admin 🌟 Weekly winners panel + "Voorskou: kroon/rally" buttons for WhatsApp
+> screenshots. Foreman verified everything in the DOM at 375px on a 13-learner
+> seeded local class: all four awards correct (incl. the Sprong-excludes-Ster
+> rule), chase line "Jy is #12 — net 20 XP agter #11!", rank-12 own row, admin
+> panel + both previews, 0 new console errors. fuzz-weekly.mjs green (6/6 groups,
+> foreman re-ran it). Review fix 20eeb93: local adminData's weekly window now
+> matches the SQL (greatest(Monday, weekly_anchor)) — offline-mirror-only bug,
+> live data was never wrong.
 
 > **2026-08-21 (ship, on her "You can ship it"):** migration RAN via MCP (g7_submit_dice
 > verified on live: SECURITY DEFINER, search_path pinned, anon+authenticated execute,
@@ -137,14 +157,34 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
 - **2026-08-21 (foreman)** — results screens must show the XP that actually BANKS;
   double-submit law now enforced at finish() + the continue button (the hole was latent
   app-wide; only the gate-less dice RPC could pay twice).
+- **2026-08-24 (weekly winners, her rulings)** — screen/tile name is **"Leaderboard"**
+  (English, NOT "Ranglys"); award names verbatim: **Ster van die Week · Grootste
+  Sprong · Aan die Brand · Perfekte Week** ("Grootste Verbetering" rejected).
+- **2026-08-24 (week windows, per her "exactly like circle geo")** — the LIVE board
+  (learner "Hierdie week" tab AND admin Weekly XP column) uses greatest(this Monday
+  00:00, weekly_anchor): Monday auto-reset AND her ↺ Reset weekly button both work.
+  The CROWN (Mon–Tue popup + admin winners panel) uses PURE calendar weeks —
+  a mid-week reset can never change last week's settled winners.
+- **2026-08-24** — NOT ported from Circle Quest, deliberately: nicknames/avatars
+  (Gr7 has no profile layer) and Circle Champion (one-time term-end honour).
+  Empty-board guards replace CQ's go-live date gating.
+- **2026-08-24** — "me" on the board is matched by display_name, not id (the RPC
+  rows carry no ids): two learners sharing an exact display_name would both
+  highlight. Known, accepted limitation.
 
 ## Pending on Megan
-- Nothing. (2026-08-24 sweep, her word: she is done with Gr7 — m1c/m11 are hers to open whenever she teaches them, and t6b STAYS as built, no extra variety.)
-(2026-08-24 sweep, her word: the Dice Quest phone test is DONE and the Afrikaans passed - no vetoes.)
+- 💻 1 min **[blocking]**: say "ship it" in the foreman chat → Claude runs
+  migration-weekly.sql on Homework Hub, then pushes, then live-verifies. Until
+  then the feature sits local-only and live learners see nothing new.
+(2026-08-24 sweep, her word: she is done with the earlier Gr7 queue — m1c/m11 are hers to open whenever she teaches them; t6b STAYS as built; Dice Quest phone test DONE, Afrikaans passed.)
 
 ## Next up
-- Her queued ask: **weekly winners** (Circle Quest pattern — three awards to three
-  different learners, g7_ RPCs in a NEW migration; ⚠️ the weekly_anchor vs
-  date_trunc('week') design call is HERS before building).
+- **Ship weekly winners** (see Pending). Ship order matters: migration FIRST
+  (learner UI is graceful either way, but migration-first means zero
+  empty-popup window), then push, then migration-check + live DOM verify.
+  Timing note: shipped this week ⇒ first rally lands naturally Fri 28 Aug,
+  first crown Mon 31 Aug — no extra gating needed.
+- Optional veto pass on popup copy (award names are hers already; the rest of
+  the Afrikaans popup text is Claude's — e.g. crown close-button "Verstaan!").
 - Still floated from Sunday: traps in st28–st32; "Tap" retro-fit in old s7; trap-style
   questions in Deel 2 rounds where the pattern fits.
