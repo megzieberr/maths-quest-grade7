@@ -282,7 +282,10 @@ export const LocalBackend = {
     const rows = Object.values(students).map(s => ({
       id: s.id, name: s.display_name, username: s.username, hasPassword: s.password != null, lastActive: s.last_active_at,
       totalXp: Object.values(progress[s.id] || {}).reduce((a, p) => a + (p.total_xp || 0), 0),
-      weeklyXp: (events[s.id] || []).filter(e => e.ts >= anchor).reduce((a, e) => a + (e.xp || 0), 0),
+      // selfde venster as leaderboard() hierbo én die SQL se g7_admin_data
+      // (greatest(hierdie Maandag, weekly_anchor)) — anders wys die admin se
+      // Weekly-kolom 'n ander getal as die leerders se bord
+      weeklyXp: (events[s.id] || []).filter(e => e.ts >= Math.max(startOfWeek(), anchor)).reduce((a, e) => a + (e.xp || 0), 0),
       quests: progress[s.id] || {},
     })).sort((a, b) => (b.totalXp - a.totalXp) || a.name.localeCompare(b.name));
     const cByConcept = {};
