@@ -1,4 +1,17 @@
-# Project status — updated 2026-08-24 (🏆 Weekly winners BUILT, foreman-reviewed, NOT shipped — migration-weekly.sql NOT run, nothing pushed; her ship-yes gates it)
+# Project status — updated 2026-08-24 (🏆 Weekly winners SHIPPED LIVE on her "Ship it!" — migration RAN first, then push; live-verified)
+
+> **2026-08-24 (ship, on her "Ship it!"):** migration-weekly.sql RAN via MCP on the
+> Homework Hub project (verified in the DB: right project confirmed first — g7 helpers
+> present, 0 mhq_ functions; all 4 functions live, SECURITY DEFINER, search_path
+> pinned, anon+authenticated execute, g7_admin_data carries the new greatest() window,
+> fake creds → clean 'auth' error), THEN pushed cc096b5..b76ac53 (incl. the morning
+> pending-sweep commit that was already sitting local). Live-verified: weekly.js /
+> leaderboard.js / local-backend.js / admin.js all serve 200 with the new content
+> ("Grootste Sprong" greps live), hub boots in ?preview=1 with the 🏆 Leaderboard
+> tile, no popup misfires, 0 console errors. sw auto-updates — no cache bump.
+> First rally lands naturally Fri 28 Aug; first crown Mon 31 Aug.
+> A stray wiskunde-avontuur-leerders.csv (Session 3's CSV-button test on the FAKE
+> Toets class) was deleted before push — never a real-data file.
 
 > **2026-08-24 (Weekly winners foreman day — her "run the plan", Fable dispatched 3
 > Sonnet sessions, reviewed each with own eyes):** the Circle Quest leaderboard +
@@ -173,18 +186,14 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   highlight. Known, accepted limitation.
 
 ## Pending on Megan
-- 💻 1 min **[blocking]**: say "ship it" in the foreman chat → Claude runs
-  migration-weekly.sql on Homework Hub, then pushes, then live-verifies. Until
-  then the feature sits local-only and live learners see nothing new.
+- 📱 2 min **[whenever]**: open the app on your phone (close and reopen it twice so
+  the update lands), tap 🏆 Leaderboard, and eyeball the admin's new 🌟 Weekly
+  winners panel + "Voorskou: kroon/rally" buttons — veto any Afrikaans popup
+  wording you don't like (e.g. the crown's "Verstaan!" close button).
 (2026-08-24 sweep, her word: she is done with the earlier Gr7 queue — m1c/m11 are hers to open whenever she teaches them; t6b STAYS as built; Dice Quest phone test DONE, Afrikaans passed.)
 
 ## Next up
-- **Ship weekly winners** (see Pending). Ship order matters: migration FIRST
-  (learner UI is graceful either way, but migration-first means zero
-  empty-popup window), then push, then migration-check + live DOM verify.
-  Timing note: shipped this week ⇒ first rally lands naturally Fri 28 Aug,
-  first crown Mon 31 Aug — no extra gating needed.
-- Optional veto pass on popup copy (award names are hers already; the rest of
-  the Afrikaans popup text is Claude's — e.g. crown close-button "Verstaan!").
+- Watch the first natural cycle: rally Fri 28 Aug, first crown Mon 31 Aug — the
+  admin "Voorskou: kroon" button is the WhatsApp-screenshot path that Monday.
 - Still floated from Sunday: traps in st28–st32; "Tap" retro-fit in old s7; trap-style
   questions in Deel 2 rounds where the pattern fits.
