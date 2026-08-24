@@ -57,6 +57,12 @@ const PreviewBackend = {
   async submitQuest() { return { ok: true, passed: true, badgeEarned: false, xpAwarded: 0, alreadyPassed: true }; },
   async submitDice() { return { ok: true }; },  // geen xpAwarded nie → uitslae-skerm wys die formule-bedrag
   async logStruggle() { return { ok: true }; },
+  // 🏆 leeg/onskadelik: die regte klas se ranglys/kroon verskyn nooit in
+  // voorskou nie — dieselfde "niks raak die regte data" reël as hierbo.
+  async leaderboard() { return { ok: true, weekly: [], allTime: [], myWeekly: null, myAllTime: null }; },
+  async weeklyResults() {
+    return { ok: true, board: [], star: null, mostImproved: null, onFire: null, perfectWeek: [], me: { xp: 0, rank: null }, prevRank: null, bestPrevXp: 0 };
+  },
 };
 
 const useLocal = !hasSupabase || forceLocal();

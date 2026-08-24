@@ -39,6 +39,14 @@ export const SupabaseBackend = {
   },
   async logStruggle(username, password, concept) { return rpc("g7_log_struggle", { p_username: username, p_password: password, p_concept: concept }); },
 
+  // 🏆 Weekly winners (supabase/migration-weekly.sql, not run on live yet).
+  // GRACEFUL like submitDice above: until the migration runs, rpc() throws
+  // "Could not find the function..." and the caller (js/weekly.js /
+  // leaderboard.js, Session 2) shows its empty-board state, not an error.
+  async leaderboard(username, password) { return rpc("g7_leaderboard", { p_username: username, p_password: password }); },
+  async weeklyResults(username, password) { return rpc("g7_weekly_results", { p_username: username, p_password: password }); },
+  async adminWeeklyResults(pw) { return rpc("g7_admin_weekly_results", { p_admin_password: pw }); },
+
   // ---- admin ----
   async adminLogin(pw) { return rpc("g7_admin_login", { p_admin_password: pw }); },
   async adminData(pw) { return rpc("g7_admin_data", { p_admin_password: pw }); },
