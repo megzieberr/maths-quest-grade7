@@ -139,15 +139,8 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   app-wide; only the gate-less dice RPC could pay twice).
 
 ## Pending on Megan
-- 📱 3 min **[whenever]**: open the app on your phone, close-and-reopen twice (service
-  worker double-load), then play one 🎲 Dice Quest round for real — and veto any of my
-  Afrikaans (card blurb, "Elke gooi verdien XP" lines, "Gooi weer" button) if it reads
-  wrong.
-- 🌐 1 min **[whenever]**: m1c + m11 are on the learner map as "Binnekort" (migration ran
-  2026-08-14, seeded CLOSED per the new-content rule) — open them in admin.html when
-  you're ready to teach them.
-- 💬 1 min **[whenever]**: t6b (dubbele 180°-rotasie) is correct but all 5 questions share
-  the one "you land back where you started" trick — say if you want more variety mixed in.
+- Nothing. (2026-08-24 sweep, her word: she is done with Gr7 — m1c/m11 are hers to open whenever she teaches them, and t6b STAYS as built, no extra variety.)
+(2026-08-24 sweep, her word: the Dice Quest phone test is DONE and the Afrikaans passed - no vetoes.)
 
 ## Next up
 - Her queued ask: **weekly winners** (Circle Quest pattern — three awards to three
