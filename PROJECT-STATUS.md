@@ -186,10 +186,7 @@ All harnesses green at wrap; DOM plays clean at phone width, 0 console errors.
   highlight. Known, accepted limitation.
 
 ## Pending on Megan
-- 📱 2 min **[whenever]**: open the app on your phone (close and reopen it twice so
-  the update lands), tap 🏆 Leaderboard, and eyeball the admin's new 🌟 Weekly
-  winners panel + "Voorskou: kroon/rally" buttons — veto any Afrikaans popup
-  wording you don't like (e.g. the crown's "Verstaan!" close button).
+- Nothing. (2026-08-31 sweep, her word: the 🌟 Weekly-winners phone eyeball is KILLED — the Afrikaans popup wording stands as built, no veto coming.)
 (2026-08-24 sweep, her word: she is done with the earlier Gr7 queue — m1c/m11 are hers to open whenever she teaches them; t6b STAYS as built; Dice Quest phone test DONE, Afrikaans passed.)
 
 ## Next up
